@@ -5,10 +5,11 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   resolve:{alias:{"@":path.join(import.meta.dirname,"src")}},
   plugins:[cloudflareTest(async()=>({
-    main:"./workers/events.ts",
+    main:"./tests/workers/entry.ts",
     miniflare:{
       compatibilityDate:"2026-09-11",compatibilityFlags:["nodejs_compat"],
       d1Databases:["DB"],r2Buckets:["MEDIA"],queueProducers:{EVENTS_QUEUE:{queueName:"new-wed-events-test"}},
+      durableObjects:{ADMIN_PASSWORD_VERIFIER:{className:"AdminPasswordVerifier",useSQLite:true}},
       bindings:{
         TEST_MIGRATIONS:await readD1Migrations(path.join(import.meta.dirname,"migrations")),
         ENVIRONMENT:"development",ACCESS_TEAM_DOMAIN:"",ACCESS_AUD:"",ALLOW_LOCAL_ACCESS:"true",OPENAI_MODEL:"gpt-5-mini",

@@ -5,6 +5,7 @@ import { BarChart3,CalendarClock,Columns3,List,MessageSquare,RefreshCw,Search,X 
 import { AdminInbox } from "@/features/admin/AdminInbox";
 import { AdminNotifications } from "@/features/admin/AdminNotifications";
 import { AdminReports } from "@/features/admin/AdminReports";
+import { adminApi as api } from "@/features/admin/api";
 import { canManuallyTransition } from "@/features/pipeline/model";
 
 const stages = ["NOVO","EM_ATENDIMENTO","QUALIFICADO","CHECKOUT_ENVIADO","AGUARDANDO_PAGAMENTO","PAGO","NUTRICAO","PERDIDO","CANCELADO"] as const;
@@ -12,16 +13,16 @@ type Stage = typeof stages[number];
 type Lead = { id:string;name:string;email:string;phone:string;company?:string;city_state?:string;stage:Stage;edition_id?:string;edition_name?:string;assignee_id?:string;assignee_name?:string;origin?:string;next_task_due?:string;created_at:string };
 type Detail = { lead: Record<string, unknown>; answers: Array<Record<string, unknown>>; history: Array<Record<string, unknown>>; activities: Array<Record<string, unknown>>; conversations: Array<Record<string, unknown>>; checkouts: Array<Record<string, unknown>> };
 
-async function api<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { ...init, headers: { "content-type": "application/json", ...init?.headers } });
-  const body = await response.json() as T & { message?: string };
-  if (!response.ok) throw new Error(body.message ?? "Falha na solicitação");
-  return body;
-}
 
 function stageLabel(stage: string) { return stage.replaceAll("_", " "); }
 
-export function AdminDashboard() {
+export function AdminDashboard({ userName }: { userName: string }) {
+  const [signingOut, setSigningOut] = useState(false);
+  const logout = async () => {
+    setSigningOut(true);
+    try { await api("/api/auth/logout", { method: "POST" }); window.location.replace("/admin/login"); }
+    catch { setSigningOut(false); setError("Não foi possível sair. Tente novamente."); }
+  };
   const [leads,setLeads] = useState<Lead[]>([]);
   const [query,setQuery] = useState("");
   const [view,setView] = useState<"kanban"|"list">("kanban");
@@ -79,13 +80,15 @@ export function AdminDashboard() {
 
   return <main className="min-h-screen bg-[#F7F4EE] text-[#191010]">
     <header className="sticky top-0 z-30 border-b border-white/10 bg-[#191010] px-5 py-4 text-white md:px-8">
-      <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-5">
+      <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-5">
         <div><div className="serif text-xl tracking-[0.18em]">NEW WED</div><div className="mt-1 text-[9px] uppercase tracking-[0.22em] text-white/45">Comercial</div></div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button onClick={() => setWorkspace("pipeline")} aria-label="Pipeline" className={`flex items-center gap-2 px-3 py-2 text-[9px] uppercase tracking-[0.12em] ${workspace === "pipeline" ? "bg-white text-[#191010]" : "text-white/65"}`}><Columns3 size={16}/> Pipeline</button>
           <button onClick={() => setWorkspace("inbox")} aria-label="Inbox" className={`flex items-center gap-2 px-3 py-2 text-[9px] uppercase tracking-[0.12em] ${workspace === "inbox" ? "bg-white text-[#191010]" : "text-white/65"}`}><MessageSquare size={16}/> Inbox</button>
           <button onClick={() => setWorkspace("reports")} aria-label="Relatórios" className={`flex items-center gap-2 px-3 py-2 text-[9px] uppercase tracking-[0.12em] ${workspace === "reports" ? "bg-white text-[#191010]" : "text-white/65"}`}><BarChart3 size={16}/> Relatórios</button>
           <AdminNotifications/>
+          <span className="hidden text-xs text-white/60 lg:block">{userName}</span>
+          <button onClick={logout} disabled={signingOut} className="px-2 py-2 text-xs text-white/70 disabled:opacity-40">{signingOut ? "Saindo…" : "Sair"}</button>
           {workspace === "pipeline" && <><button onClick={() => setView("kanban")} aria-label="Kanban" className={`p-2 ${view === "kanban" ? "text-white" : "text-white/45"}`}><Columns3 size={17}/></button><button onClick={() => setView("list")} aria-label="Lista" className={`p-2 ${view === "list" ? "text-white" : "text-white/45"}`}><List size={17}/></button><button onClick={load} aria-label="Atualizar" className="p-2 text-white/65 hover:text-white"><RefreshCw size={17}/></button></>}
         </div>
       </div>

@@ -272,6 +272,19 @@ export const roles = sqliteTable("roles", {
   createdAt: text("created_at").notNull(),
 }, (table) => [uniqueIndex("user_role_uidx").on(table.userId, table.role)]);
 
+export const adminCredentials = sqliteTable("admin_credentials", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  passwordHash: text("password_hash").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const adminSessions = sqliteTable("admin_sessions", {
+  tokenHash: text("token_hash").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: text("expires_at").notNull(),
+  createdAt: text("created_at").notNull(),
+}, (table) => [index("admin_sessions_user_idx").on(table.userId), index("admin_sessions_expiry_idx").on(table.expiresAt)]);
+
 export const notifications = sqliteTable("notifications", {
   id: text("id").primaryKey(),
   type: text("type").notNull(),

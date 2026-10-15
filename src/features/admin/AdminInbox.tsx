@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback,useEffect,useState } from "react";
+import { adminApi as inboxApi } from "@/features/admin/api";
 import { AlertTriangle,Bot,RefreshCw,Search,Send,UserRound } from "lucide-react";
 
 type InboxItem = {
@@ -13,12 +14,6 @@ type Conversation = InboxItem & { lead_id:string|null;lead_email:string|null;lea
 type Detail = { conversation:Conversation;messages:Message[];nextCursor:string|null };
 type CurrentUser = { id:string;name:string;roles:string[] };
 
-async function inboxApi<T>(url: string,init?:RequestInit): Promise<T> {
-  const response = await fetch(url,{ ...init,headers:{ "content-type":"application/json",...init?.headers } });
-  const body = await response.json() as T & { message?:string };
-  if (!response.ok) throw new Error(body.message ?? "Falha na solicitação");
-  return body;
-}
 
 function usePolling(task: () => Promise<void>,dependencies: readonly unknown[]) {
   useEffect(() => {

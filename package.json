@@ -68,7 +68,7 @@
     "test:d1:wave4": "bash scripts/test-wave4-d1.sh",
     "test:workers": "vitest run --config vitest.worker.config.ts",
     "preflight:launch": "node scripts/preflight-launch.mjs",
-    "test:visual": "playwright test tests/visual/parity.spec.ts",
+    "test:visual": "playwright test tests/visual",
     "baseline:capture": "UPDATE_BASELINES=1 playwright test tests/visual/parity.spec.ts",
     "baseline:capture:target": "UPDATE_BASELINES=1 BASELINE_CAPTURE_TARGET=1 playwright test tests/visual/parity.spec.ts",
     "db:generate": "drizzle-kit generate",

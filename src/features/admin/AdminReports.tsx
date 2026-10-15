@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback,useEffect,useState } from "react";
+import { adminApi as get } from "@/features/admin/api";
 import { AlertTriangle,RefreshCw } from "lucide-react";
 
 type Metric = {label:string;total:number;amount_cents?:number};
 type Report = {stages:Metric[];origins:Metric[];editions:Metric[];assignees:Metric[];checkouts:Metric[];payments:Metric[]};
 type Failure = {id:string;type:string;entity_id:string;error:string;attempts:number;request_id?:string;created_at:string};
 
-async function get<T>(url:string) { const response=await fetch(url);const body=await response.json() as T&{message?:string};if(!response.ok) throw new Error(body.message??"Falha ao carregar");return body; }
 
 export function AdminReports() {
   const [report,setReport]=useState<Report|null>(null);const [failures,setFailures]=useState<Failure[]>([]);const [error,setError]=useState("");
