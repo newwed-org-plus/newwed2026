@@ -31,7 +31,7 @@ function Divisor({ children }: { children: React.ReactNode }) {
       <div style={{ flex: 1, height: 1, background: "rgba(25,16,16,0.1)" }} />
       <span
         style={{
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "'Fedra Sans Std', sans-serif",
           fontSize: "0.65rem",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
@@ -66,12 +66,12 @@ export function FamtourLanding() {
     }
   };
 
-  const handleLearnMore = (slug: string) => {
+  const handleRequestInformation = (slug: string) => {
     router.push(`/famtour?edicao=${encodeURIComponent(slug)}#form`);
     setTimeout(() => scrollTo("form"), 50);
   };
 
-  const handleRegister = (slug: string) => {
+  const handleViewEdition = (slug: string) => {
     router.push(`/famtour/inscricao/${encodeURIComponent(slug)}`);
   };
 
@@ -98,7 +98,7 @@ export function FamtourLanding() {
               <Divisor>O que é</Divisor>
               <h2
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "'Fedra Sans Std', sans-serif",
                   fontWeight: 300,
                   fontSize: "clamp(2rem, 4vw, 2.8rem)",
                   color: "#191010",
@@ -114,8 +114,8 @@ export function FamtourLanding() {
               </h2>
               <p
                 style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontWeight: 400,
+                  fontFamily: "'Fedra Sans Std', sans-serif",
+                  fontWeight: 350,
                   fontSize: "0.92rem",
                   lineHeight: "1.8",
                   marginTop: "1.5rem",
@@ -137,8 +137,8 @@ export function FamtourLanding() {
                   color: "#FFFFFF",
                   border: "1px solid #7A2535",
                   padding: "1rem 1.75rem",
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontWeight: 500,
+                  fontFamily: "'Fedra Sans Std', sans-serif",
+                  fontWeight: 350,
                   fontSize: "0.78rem",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
@@ -173,8 +173,8 @@ export function FamtourLanding() {
                   <FamTourCard
                     key={f.id}
                     famtour={f}
-                    onLearnMore={handleLearnMore}
-                    onRegister={handleRegister}
+                    onRequestInformation={handleRequestInformation}
+                    onViewEdition={handleViewEdition}
                   />
                 ))}
               </div>

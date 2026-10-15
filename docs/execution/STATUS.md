@@ -1,21 +1,17 @@
 # Status de execução
 
-Atualizado em: 2026-09-30
+Atualizado em: 2026-10-14
 
 ## Estado geral
 
-- Onda atual: onda 9, navegação interna da landing FAMTOUR validada localmente, em publicação.
-- Branch operacional: `codex/wave-9-famtour-section-navigation`; main publicado `c8dc547`.
+- Onda atual: onda 10, fontes oficiais, CTAs e retorno explícito ao institucional em validação.
+- Branch: `codex/wave-10-official-fonts-cta`; base `origin/main` em `5a0cc17`.
 - Dados legados: inexistentes; o projeto começa vazio.
 - Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
 
 ## Concluído antes das ondas
 
-- Site institucional, landing FAMTOUR e formulário existentes.
-- Schema D1 inicial com catálogo, leads, pipeline, atividades, conversas, mensagens, pagamentos, auditoria, idempotência e outbox.
-- Cloudflare Access, Turnstile, Meta, OpenAI e Asaas possuem integrações iniciais.
-- Dashboard comercial básico existente.
-- 20 testes unitários e 33 baselines visuais existentes.
+- Institucional, FAMTOUR, formulário e dashboard existentes, com schema D1 comercial e integrações iniciais; 20 unitários e 33 baselines no início.
 
 ## Onda 0 concluída
 
@@ -101,12 +97,8 @@ Atualizado em: 2026-09-30
 
 ## Onda 6 validada localmente
 
-- A página inicial institucional segue a referência recebida: hero editorial, quatro projetos, números, apresentação de Cindy e chamada final.
-- Fundo branco e tons neutros substituem as cores institucionais nessa página; as demais rotas permanecem com o visual existente.
-- Uma foto editorial gerada foi adicionada ao projeto para o hero; os cards e a seção sobre usam fotos locais.
-- Gate local aprovado: tipos Cloudflare, lint, typecheck, 64 unitários, build, 33 verificações visuais e auditoria sem vulnerabilidades.
-- Não houve alteração de schema, envio externo ou deploy.
-- Commit de implementação na branch: `127f1f3`.
+- Home institucional branca segue a referência editorial, com quatro projetos, indicadores, Cindy e chamada final; commit `127f1f3`.
+- Gate local aprovado; sem schema, envio externo ou deploy nessa onda. Detalhes em `checkpoints/CP-06.md`.
 
 ## Onda 7 publicada
 
@@ -134,11 +126,18 @@ Atualizado em: 2026-09-30
 - Commit `c8dc547`; Workers Build `50059df3-a0ef-4eb2-8218-a1af3a392f14` aprovado às 17:55 de 2026-09-30 (America/Recife), version `62da01b3-f45f-4988-ab6f-37703ad240a0`.
 - Os 12 links das navbars e o redirect de `/sobre` foram confirmados no Chrome público; CI GitHub `36775891576` aprovado.
 
-## Onda 9 validada localmente
+## Onda 9 publicada
 
 - Navbar/rodapé navegam pelas seções da FAMTOUR; query de edição preservada e menu mobile fecha após o clique.
-- Galerias e inscrição retornam à landing; alvos respeitam a navbar fixa. Sem migrations novas.
+- Galerias e inscrição retornam à landing; alvos respeitam a navbar fixa. Código publicado `5a0cc17`, CI `36777558836`; sem migrations novas.
 - Gate: tipos Cloudflare, lint, typecheck, 64 unitários, build production, 27 visuais/navegação e auditoria aprovados.
+
+## Onda 10 implementada, segurança pendente
+
+- Fedra Light 300, Book 350 e Bold 700 locais; BlockGothicRR 500 no destaque FAMTOUR, sem síntese de estilos.
+- Cards usam Solicitar informações (edição selecionada no formulário) e Ver informações da edição (detalhes, sem envio/cobrança).
+- Navbar, rodapé e cabeçalho de edição oferecem Grupo New Wed e Projetos, preservando âncoras locais.
+- Commit `86aa631`, PR #1: tipos, lint, typecheck, 64 unitários, build e 39 visuais macOS aprovados. Baselines Linux revisados pelo CI; revalidação em andamento.
 
 ## Riscos e bloqueios atuais
 
@@ -147,3 +146,4 @@ Atualizado em: 2026-09-30
 - O consumidor de eventos não será publicado nesta etapa de hospedagem do site.
 - O preflight comercial completo permanece bloqueado sem R2 e os demais requisitos de lançamento.
 - Nenhum envio ou cobrança externa foi autorizado.
+- Auditoria atual do lockfile original aponta 8 alertas altos em dependências transitivas; gate de segurança bloqueado, sem alteração de dependências nesta onda.

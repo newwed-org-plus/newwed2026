@@ -55,6 +55,8 @@ export function Footer() {
             Participe
           </div>
           <ul className="flex flex-col gap-2.5 text-[11px] text-cream/55 font-light">
+            <li><a href="/" className="hover:text-cream transition-colors">Grupo New Wed</a></li>
+            <li><a href="/#projetos" className="hover:text-cream transition-colors">Projetos do grupo</a></li>
             {participation.map((l) => (
               <li key={l.id}>
                 <a href={href(l.id)} className="hover:text-cream transition-colors">

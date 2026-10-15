@@ -40,6 +40,7 @@ function blockMeanAbsoluteError(expected: PNG, received: PNG, blockSize = 4) {
   return totalError / blockCount;
 }
 const cases = [
+  ["institucional-home","http://127.0.0.1:5174/","/"],
   ["institucional-404","http://127.0.0.1:5174/rota-inexistente","/rota-inexistente"],
   ["famtour-home","http://127.0.0.1:5173/","/famtour"],
   ["famtour-edicao","http://127.0.0.1:5173/edicoes/fernando-de-noronha-2026","/famtour/edicoes/fernando-de-noronha-2026"],
@@ -68,7 +69,7 @@ async function settle(page: import("@playwright/test").Page) {
 }
 
 for (const [viewportName,width,height] of viewports) {
-  test(`${viewportName} · institucional-home`,async ({ page }) => {
+  test(`${viewportName} · institucional-home estrutura`,async ({ page }) => {
     await page.setViewportSize({ width,height });
     await page.goto("http://localhost:4173/",{ waitUntil:"load" });
     await settle(page);
@@ -155,6 +156,71 @@ for (const [viewportName,width,height] of viewports) {
     }
   });
 
+  test(`${viewportName} · fontes oficiais locais`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    const remoteFonts: string[] = [];
+    page.on("request", request => {
+      if (/fonts\.(googleapis|gstatic)\.com/.test(request.url())) remoteFonts.push(request.url());
+    });
+    for (const route of ["/", "/famtour"]) {
+      await page.goto(`http://localhost:4173${route}`);
+      const typography = await page.evaluate(async () => {
+        for (const weight of [300, 350, 700]) await document.fonts.load(`${weight} 16px "Fedra Sans Std"`);
+        await document.fonts.load('500 16px "BlockGothicRR"');
+        return {
+          loaded: Array.from(document.fonts).filter(face => face.status === "loaded").map(face => `${face.family.replaceAll('"', '')}:${face.weight}`),
+          heading: getComputedStyle(document.querySelector("h1")!).fontFamily,
+          synthesis: getComputedStyle(document.body).fontSynthesis,
+        };
+      });
+      expect(typography.loaded).toEqual(expect.arrayContaining(["Fedra Sans Std:300", "Fedra Sans Std:350", "Fedra Sans Std:700", "BlockGothicRR:500"]));
+      expect(typography.heading).toContain(route === "/" ? "Fedra Sans Std" : "BlockGothicRR");
+      expect(typography.synthesis).toBe("none");
+    }
+    expect(remoteFonts).toEqual([]);
+  });
+
+  test(`${viewportName} · CTAs correspondem ao destino e à edição`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    const slugs = ["famtour-alagoas-fevereiro-2027", "famtour-rn-abril-2027", "famtour-noronha-maio-2027", "famtour-ceara-agosto-2027"];
+    for (const [index, slug] of slugs.entries()) {
+      await page.goto("http://localhost:4173/famtour#famtours");
+      await page.waitForLoadState("networkidle");
+      await page.locator("#famtours").getByRole("button", { name: "Solicitar informações", exact: true }).nth(index).click();
+      await expect(page).toHaveURL(`http://localhost:4173/famtour?edicao=${slug}#form`);
+      await expect(page.locator("#form")).toBeInViewport();
+      await page.locator("#famtours").getByRole("button", { name: "Ver informações da edição", exact: true }).nth(index).click();
+      await expect(page).toHaveURL(`http://localhost:4173/famtour/inscricao/${slug}`);
+      await expect(page.getByText("Nenhuma cobrança será realizada nesta etapa. O ambiente de inscrição online será disponibilizado posteriormente.", { exact: true })).toBeVisible();
+      await expect(page.getByText("Ainda não. Esta página apresenta a estrutura da inscrição", { exact: false })).toBeVisible();
+    }
+  });
+
+  test(`${viewportName} · retorno explícito ao grupo e aos projetos`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    for (const route of ["/famtour", "/famtour/edicoes/fernando-de-noronha-2026", "/famtour/inscricao/famtour-rn-abril-2027"]) {
+      await page.goto(`http://localhost:4173${route}`);
+      await page.waitForLoadState("networkidle");
+      const header = page.getByRole("navigation", { name: route.includes("inscricao") ? "Retorno ao institucional" : "Navegação FAMTOUR" });
+      await header.getByRole("link", { name: "Grupo New Wed", exact: true }).click();
+      await expect(page).toHaveURL("http://localhost:4173/");
+      await expect(page.locator(".nw-home")).toBeVisible();
+      await page.goto(`http://localhost:4173${route}`);
+      await page.waitForLoadState("networkidle");
+      if (!route.includes("inscricao") && width < 1024) await page.getByRole("button", { name: "Abrir menu" }).click();
+      await header.getByRole("link", { name: /^Projetos/ }).click();
+      await expect(page).toHaveURL("http://localhost:4173/#projetos");
+      await expect(page.locator("#projetos")).toBeInViewport();
+      if (!route.includes("inscricao")) {
+        await page.goto(`http://localhost:4173${route}`);
+        await page.getByRole("contentinfo").getByRole("link", { name: "Projetos do grupo" }).click();
+        await expect(page).toHaveURL("http://localhost:4173/#projetos");
+      }
+    }
+  });
+
   for (const [name,source,target] of cases) {
     test(`${viewportName} · ${name}`,async ({ page }) => {
       await page.setViewportSize({ width,height });
@@ -171,6 +237,12 @@ for (const [viewportName,width,height] of viewports) {
       }
       const expected = PNG.sync.read(await readFile(baselinePath));
       const received = PNG.sync.read(actual);
+      if (received.width !== expected.width || received.height !== expected.height) {
+        const evidenceDir = resolve("test-results/visual", viewportName);
+        await mkdir(evidenceDir, { recursive: true });
+        await writeFile(resolve(evidenceDir, `${name}-actual.png`), actual);
+        await writeFile(resolve(evidenceDir, `${name}-expected.png`), PNG.sync.write(expected));
+      }
       expect(received.width,`largura divergente em ${name}`).toBe(expected.width);
       expect(received.height,`altura divergente em ${name}`).toBe(expected.height);
       const diff = new PNG({ width:expected.width,height:expected.height });

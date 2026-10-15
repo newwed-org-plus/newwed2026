@@ -42,8 +42,8 @@ function normalizeTelefone(value: string): string {
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  fontFamily: "'DM Sans', sans-serif",
-  fontWeight: 400,
+  fontFamily: "'Fedra Sans Std', sans-serif",
+  fontWeight: 350,
   fontSize: "0.7rem",
   letterSpacing: "0.12em",
   textTransform: "uppercase",
@@ -57,8 +57,8 @@ const inputBaseStyle: React.CSSProperties = {
   border: "none",
   borderBottom: "1.5px solid rgba(25,16,16,0.2)",
   padding: "0.75rem 0",
-  fontFamily: "'DM Sans', sans-serif",
-  fontWeight: 400,
+  fontFamily: "'Fedra Sans Std', sans-serif",
+  fontWeight: 350,
   fontSize: "1rem",
   color: "#191010",
   outline: "none",
@@ -66,7 +66,7 @@ const inputBaseStyle: React.CSSProperties = {
 };
 
 const errorStyle: React.CSSProperties = {
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "'Fedra Sans Std', sans-serif",
   fontSize: "0.75rem",
   color: "#7A2535",
   marginTop: "0.4rem",
@@ -77,8 +77,8 @@ function SubDivisor({ children }: { children: React.ReactNode }) {
     <div style={{ margin: "2.5rem 0 1.5rem" }}>
       <div
         style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontWeight: 400,
+          fontFamily: "'Fedra Sans Std', sans-serif",
+          fontWeight: 350,
           fontSize: "0.6rem",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
@@ -304,7 +304,7 @@ export function PreInscricaoForm({
         >
           <span
             style={{
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Fedra Sans Std', sans-serif",
               fontSize: "0.85rem",
               color: "#191010",
             }}
@@ -320,7 +320,7 @@ export function PreInscricaoForm({
                 color: "#FFFFFF",
                 border: "none",
                 padding: "0.5rem 1rem",
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "'Fedra Sans Std', sans-serif",
                 fontSize: "0.75rem",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
@@ -337,7 +337,7 @@ export function PreInscricaoForm({
                 color: "#191010",
                 border: "1.5px solid rgba(25,16,16,0.3)",
                 padding: "0.5rem 1rem",
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "'Fedra Sans Std', sans-serif",
                 fontSize: "0.75rem",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
@@ -521,7 +521,7 @@ export function PreInscricaoForm({
           </label>
           <div
             style={{
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Fedra Sans Std', sans-serif",
               fontSize: "0.7rem",
               color: "rgba(25,16,16,0.6)",
               marginBottom: "0.75rem",
@@ -676,7 +676,7 @@ export function PreInscricaoForm({
           </label>
           <div
             style={{
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Fedra Sans Std', sans-serif",
               fontSize: "0.7rem",
               color: "rgba(25,16,16,0.6)",
               marginBottom: "0.5rem",
@@ -701,7 +701,7 @@ export function PreInscricaoForm({
 
       <p
         style={{
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "'Fedra Sans Std', sans-serif",
           fontSize: "0.85rem",
           lineHeight: 1.6,
           color: "rgba(25,16,16,0.7)",
@@ -767,7 +767,7 @@ export function PreInscricaoForm({
         />
         <span
           style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Fedra Sans Std', sans-serif",
             fontSize: "0.9rem",
             color: "#191010",
           }}
@@ -800,8 +800,8 @@ export function PreInscricaoForm({
             padding: "1.2rem",
             width: "100%",
             maxWidth: 480,
-            fontFamily: "'DM Sans', sans-serif",
-            fontWeight: 500,
+            fontFamily: "'Fedra Sans Std', sans-serif",
+            fontWeight: 350,
             fontSize: "0.9rem",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
@@ -814,7 +814,7 @@ export function PreInscricaoForm({
         </button>
         <div
           style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Fedra Sans Std', sans-serif",
             fontSize: "0.7rem",
             color: "rgba(25,16,16,0.6)",
             textAlign: "center",

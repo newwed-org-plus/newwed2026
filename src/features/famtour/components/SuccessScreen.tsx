@@ -25,7 +25,7 @@ export function SuccessScreen({ nome, telefoneFormatado: _telefoneFormatado, fam
       <div style={{ maxWidth: 600, margin: "0 auto" }}>
         <h1
           style={{
-            fontFamily: "'Cormorant Garamond', serif",
+            fontFamily: "'Fedra Sans Std', sans-serif",
             fontWeight: 300,
             fontSize: "clamp(2rem, 4vw, 2.8rem)",
             color: "#191010",
@@ -41,7 +41,7 @@ export function SuccessScreen({ nome, telefoneFormatado: _telefoneFormatado, fam
         </h1>
         <p
           style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Fedra Sans Std', sans-serif",
             fontSize: "0.92rem",
             lineHeight: 1.72,
             color: "#191010",
@@ -52,7 +52,7 @@ export function SuccessScreen({ nome, telefoneFormatado: _telefoneFormatado, fam
         </p>
         <p
           style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Fedra Sans Std', sans-serif",
             fontSize: "0.85rem",
             lineHeight: 1.6,
             color: "rgba(25,16,16,0.75)",
@@ -75,8 +75,8 @@ export function SuccessScreen({ nome, telefoneFormatado: _telefoneFormatado, fam
             background: "#7A2535",
             color: "#FFFFFF",
             padding: "1.2rem 2.5rem",
-            fontFamily: "'DM Sans', sans-serif",
-            fontWeight: 500,
+            fontFamily: "'Fedra Sans Std', sans-serif",
+            fontWeight: 350,
             fontSize: "0.9rem",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
@@ -97,8 +97,8 @@ export function SuccessScreen({ nome, telefoneFormatado: _telefoneFormatado, fam
               border: "1.5px solid #191010",
               color: "#191010",
               padding: "1rem 2rem",
-              fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 500,
+              fontFamily: "'Fedra Sans Std', sans-serif",
+              fontWeight: 350,
               fontSize: "0.85rem",
               letterSpacing: "0.12em",
               textTransform: "uppercase",

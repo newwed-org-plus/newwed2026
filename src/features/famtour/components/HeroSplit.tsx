@@ -71,8 +71,8 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
           <div
             className="mt-1.5 text-[0.54rem] md:mt-5 md:text-[clamp(0.62rem,1.2vw,0.78rem)]"
             style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 500,
+              fontFamily: "'Fedra Sans Std', sans-serif",
+              fontWeight: 350,
               letterSpacing: "0.12em",
               color: "#2E8E8E",
               lineHeight: 1.6,
@@ -84,8 +84,8 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
           <div
             className="mt-2 text-[0.56rem] md:mt-8 md:text-[0.7rem]"
             style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 400,
+              fontFamily: "'Fedra Sans Std', sans-serif",
+              fontWeight: 350,
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "#2E8E8E",
@@ -145,8 +145,8 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
             />
             <h1
               style={{
-                fontFamily: "'Anton', sans-serif",
-                fontWeight: 400,
+                fontFamily: "'BlockGothicRR', sans-serif",
+                fontWeight: 500,
                 textTransform: "uppercase",
                 fontSize: "clamp(3rem, 14vw, 5rem)",
                 color: "#FFFFFF",
@@ -177,8 +177,8 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
                 color: "#7A2535",
                 padding: "1rem 2rem",
                 borderRadius: 0,
-                fontFamily: "'DM Sans', sans-serif",
-                fontWeight: 500,
+                fontFamily: "'Fedra Sans Std', sans-serif",
+                fontWeight: 350,
                 fontSize: "0.85rem",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
@@ -191,8 +191,8 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
             <div
               style={{
                 marginTop: "1rem",
-                fontFamily: "'DM Sans', sans-serif",
-                fontWeight: 400,
+                fontFamily: "'Fedra Sans Std', sans-serif",
+                fontWeight: 350,
                 fontSize: "0.75rem",
                 color: "rgba(255,255,255,0.8)",
               }}

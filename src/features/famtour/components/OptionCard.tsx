@@ -38,8 +38,8 @@ export function OptionCard({ label, value, selected, onSelect, name }: Props) {
       />
       <span
         style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontWeight: 500,
+          fontFamily: "'Fedra Sans Std', sans-serif",
+          fontWeight: 350,
           fontSize: "1rem",
           color: "#191010",
         }}

@@ -18,7 +18,7 @@ export function Nav() {
         >
           NEW WED
         </a>
-        <div className="hidden lg:flex gap-7 text-[10px] uppercase tracking-[0.2em] text-smoke font-light">
+        <div className="hidden lg:flex gap-5 text-[10px] uppercase tracking-[0.2em] text-smoke font-light">
           {FAMTOUR_NAVIGATION.map((l) => (
             <a
               key={l.id}
@@ -28,10 +28,14 @@ export function Nav() {
               {l.label}
             </a>
           ))}
+          <a href={href("form")} className="hover:text-cream transition-colors">Contato</a>
         </div>
         <div className="flex items-center gap-3">
-          <a href={href("form")} className="hidden lg:inline-flex btn btn-solid !py-2 !px-4 text-[9px]">
-            Falar com a equipe
+          <a href="/" className="whitespace-nowrap text-[11px] text-cream underline underline-offset-4 hover:text-cream/75">
+            Grupo New Wed
+          </a>
+          <a href="/#projetos" className="hidden lg:inline-flex text-[11px] text-smoke hover:text-cream">
+            Projetos
           </a>
           <button
             aria-label="Abrir menu"
@@ -57,6 +61,9 @@ export function Nav() {
               {l.label}
             </a>
           ))}
+          <a href="/#projetos" onClick={() => setOpen(false)} className="hover:text-cream transition-colors">
+            Projetos do grupo
+          </a>
           <a
             href={href("form")}
             onClick={() => setOpen(false)}

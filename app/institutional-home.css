@@ -4,8 +4,8 @@
   --nw-paper: #fff;
   background: var(--nw-paper);
   color: var(--nw-ink);
-  font-family: "DM Sans", sans-serif;
-  font-weight: 400;
+  font-family: "Fedra Sans Std", sans-serif;
+  font-weight: 350;
 }
 
 .nw-home * { box-sizing: border-box; }
@@ -44,12 +44,12 @@
   flex-direction: column;
   width: 78px;
   color: #1e1e1d;
-  font: 400 29px/.74 "Cormorant Garamond", serif;
+  font: 350 29px/.74 "Fedra Sans Std", sans-serif;
   letter-spacing: -.075em;
 }
 
 .nw-logo small {
-  font: 500 7px/1.6 "DM Sans", sans-serif;
+  font: 350 7px/1.6 "Fedra Sans Std", sans-serif;
   letter-spacing: .14em;
   margin-left: 3px;
   margin-bottom: 4px;
@@ -67,7 +67,7 @@
 .nw-mobile-menu nav a {
   color: var(--nw-ink);
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 350;
   letter-spacing: .095em;
   line-height: 1.4;
   text-transform: uppercase;
@@ -86,14 +86,14 @@
 
 .nw-hero h1 {
   margin: 0;
-  font: 400 clamp(46px, 4.5vw, 73px)/.98 "Cormorant Garamond", serif;
+  font: 350 clamp(46px, 4.5vw, 73px)/.98 "Fedra Sans Std", sans-serif;
   text-transform: uppercase;
   letter-spacing: -.035em;
 }
 
 .nw-hero-content p {
   margin: 2px 0 31px;
-  font: italic 500 clamp(26px, 3vw, 43px)/1.1 "Cormorant Garamond", serif;
+  font: italic 350 clamp(26px, 3vw, 43px)/1.1 "Fedra Sans Std", sans-serif;
   letter-spacing: .015em;
 }
 
@@ -103,7 +103,7 @@
   justify-content: center;
   min-height: 40px;
   padding: 10px 23px;
-  font: 500 10px/1.2 "DM Sans", sans-serif;
+  font: 350 10px/1.2 "Fedra Sans Std", sans-serif;
   letter-spacing: .09em;
   text-transform: uppercase;
   transition: background .2s ease, color .2s ease, border-color .2s ease;
@@ -115,7 +115,7 @@
 .nw-section-heading { text-align: center; margin-bottom: 33px; }
 .nw-section-heading h2 {
   margin: 0;
-  font: 400 clamp(29px, 2.6vw, 43px)/1 "Cormorant Garamond", serif;
+  font: 350 clamp(29px, 2.6vw, 43px)/1 "Fedra Sans Std", sans-serif;
   text-transform: uppercase;
 }
 .nw-section-heading p { margin: 6px 0 0; color: var(--nw-muted); font-size: 12px; }
@@ -162,7 +162,7 @@
   display: flex;
   flex-direction: column;
   margin: 0;
-  font: 400 clamp(27px, 2.8vw, 41px)/.78 "Cormorant Garamond", serif;
+  font: 350 clamp(27px, 2.8vw, 41px)/.78 "Fedra Sans Std", sans-serif;
   letter-spacing: -.055em;
 }
 .nw-project-copy h3 span:last-child {
@@ -201,7 +201,7 @@
 }
 .nw-number:first-child { border-left: 0; }
 .nw-number strong {
-  font: 400 clamp(30px, 3vw, 48px)/1 "Cormorant Garamond", serif;
+  font: 350 clamp(30px, 3vw, 48px)/1 "Fedra Sans Std", sans-serif;
   white-space: nowrap;
 }
 .nw-number span {
@@ -209,7 +209,7 @@
   margin-top: 8px;
   color: #5c5956;
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 350;
   letter-spacing: .1em;
   line-height: 1.45;
   text-transform: uppercase;
@@ -223,7 +223,7 @@
 .nw-story-copy > div { max-width: 430px; }
 .nw-story-copy h2 {
   margin: 0 0 16px;
-  font: 400 clamp(29px, 2.9vw, 44px)/1.05 "Cormorant Garamond", serif;
+  font: 350 clamp(29px, 2.9vw, 44px)/1.05 "Fedra Sans Std", sans-serif;
   text-transform: uppercase;
 }
 .nw-story-copy p { margin: 0 0 25px; color: #4c4946; font-size: 13px; line-height: 1.8; }
@@ -239,9 +239,9 @@
   background: #eceae7;
   color: var(--nw-ink);
 }
-.nw-quote-mark { align-self: flex-start; color: #bfbcb7; font: 400 140px/.8 "Cormorant Garamond", serif; }
+.nw-quote-mark { align-self: flex-start; color: #bfbcb7; font: 350 140px/.8 "Fedra Sans Std", sans-serif; }
 .nw-closing-copy { text-align: center; }
-.nw-closing h2 { margin: 0 0 17px; font: 400 clamp(28px, 2.7vw, 41px)/1.05 "Cormorant Garamond", serif; text-transform: uppercase; }
+.nw-closing h2 { margin: 0 0 17px; font: 350 clamp(28px, 2.7vw, 41px)/1.05 "Fedra Sans Std", sans-serif; text-transform: uppercase; }
 .nw-button-light-outline { border: 1px solid #55514e; color: var(--nw-ink); }
 .nw-button-light-outline:hover { background: #282625; color: white; }
 .nw-social { display: flex; align-items: center; justify-content: center; width: 55px; height: 55px; border-left: 1px solid #c9c5c0; color: var(--nw-ink); }
