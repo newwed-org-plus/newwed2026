@@ -43,6 +43,13 @@
       "when": 1789398149499,
       "tag": "0005_living_hobgoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1792090557113,
+      "tag": "0006_ambitious_jasper_sitwell",
+      "breakpoints": true
     }
   ]
 }

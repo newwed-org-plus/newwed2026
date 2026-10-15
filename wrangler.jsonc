@@ -5,7 +5,9 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "main": "vinext/server/fetch-handler",
+  "main": "workers/web.ts",
+  "durable_objects": { "bindings": [{ "name": "ADMIN_PASSWORD_VERIFIER", "class_name": "AdminPasswordVerifier" }] },
+  "migrations": [{ "tag": "admin-password-v1", "new_sqlite_classes": ["AdminPasswordVerifier"] }],
   "assets": {
     "directory": "dist/client",
     "not_found_handling": "none",
@@ -51,12 +53,14 @@
   },
   "env": {
     "staging": {
+      "durable_objects": { "bindings": [{ "name": "ADMIN_PASSWORD_VERIFIER", "class_name": "AdminPasswordVerifier" }] },
       "vars": { "ENVIRONMENT": "staging", "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "", "ALLOW_LOCAL_ACCESS": "false", "OPENAI_MODEL": "gpt-5-mini", "ASAAS_API_URL": "https://api-sandbox.asaas.com/v3", "META_GRAPH_VERSION": "v23.0", "TURNSTILE_SITE_KEY": "", "META_CHECKOUT_TEMPLATE": "checkout_famtour" },
       "d1_databases": [{ "binding": "DB", "database_name": "new-wed-platform-staging", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }],
       "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "new-wed-platform-staging" }],
       "queues": { "producers": [{ "binding": "EVENTS_QUEUE", "queue": "new-wed-events-staging" }] }
     },
     "production": {
+      "durable_objects": { "bindings": [{ "name": "ADMIN_PASSWORD_VERIFIER", "class_name": "AdminPasswordVerifier" }] },
       "account_id": "41245f76790f4922487ec395c9e3bcec",
       "workers_dev": true,
       "routes": [
