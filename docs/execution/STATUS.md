@@ -4,8 +4,8 @@ Atualizado em: 2026-10-15
 
 ## Estado geral
 
-- Onda atual: onda 12, login próprio do painel administrativo.
-- Branch: `codex/wave-12-admin-access`; base `origin/main` em `267b7ba`.
+- Onda atual: onda 13, ajustes visuais solicitados em 2026-10-15.
+- Branch: `codex/wave-13-visual-feedback`; base `origin/main` em `906f412`.
 - Dados legados: inexistentes; o projeto começa vazio.
 - Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
 
@@ -72,7 +72,7 @@ Atualizado em: 2026-10-15
 - PR #2 integrada em `31979fa`; CI `38786022714` aprovou também D1, Workers e 39 cenários Linux, falhando somente na auditoria preexistente.
 - Integração Workers Builds reconectada a `newwed-org-plus/newwed2026`, branch `main`, comandos production e token existente; acompanhamento final na PR #2.
 
-## Onda 12 validada localmente
+## Onda 12 publicada
 
 - Usuário solicitou e-mail e senha próprios após bloqueio do onboarding Zero Trust; decisão D-033.
 - Migration `0006` adiciona credenciais scrypt e sessões revogáveis; APIs mantêm usuários ativos e papéis.
@@ -80,11 +80,23 @@ Atualizado em: 2026-10-15
 - Login com rate limit, CSRF, cookie HttpOnly/Secure/SameSite e logout no servidor; provisionamento por operador, sem segredo no Git.
 - Tipos, lint, TypeScript, 76 unitários, 14 cenários Workers, migrations locais repetíveis e build production aprovados; 43 cenários visuais aprovados, incluindo login real/reload/logout após ajuste de CPU.
 - OAuth Wrangler autorizado pelo usuário para D1, mas retorno falhou por state incompatível; nenhum token/profile New Wed foi persistido. Console D1 preparado como alternativa.
-- Próximo passo: integrar PR, acompanhar Workers Build, provisionar credencial pelo operador e validar login real.
+- PR #3 integrada em `906f412`; Workers Build `96b29de5-c0cd-43fe-a0f7-ddb0619f3fa0` Ready, versão `39e00b42` ativa.
+- Migration 0006 e cadastro inicial confirmados em produção. Login, papel admin, reload, logout/revogação e novo login reais aprovados; evidências finais na PR #3. O handoff descrito em CP-12 foi uma interpretação excessiva para cadastro inicial e não foi necessário.
+- CI `38792552504`: todos os gates funcionais e 43 visuais aprovados; falha somente na auditoria preexistente.
+
+## Onda 13 em validação
+
+- Referências e assets oficiais recebidos na conversa indicada pelo usuário, somente mensagens de hoje; nenhuma mensagem enviada.
+- Logo script marsala nos cabeçalhos em uso; marca FAMTOUR retorna à home, preservando menus locais.
+- Quatro banners oficiais da home em proporção 9:16, sem repetir as marcas em texto, com descrições e links preservados.
+- Botões institucionais usam o marsala do logo; nova foto de Cindy na seção inferior com enquadramento à direita.
+- Parceiros FAMTOUR em fundo claro, grade fixa 2/4 colunas, sem ticker/divisórias e com contraste para os logos brancos.
+- Vídeo principal fica pendente de material; usuário confirmou que será incluído depois. Imagem atual do hero preservada.
+- Sem schema, integrações comerciais ou alteração de infraestrutura. Gates e publicação em acompanhamento.
 
 ## Riscos e bloqueios atuais
 
-- Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa; login próprio depende do provisionamento em D1.
+- Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa.
 - O painel permanece autenticado; inscrições falham de forma segura sem Turnstile.
 - O consumidor de eventos não será publicado nesta etapa de hospedagem do site.
 - O preflight comercial completo permanece bloqueado sem R2 e os demais requisitos de lançamento.

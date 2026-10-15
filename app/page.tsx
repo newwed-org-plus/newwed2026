@@ -1,10 +1,5 @@
 import { redirect } from "next/navigation";
 import { Instagram } from "lucide-react";
-import feiraImage from "@/assets/feira.jpg";
-import destinosImage from "@/assets/fantour-noronha.jpg";
-import guiaImage from "@/assets/guia.jpg";
-import workshopImage from "@/assets/workshop.jpg";
-import cindyImage from "@/assets/cindy.jpg";
 import { INSTAGRAM_URL, WHATSAPP_URL } from "@/features/institutional/contact";
 import { InstitutionalHeader } from "@/features/institutional/components/InstitutionalHeader";
 
@@ -13,33 +8,29 @@ const projects = [
     id: "feira",
     href: "/feira",
     name: "Feira Tendência",
-    brand: ["NEW", "WED", "FEIRA"],
     description: "A maior feira de tendências e destinos para casamentos do Nordeste.",
-    image: feiraImage.src,
+    image: "/assets/brand/banner-feira.webp",
   },
   {
     id: "destinos",
     href: "/famtour",
     name: "Destinos",
-    brand: ["NEW", "WED", "DESTINOS"],
     description: "Famtours imersivos que apresentam destinos e criam conexões reais de negócios.",
-    image: destinosImage.src,
+    image: "/assets/brand/banner-destinos.webp",
   },
   {
     id: "guia",
     href: "/guia",
     name: "Guia",
-    brand: ["NEW", "WED", "GUIA"],
     description: "Publicação de referência com fornecedores, destinos e conteúdo exclusivo.",
-    image: guiaImage.src,
+    image: "/assets/brand/banner-guia.webp",
   },
   {
     id: "workshop",
     href: "/workshop",
     name: "Workshop",
-    brand: ["NEW", "WED", "WORKSHOP"],
     description: "Encontro estratégico que conecta destinos aos principais profissionais do país.",
-    image: workshopImage.src,
+    image: "/assets/brand/banner-workshop.webp",
   },
 ] as const;
 
@@ -68,12 +59,9 @@ function HomeContent() {
         <div className="nw-project-grid">
           {projects.map((project) => (
             <article className="nw-project-card" id={project.id} key={project.id}>
-              <img src={project.image} alt="" loading="lazy" />
-              <div className="nw-project-shade" />
+              <img src={project.image} alt="" width={1080} height={1920} loading="lazy" />
               <div className="nw-project-copy">
-                <h3 aria-label={`New Wed ${project.name}`}>
-                  {project.brand.map((line) => <span key={line}>{line}</span>)}
-                </h3>
+                <h3 className="sr-only">New Wed {project.name}</h3>
                 <div className="nw-project-bottom">
                   <p>{project.description}</p>
                   <a href={project.href} className="nw-button nw-button-outline" aria-label={project.id === "destinos" ? "Conheça o FAMTOUR New Wed Destinos" : `Conheça New Wed ${project.name}`}>
@@ -97,7 +85,7 @@ function HomeContent() {
 
       <section id="sobre" className="nw-story" aria-labelledby="nw-story-title">
         <div className="nw-story-image">
-          <img src={cindyImage.src} alt="Cindy Noel, idealizadora do Grupo New Wed" loading="lazy" />
+          <img src="/assets/brand/cindy-noel.webp" width={1600} height={900} alt="Cindy Noel, idealizadora do Grupo New Wed" loading="lazy" />
         </div>
         <div className="nw-story-copy">
           <div>

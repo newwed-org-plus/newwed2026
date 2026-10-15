@@ -12,11 +12,12 @@ export function Nav() {
     <nav aria-label="Navegação FAMTOUR" className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-dark/80 border-b border-cream/10">
       <div className="flex items-center justify-between px-6 md:px-12 py-4">
         <a
-          href={href("inicio")}
+          href="/"
+          aria-label="New Wed, página inicial"
           onClick={() => setOpen(false)}
-          className="serif whitespace-nowrap text-cream tracking-[0.18em] text-lg md:text-xl font-light"
+          className="shrink-0 bg-[#fffaf5] px-2 py-1"
         >
-          NEW WED
+          <img src="/assets/brand/new-wed-marsala.png" width={1167} height={927} alt="New Wed" className="block h-10 w-auto md:h-12" />
         </a>
         <div className="hidden lg:flex gap-5 text-[10px] uppercase tracking-[0.2em] text-smoke font-light">
           {FAMTOUR_NAVIGATION.map((l) => (

@@ -76,6 +76,8 @@ for (const [viewportName,width,height] of viewports) {
     await expect(page.getByRole("heading",{ name:/conectamos pessoas, destinos e experiências/i })).toBeVisible();
     await expect(page.locator(".nw-project-card")).toHaveCount(4);
     await expect(page.getByRole("heading",{ name:"Nosso ecossistema" })).toBeVisible();
+    await expect(page.locator(".nw-logo img")).toBeVisible();
+    await expect(page.locator(".nw-project-card > img")).toHaveCount(4);
     const layout = await page.evaluate(() => ({
       documentWidth:document.documentElement.scrollWidth,
       viewportWidth:window.innerWidth,
@@ -158,7 +160,7 @@ for (const [viewportName,width,height] of viewports) {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(`${siteOrigin}/famtour?edicao=famtour-rn-abril-2027`);
     await page.waitForLoadState("networkidle");
-    for (const section of ["experiencia", "edicoes-anteriores", "famtours", "parceiros", "form", "inicio"]) {
+    for (const section of ["experiencia", "edicoes-anteriores", "famtours", "parceiros", "form"]) {
       if (width < 1024) await page.getByRole("button", { name: "Abrir menu" }).click();
       await page.getByRole("navigation", { name: "Navegação FAMTOUR" }).locator(`a[href="#${section}"]:visible`).click();
       await expect(page).toHaveURL(`${siteOrigin}/famtour?edicao=famtour-rn-abril-2027#${section}`);
@@ -171,6 +173,15 @@ for (const [viewportName,width,height] of viewports) {
       await expect(page).toHaveURL(`${siteOrigin}/famtour?edicao=famtour-rn-abril-2027#${section}`);
       await expect(page.locator(`.famtour-landing #${section}`)).toBeInViewport();
     }
+    await expect(page.locator('#parceiros img')).toHaveCount(4);
+    const partners = await page.locator('#parceiros ul').evaluate(element => {
+      const boxes = Array.from(element.children).map(child => child.getBoundingClientRect());
+      return { columns:getComputedStyle(element).gridTemplateColumns.split(' ').length, sameRow:boxes[0].top === boxes[3].top };
+    });
+    expect(partners.columns).toBe(width < 768 ? 2 : 4);
+    expect(partners.sameRow).toBe(width >= 768);
+    await page.getByRole('link', { name:'New Wed, página inicial', exact:true }).click();
+    await expect(page).toHaveURL(`${siteOrigin}/`);
   });
 
   test(`${viewportName} · páginas FAMTOUR retornam à landing`, async ({ page }) => {
