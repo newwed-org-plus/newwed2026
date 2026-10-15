@@ -12,7 +12,7 @@ export function HomeMobileMenu() {
       <nav aria-label="Navegação principal mobile">
         {institutionalNavigation.map((item) => (
           <a
-            href={`#${item.id}`}
+            href={item.href}
             key={item.id}
             onClick={() => { if (menu.current) menu.current.open = false; }}
           >
