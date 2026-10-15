@@ -9,7 +9,7 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"]],
   use: { browserName: "chromium", colorScheme: "light", locale: "pt-BR", timezoneId: "America/Recife" },
-  webServer: captureRemoteBaselines ? undefined : {
+  webServer: captureRemoteBaselines || process.env.VISUAL_BASE_URL ? undefined : {
     command: "npm run dev -- --port 4173",
     url: "http://localhost:4173",
     reuseExistingServer: true,

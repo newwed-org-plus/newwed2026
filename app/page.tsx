@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { Instagram } from "lucide-react";
 import feiraImage from "@/assets/feira.jpg";
 import destinosImage from "@/assets/fantour-noronha.jpg";
@@ -7,13 +6,12 @@ import guiaImage from "@/assets/guia.jpg";
 import workshopImage from "@/assets/workshop.jpg";
 import cindyImage from "@/assets/cindy.jpg";
 import { INSTAGRAM_URL, WHATSAPP_URL } from "@/features/institutional/contact";
-import { institutionalNavigation } from "@/features/institutional/navigation";
-import { HomeMobileMenu } from "@/features/institutional/components/HomeMobileMenu";
+import { InstitutionalHeader } from "@/features/institutional/components/InstitutionalHeader";
 
 const projects = [
   {
     id: "feira",
-    href: "#contato",
+    href: "/feira",
     name: "Feira Tendência",
     brand: ["NEW", "WED", "FEIRA"],
     description: "A maior feira de tendências e destinos para casamentos do Nordeste.",
@@ -29,7 +27,7 @@ const projects = [
   },
   {
     id: "guia",
-    href: "#contato",
+    href: "/guia",
     name: "Guia",
     brand: ["NEW", "WED", "GUIA"],
     description: "Publicação de referência com fornecedores, destinos e conteúdo exclusivo.",
@@ -37,7 +35,7 @@ const projects = [
   },
   {
     id: "workshop",
-    href: "#contato",
+    href: "/workshop",
     name: "Workshop",
     brand: ["NEW", "WED", "WORKSHOP"],
     description: "Encontro estratégico que conecta destinos aos principais profissionais do país.",
@@ -49,19 +47,7 @@ function HomeContent() {
   return (
     <main className="nw-home">
       <section className="nw-hero" aria-labelledby="nw-hero-title">
-        <header className="nw-header">
-          <Link href="/" className="nw-logo" aria-label="Grupo New Wed, página inicial">
-            <small>GRUPO</small>
-            <span>NEW</span>
-            <span>WED</span>
-          </Link>
-          <nav className="nw-nav" aria-label="Navegação principal">
-            {institutionalNavigation.map((item) => (
-              <a href={`#${item.id}`} key={item.id}>{item.label}</a>
-            ))}
-          </nav>
-          <HomeMobileMenu />
-        </header>
+        <InstitutionalHeader />
 
         <div className="nw-hero-content">
           <h1 id="nw-hero-title">
@@ -90,8 +76,8 @@ function HomeContent() {
                 </h3>
                 <div className="nw-project-bottom">
                   <p>{project.description}</p>
-                  <a href={project.href} className="nw-button nw-button-outline" aria-label={project.id === "destinos" ? "Conheça o FAMTOUR New Wed Destinos" : `Fale com a equipe sobre New Wed ${project.name}`}>
-                    {project.id === "destinos" ? "Conheça o FAMTOUR" : "Fale com a equipe"}
+                  <a href={project.href} className="nw-button nw-button-outline" aria-label={project.id === "destinos" ? "Conheça o FAMTOUR New Wed Destinos" : `Conheça New Wed ${project.name}`}>
+                    {project.id === "destinos" ? "Conheça o FAMTOUR" : "Conheça o projeto"}
                   </a>
                 </div>
               </div>

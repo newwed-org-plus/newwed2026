@@ -124,3 +124,8 @@ A solicitação de 2026-10-14 aplica os arquivos oficiais fornecidos pelo client
 ## D-031 — CTAs e retorno institucional explícitos
 
 A solicitação de 2026-10-14 complementa D-029: a marca e os menus de seção continuam dentro da FAMTOUR; links separados Grupo New Wed e Projetos levam a `/` e `/#projetos`. Eles ficam no cabeçalho da landing/galerias, no rodapé e no cabeçalho da página de edição. Os cards usam Solicitar informações para selecionar a edição no formulário de contato e Ver informações da edição para os detalhes atuais. O formulário de inscrição continua sendo uma prévia, sem envio ou cobrança; o CTA não promete inscrição funcional.
+
+
+## D-032 — Páginas próprias dos projetos institucionais
+
+Em 2026-10-15, o usuário confirmou a solicitação do cliente e autorizou corrigir e publicar a navegação dos projetos. Esta decisão substitui D-028 para Feira, Guia e Workshop: `/feira`, `/guia` e `/workshop` voltam a renderizar páginas próprias com conteúdo recuperado do histórico anterior à onda 8, adaptado à paleta branca e às fontes oficiais. Cards e menus desktop/mobile abrem essas rotas; Destinos segue em `/famtour`. Sobre e Contato continuam como seções da home. As páginas incluem retorno a `/#projetos` e contato contextualizado com a equipe. Nenhum envio, cobrança, alteração de schema ou publicação do consumidor de eventos faz parte deste fix.
