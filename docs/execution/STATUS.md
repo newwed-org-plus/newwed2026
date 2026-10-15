@@ -132,12 +132,12 @@ Atualizado em: 2026-10-14
 - Galerias e inscrição retornam à landing; alvos respeitam a navbar fixa. Código publicado `5a0cc17`, CI `36777558836`; sem migrations novas.
 - Gate: tipos Cloudflare, lint, typecheck, 64 unitários, build production, 27 visuais/navegação e auditoria aprovados.
 
-## Onda 10 em validação
+## Onda 10 implementada, segurança pendente
 
 - Fedra Light 300, Book 350 e Bold 700 locais; BlockGothicRR 500 no destaque FAMTOUR, sem síntese de estilos.
 - Cards usam Solicitar informações (edição selecionada no formulário) e Ver informações da edição (detalhes, sem envio/cobrança).
 - Navbar, rodapé e cabeçalho de edição oferecem Grupo New Wed e Projetos, preservando âncoras locais.
-- Tipos, lint, typecheck, 64 unitários, build e 39 visuais/navegação macOS aprovados; Linux em validação. Sem publicação.
+- Commit `86aa631`, PR #1: tipos, lint, typecheck, 64 unitários, build e 39 visuais macOS aprovados. Baselines Linux revisados pelo CI; revalidação em andamento.
 
 ## Riscos e bloqueios atuais
 
