@@ -115,3 +115,12 @@ O usuário retirou o institucional escuro em 2026-09-30. Os menus do institucion
 ## D-029 — FAMTOUR navega dentro da própria landing
 
 O usuário esclareceu que a navbar da FAMTOUR deve permanecer na landing. Navbar e rodapé usam seções Sobre o FAMTOUR, Edições anteriores, Edições abertas e Parceiros; Falar com a equipe conduz ao formulário. Na landing, âncoras locais preservam a edição selecionada na query string. Em páginas de galeria e inscrição, os mesmos links retornam a `/famtour#<seção>`. A marca retorna ao início da landing. Os alvos possuem margem para a navbar fixa e o menu mobile fecha após o clique.
+
+
+## D-030 — Tipografia oficial local
+
+A solicitação de 2026-10-14 aplica os arquivos oficiais fornecidos pelo cliente: Fedra Sans Std Light 300, Book 350 e Bold 700, e BlockGothicRR Medium Extra Cond 500 exclusivamente no título de destaque FAMTOUR. As quatro faces ficam em `public/assets/fonts` e são servidas pelo próprio site, sem Google Fonts. Utilitários de peso normal/medium usam Book; semibold/bold usam Bold. `font-synthesis: none` impede pesos e itálicos artificiais. O alias de CSS `font-serif` permanece por compatibilidade de componentes, mas passa a usar Fedra.
+
+## D-031 — CTAs e retorno institucional explícitos
+
+A solicitação de 2026-10-14 complementa D-029: a marca e os menus de seção continuam dentro da FAMTOUR; links separados Grupo New Wed e Projetos levam a `/` e `/#projetos`. Eles ficam no cabeçalho da landing/galerias, no rodapé e no cabeçalho da página de edição. Os cards usam Solicitar informações para selecionar a edição no formulário de contato e Ver informações da edição para os detalhes atuais. O formulário de inscrição continua sendo uma prévia, sem envio ou cobrança; o CTA não promete inscrição funcional.

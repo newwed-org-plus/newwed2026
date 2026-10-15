@@ -77,9 +77,9 @@ function PartnerLogo({
         style={{
           display: "none",
           color: "#FFFFFF",
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "'Fedra Sans Std', sans-serif",
           fontSize: "0.78rem",
-          fontWeight: 500,
+          fontWeight: 350,
           letterSpacing: "0.08em",
           whiteSpace: "nowrap",
         }}
@@ -150,9 +150,9 @@ export function ParceirosLogos() {
             margin: 0,
             flex: "0 0 auto",
             color: "#E7C88A",
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Fedra Sans Std', sans-serif",
             fontSize: "0.62rem",
-            fontWeight: 500,
+            fontWeight: 350,
             letterSpacing: "0.22em",
             lineHeight: 1,
             whiteSpace: "nowrap",

@@ -5,11 +5,11 @@ import { formatCurrency, type FamtourEdition } from "@/features/famtour/lib/famt
 
 type Props = {
   famtour: FamtourEdition;
-  onLearnMore: (slug: string) => void;
-  onRegister: (slug: string) => void;
+  onRequestInformation: (slug: string) => void;
+  onViewEdition: (slug: string) => void;
 };
 
-export function FamTourCard({ famtour, onLearnMore, onRegister }: Props) {
+export function FamTourCard({ famtour, onRequestInformation, onViewEdition }: Props) {
   return (
     <article className="group flex h-full flex-col border border-black/10 bg-white shadow-[0_14px_40px_rgba(25,16,16,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[#2E8E8E]/40 hover:shadow-[0_20px_48px_rgba(25,16,16,0.1)]">
       {famtour.imagem ? (
@@ -89,17 +89,17 @@ export function FamTourCard({ famtour, onLearnMore, onRegister }: Props) {
           <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
             <button
               type="button"
-              onClick={() => onLearnMore(famtour.slug)}
+              onClick={() => onRequestInformation(famtour.slug)}
               className="min-h-11 border border-black/20 bg-white px-4 py-2.5 font-sans text-xs font-semibold uppercase tracking-[0.12em] text-[#7A2535] transition-colors hover:border-[#7A2535] hover:bg-[#F7F4EE] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2E8E8E] sm:min-h-12 sm:py-3"
             >
-              SABER MAIS
+              Solicitar informações
             </button>
             <button
               type="button"
-              onClick={() => onRegister(famtour.slug)}
+              onClick={() => onViewEdition(famtour.slug)}
               className="min-h-14 border border-[#7A2535] bg-[#7A2535] px-4 py-3 font-sans text-xs font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:bg-[#641D2C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2E8E8E] sm:min-h-12"
             >
-              FAZER INSCRIÇÃO
+              Ver informações da edição
             </button>
           </div>
         </div>
