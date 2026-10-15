@@ -129,13 +129,14 @@ Atualizado em: 2026-10-15
 - Navbar, rodapé e cabeçalho de edição oferecem Grupo New Wed e Projetos, preservando âncoras locais.
 - Commit `86aa631`, PR #1: tipos, lint, typecheck, 64 unitários, build e 39 visuais macOS aprovados. Baselines Linux revisados pelo CI; revalidação em andamento.
 
-## Onda 11 em validação
+## Onda 11 integrada
 
 - Usuário autorizou correção e deploy em 2026-10-15 após confirmação no site público.
 - Páginas Feira/Guia/Workshop recuperadas do histórico com visual branco e fontes oficiais.
 - Cards e menus abrem páginas próprias; navegação FAMTOUR preservada. Decisão D-032 substitui D-028 nesses projetos.
 - Tipos Cloudflare, lint, TypeScript, 64 unitários, build production, dry-run e 39 cenários visuais/navegação aprovados.
-- Sessão Chrome da conta New Wed autenticada pelo usuário; publicação por Workers Builds em preparação.
+- PR #2 integrada em `31979fa`; CI `38786022714` aprovou também D1, Workers e 39 cenários Linux, falhando somente na auditoria preexistente.
+- Integração Workers Builds reconectada a `newwed-org-plus/newwed2026`, branch `main`, comandos production e token existente; acompanhamento final na PR #2.
 
 ## Riscos e bloqueios atuais
 
