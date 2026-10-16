@@ -6,7 +6,7 @@ export function InstitutionalHeader({ currentProject }: { currentProject?: strin
   return (
     <header className="nw-header">
       <Link href="/" className="nw-logo" aria-label="Grupo New Wed, página inicial">
-        <small>GRUPO</small><span>NEW</span><span>WED</span>
+        <img src="/assets/brand/new-wed-marsala.png" width={1167} height={927} alt="New Wed" />
       </Link>
       <nav className="nw-nav" aria-label="Navegação principal">
         {institutionalNavigation.map((item) => (
