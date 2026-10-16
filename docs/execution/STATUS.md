@@ -84,7 +84,7 @@ Atualizado em: 2026-10-15
 - Migration 0006 e cadastro inicial confirmados em produção. Login, papel admin, reload, logout/revogação e novo login reais aprovados; evidências finais na PR #3. O handoff descrito em CP-12 foi uma interpretação excessiva para cadastro inicial e não foi necessário.
 - CI `38792552504`: todos os gates funcionais e 43 visuais aprovados; falha somente na auditoria preexistente.
 
-## Onda 13 em validação
+## Onda 13 validada localmente
 
 - Referências e assets oficiais recebidos na conversa indicada pelo usuário, somente mensagens de hoje; nenhuma mensagem enviada.
 - Logo script marsala nos cabeçalhos em uso; marca FAMTOUR retorna à home, preservando menus locais.
@@ -92,7 +92,7 @@ Atualizado em: 2026-10-15
 - Botões institucionais usam o marsala do logo; nova foto de Cindy na seção inferior com enquadramento à direita.
 - Parceiros FAMTOUR em fundo claro, grade fixa 2/4 colunas, sem ticker/divisórias e com contraste para os logos brancos.
 - Vídeo principal fica pendente de material; usuário confirmou que será incluído depois. Imagem atual do hero preservada.
-- Sem schema, integrações comerciais ou alteração de infraestrutura. Gates e publicação em acompanhamento.
+- Tipos, lint, TypeScript, 76 unitários, build production e 43 cenários visuais/navegação aprovados localmente; nove baselines macOS atualizados. Seis baselines Linux revisados no CI `38826677583`, que aprovou os gates funcionais; nova validação/publicação em acompanhamento.
 
 ## Riscos e bloqueios atuais
 
