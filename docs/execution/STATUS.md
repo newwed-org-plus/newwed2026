@@ -1,11 +1,11 @@
 # Status de execução
 
-Atualizado em: 2026-10-15
+Atualizado em: 2026-10-19
 
 ## Estado geral
 
-- Onda atual: onda 13, ajustes visuais solicitados em 2026-10-15.
-- Branch: `codex/wave-13-visual-feedback`; base `origin/main` em `906f412`.
+- Onda atual: onda 14, UAZAPI, QR e integração à Inbox.
+- Branch: `codex/wave-14-uazapi-qr`; base `origin/main` em `25d5ad4`.
 - Dados legados: inexistentes; o projeto começa vazio.
 - Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
 
@@ -94,11 +94,22 @@ Atualizado em: 2026-10-15
 - Vídeo principal fica pendente de material; usuário confirmou que será incluído depois. Imagem atual do hero preservada.
 - Tipos, lint, TypeScript, 76 unitários, build production e 43 cenários visuais/navegação aprovados localmente; nove baselines macOS atualizados. Seis baselines Linux revisados no CI `38826677583`, que aprovou os gates funcionais; nova validação/publicação em acompanhamento.
 
+## Onda 14 validada localmente
+
+- Integração UAZAPI por linha, estado/QR efêmero, lock operacional, configuração server-side e RBAC admin/gestor; migration `0007`.
+- Webhooks autenticados por instância, payload normalizado sem tokens, outbox/fan-out limitado e deduplicação.
+- Histórico inicial e mensagens ao vivo entram nas tabelas e na Inbox existentes, com identidade de linha/contato; respostas manuais usam a linha correta. Recibos antecipados e fora de ordem preservam leitura.
+- Mensagens do celular pausam o agente; importação de histórico não dispara respostas. Conversas novas entram humanas.
+- Tipos Cloudflare, lint, TypeScript, 83 unitários, 21 Workers, migrations repetíveis, 18 invariantes D1 legadas e build aprovados. Suíte completa de 47 cenários visuais/navegação aprovada; inspeção visual mobile/desktop com QR sintético aprovada.
+- Guia operacional: `docs/UAZAPI.md`. Sem credenciais reais, pareamento, envio externo, deploy ou alterações de dependências.
+- Próxima fatia: OpenRouter, configuração de contexto/modelo por agente e contatos de demonstração/sincronização.
+
 ## Riscos e bloqueios atuais
 
+- UAZAPI depende de URL/token de instância, callback HTTPS público e ativação do consumidor de eventos; nenhum deles foi validado com conta real nesta onda.
 - Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa.
 - O painel permanece autenticado; inscrições falham de forma segura sem Turnstile.
-- O consumidor de eventos não será publicado nesta etapa de hospedagem do site.
+- O último registro de publicação cobre o site; o consumidor de eventos precisa ser ativado para a operação UAZAPI.
 - O preflight comercial completo permanece bloqueado sem R2 e os demais requisitos de lançamento.
 - Nenhum envio ou cobrança externa foi autorizado.
 - Auditoria da onda 12 aponta 8 alertas altos transitivos em `braces`/`source-map-js` e dependentes; lockfile preservado e gate de auditoria continua integral.
