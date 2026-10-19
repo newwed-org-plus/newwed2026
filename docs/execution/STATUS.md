@@ -4,8 +4,8 @@ Atualizado em: 2026-10-19
 
 ## Estado geral
 
-- Onda atual: onda 14, UAZAPI, QR e integração à Inbox.
-- Branch: `codex/wave-14-uazapi-qr`; base `origin/main` em `25d5ad4`.
+- Onda atual: onda 15, atendentes WhatsApp com OpenRouter gratuito.
+- Branch: `codex/wave-15-openrouter-agents`; base local na onda 14 em `a593cb5`.
 - Dados legados: inexistentes; o projeto começa vazio.
 - Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
 
@@ -102,12 +102,23 @@ Atualizado em: 2026-10-19
 - Mensagens do celular pausam o agente; importação de histórico não dispara respostas. Conversas novas entram humanas.
 - Tipos Cloudflare, lint, TypeScript, 83 unitários, 21 Workers, migrations repetíveis, 18 invariantes D1 legadas e build aprovados. Suíte completa de 47 cenários visuais/navegação aprovada; inspeção visual mobile/desktop com QR sintético aprovada.
 - Guia operacional: `docs/UAZAPI.md`. Sem credenciais reais, pareamento, envio externo, deploy ou alterações de dependências.
-- Próxima fatia: OpenRouter, configuração de contexto/modelo por agente e contatos de demonstração/sincronização.
+- OpenRouter/contexto por agente implementados na onda 15; contatos de demonstração/sincronização permanecem fora desta fatia.
+
+## Onda 15 validada localmente
+
+- Atendentes com nome/contexto/modelo, vínculo opcional e exclusivo por linha UAZAPI, versão otimista e RBAC admin/gestor; migration `0008` aplicada/repetida localmente.
+- Rascunhos e teste sem WhatsApp disponíveis antes da UAZAPI. Catálogo atual filtra modelos gratuitos de texto compatíveis com JSON; cada geração confirma preço zero e impõe teto zero/sem fallback pago.
+- Ingestão e Inbox existentes reaproveitadas: novos contatos podem entrar no agente; histórico/celular/conversas humanas preservam pausa. Contexto antigo, resumo e 12 mensagens recentes acompanham a resposta. Desativação/desvínculo e versão invalidam geração pendente.
+- Chave dedicada OpenRouter criada no Chrome com autorização explícita do usuário: teto US$ 0, expiração 2026-11-18, somente `.dev.vars` ignorado/0600. Não há chave no banco nem nos assets client.
+- Teste real fictício aprovado com `liquid/lfm-2.5-2.6b:free`, em português, sem envio WhatsApp. Tentativa anterior de roteador genérico encontrou saída inválida/limite; falhas tratadas sem envio.
+- Tipos, lint, TypeScript, 90 unitários, 28 Workers, 18 invariantes D1 anteriores e build aprovados. Regressão completa de 51 cenários visuais aprovada. Após ajuste do runtime/redirecionamento, os 8 cenários afetados foram repetidos e aprovados.
+- Teste real pelo painel confirmou os quatro projetos do contexto e continuidade com o atendente. Rascunho local Atendimento New Wed salvo/pausado, sem linha. Clientes OpenRouter/UAZAPI usam redirect manual e recusam 3xx, compatível com o runtime alvo.
+- Guia: `docs/OPENROUTER.md`. Nenhum deploy, push, migração remota ou WhatsApp real nesta onda.
 
 ## Riscos e bloqueios atuais
 
 - UAZAPI depende de URL/token de instância, callback HTTPS público e ativação do consumidor de eventos; nenhum deles foi validado com conta real nesta onda.
-- Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa.
+- Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa. OpenRouter foi validado apenas localmente com mensagem fictícia.
 - O painel permanece autenticado; inscrições falham de forma segura sem Turnstile.
 - O último registro de publicação cobre o site; o consumidor de eventos precisa ser ativado para a operação UAZAPI.
 - O preflight comercial completo permanece bloqueado sem R2 e os demais requisitos de lançamento.

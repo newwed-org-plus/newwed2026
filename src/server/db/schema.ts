@@ -135,6 +135,18 @@ export const whatsappInstances = sqliteTable("whatsapp_instances", {
   ...timestamps,
 });
 
+export const whatsappAgents = sqliteTable("whatsapp_agents", {
+  id: text("id").primaryKey(),
+  instanceId: text("instance_id").unique().references(() => whatsappInstances.id),
+  name: text("name").notNull(),
+  instructions: text("instructions").notNull(),
+  model: text("model").notNull(),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(false),
+  version: integer("version").notNull().default(1),
+  updatedBy: text("updated_by").notNull(),
+  ...timestamps,
+});
+
 export const conversations = sqliteTable("conversations", {
   id: text("id").primaryKey(),
   leadId: text("lead_id").references(() => leads.id),

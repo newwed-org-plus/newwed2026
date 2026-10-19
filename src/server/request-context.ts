@@ -12,7 +12,7 @@ export function responseWithRequestId(response: Response, requestId: string) {
   return response;
 }
 
-export async function readJsonWithLimit(request: Request, maxBytes: number) {
+export async function readJsonWithLimit(request: Request | Response, maxBytes: number) {
   const declared = Number(request.headers.get("content-length") ?? 0);
   if (declared > maxBytes) throw new HttpError(413,"PAYLOAD_TOO_LARGE","O payload excede o limite permitido.");
   const reader = request.body?.getReader();

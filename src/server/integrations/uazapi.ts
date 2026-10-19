@@ -42,7 +42,7 @@ export async function uazapiRequest(instance: UazapiInstance,path: string,body?:
       method:body === undefined ? "GET" : "POST",
       headers:{ token:instance.token,"content-type":"application/json" },
       body:body === undefined ? undefined : JSON.stringify(body),
-      signal:AbortSignal.timeout(15_000),redirect:"error",
+      signal:AbortSignal.timeout(15_000),redirect:"manual",
     });
   } catch { throw new HttpError(502,"UAZAPI_UNAVAILABLE","A UAZAPI não respondeu. Atualize o estado antes de tentar novamente."); }
   if (!response.ok) {

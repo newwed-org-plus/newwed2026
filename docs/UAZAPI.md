@@ -53,3 +53,7 @@ O teste de uma conta real deve verificar pareamento, mensagem recebida, resposta
 - [Histórico](https://docs.uazapi.com/reference/webhooks/history.md)
 - [Entrega e leitura](https://docs.uazapi.com/reference/webhooks/messages_update.md)
 - [Envio de texto](https://docs.uazapi.com/reference/sendText.md)
+
+Atendentes OpenRouter e contexto editável: consulte [OPENROUTER.md](OPENROUTER.md). Essa configuração substitui o caminho OpenAI para respostas UAZAPI, mantendo Meta compatível.
+
+Clientes UAZAPI e OpenRouter usam `redirect:manual` e rejeitam 3xx. A verificação real da onda 15 identificou que o runtime alvo não implementa `redirect:error`; tokens não são encaminhados para destinos de redirecionamento.

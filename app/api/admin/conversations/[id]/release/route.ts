@@ -1,6 +1,8 @@
 import { env } from "cloudflare:workers";
 import { requireAccessUser } from "@/server/auth/access";
 import { errorResponse,HttpError,json } from "@/server/http";
+import { getLineAgent } from "@/server/whatsapp-agents";
+import { getSecrets } from "@/server/secrets";
 
 export async function POST(request: Request,{ params }:{ params:Promise<{ id:string }> }) {
   try {
@@ -9,6 +11,8 @@ export async function POST(request: Request,{ params }:{ params:Promise<{ id:str
     const before = await env.DB.prepare("SELECT mode,claimed_by,agent_processing_token,opted_out_at,agent_error FROM conversations WHERE id=?")
       .bind(id).first<{ mode:string;claimed_by:string|null;agent_processing_token:string|null;opted_out_at:string|null;agent_error:string|null }>();
     if (!before) throw new HttpError(404,"CONVERSATION_NOT_FOUND","Conversa não encontrada.");
+    const line = await env.DB.prepare("SELECT whatsapp_instance_id FROM conversations WHERE id=?").bind(id).first<{whatsapp_instance_id:string|null}>();
+    if (line?.whatsapp_instance_id && (!(await getLineAgent(env,line.whatsapp_instance_id))?.enabled || !getSecrets().OPENROUTER_API_KEY)) throw new HttpError(409,"AGENT_NOT_READY","Ative o atendente desta linha e configure o OpenRouter antes de devolver a conversa.");
     if (before.mode === "AGENT" && !before.claimed_by) return json({ conversationId:id,mode:"AGENT",changed:false });
     const elevated = actor.roles.includes("admin") || actor.roles.includes("gestor");
     if (before.claimed_by && before.claimed_by !== actor.id && !elevated) throw new HttpError(403,"CONVERSATION_NOT_OWNED","Somente o responsável ou a gestão pode devolver esta conversa.");

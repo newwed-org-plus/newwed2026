@@ -28,3 +28,5 @@ npm run test:visual
 ```
 
 Consulte [arquitetura](docs/ARCHITECTURE.md), [deploy](docs/DEPLOYMENT.md) e o [plano contínuo de execução](docs/execution/MASTER_PLAN.md).
+
+- Atendentes com OpenRouter gratuito: [configuração e operação](docs/OPENROUTER.md).

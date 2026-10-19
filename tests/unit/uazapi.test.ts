@@ -26,7 +26,7 @@ describe("contrato UAZAPI",() => {
       calls++;
       expect(String(url)).toBe("https://example.uazapi.com/instance/connect");
       expect(init?.headers).toMatchObject({token:instance.token});
-      expect(init?.redirect).toBe("error");
+      expect(init?.redirect).toBe("manual");
       expect(init?.body).toBe("{}");
       return Response.json({error:instance.token},{status:401});
     }) as typeof fetch;
@@ -53,4 +53,10 @@ describe("contrato UAZAPI",() => {
     const request = new Request("https://newwed.test",{method:"POST",body:'{"payload":"'+"x".repeat(4096)+'"}'});
     await expect(readJsonWithLimit(request,1024)).rejects.toMatchObject({status:413});
   });
+  it("recusa redirecionamento sem seguir para outro servidor",async()=>{
+    let calls=0;
+    await expect(uazapiRequest(instance,"/instance/status",undefined,async()=>{calls++;return new Response(null,{status:302,headers:{location:"https://outside.test"}});})).rejects.toMatchObject({code:"UAZAPI_HTTP_302"});
+    expect(calls).toBe(1);
+  });
+
 });
