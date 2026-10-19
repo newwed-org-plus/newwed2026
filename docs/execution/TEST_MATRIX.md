@@ -24,3 +24,7 @@
 | Lançamento | IDs e bindings estáticos de staging/produção | `npm run preflight:launch -- <ambiente>` | bloqueio esperado enquanto IDs D1 forem marcadores |
 
 Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas extensas não devem ser copiadas para este arquivo.
+
+| UAZAPI | configuração, isolamento de segredos, parser de QR/estado, IDs por linha e limite de corpo | `tests/unit/uazapi.test.ts` | 7 cenários aprovados em 2026-10-19 |
+| UAZAPI Workers | RBAC/origem, conexão/lock, autenticação/deduplicação, histórico/celular, envio/recibos e fan-out | `tests/workers/uazapi.test.ts` | 7 cenários aprovados em 2026-10-19 |
+| UAZAPI UI | QR/conexão/desconexão em 3 viewports e estado sem configuração/falha | `tests/visual/admin-whatsapp.spec.ts` | 4 cenários locais aprovados em 2026-10-19, provider sintético |

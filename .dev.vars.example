@@ -9,3 +9,7 @@ ASAAS_WEBHOOK_TOKEN=
 TURNSTILE_SECRET_KEY=
 ACCESS_TEAM_DOMAIN=
 ACCESS_AUD=
+
+# Configuração server-side; nunca use NEXT_PUBLIC_* nem VITE_* para estas credenciais.
+UAZAPI_INSTANCES=[]
+UAZAPI_WEBHOOK_BASE_URL=

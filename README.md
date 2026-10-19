@@ -13,6 +13,10 @@ npm run dev
 
 O institucional fica em `/`, o FAMTOUR em `/famtour` e o dashboard em `/admin`. Para testar o dashboard localmente, use `ALLOW_LOCAL_ACCESS=true` apenas no `.dev.vars`; o primeiro acesso provisiona um administrador local.
 
+## WhatsApp UAZAPI
+
+A área **WhatsApp** do painel conecta linhas por QR Code e reaproveita o histórico e a Inbox. Veja [configuração e operação](docs/UAZAPI.md) para preparar instância, segredos e consumidor de eventos.
+
 ## Validação
 
 ```bash

@@ -1,6 +1,8 @@
 import { env } from "cloudflare:workers";
 
 export type RuntimeSecrets = {
+  UAZAPI_INSTANCES?: string;
+  UAZAPI_WEBHOOK_BASE_URL?: string;
   OPENAI_API_KEY?: string;
   META_APP_SECRET?: string;
   META_ACCESS_TOKEN?: string;
