@@ -2,7 +2,7 @@
 
 Atualizado em: 2026-10-20
 
-Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e autorizou o Wrangler em perfil exclusivo New Wed. Receptor e consumidor dedicado validados localmente; publicação e smoke remoto em preparação. Detalhes em `checkpoints/CP-16.md`.
+Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e autorizou o Wrangler em perfil exclusivo New Wed. Receptor e consumidor dedicado publicados; autenticação, deduplicação, ingestão humana até a Inbox e limpeza sintética aprovadas. Detalhes em `checkpoints/CP-16.md`.
 
 ## Estado geral
 
@@ -119,10 +119,18 @@ Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e aut
 
 ## Riscos e bloqueios atuais
 
-- UAZAPI: URL/token da instância validados via GET em 2026-10-20 e salvos somente no arquivo local protegido. Instância desconectada e webhook do provedor corretamente configurado/desativado. Faltam publicar o callback, ativar o consumidor apropriado e validar ingestão; acesso à conta Cloudflare New Wed pendente.
+- UAZAPI: callback publicado em 2026-10-20; web version `e224bc76`, consumidor exclusivo `6043eaec`. Migrations 0007/0008 aplicadas. GET 200, token inválido 401, evento autenticado e repetido geraram uma única mensagem humana na Inbox; limpeza confirmada. Webhook do provider continua corretamente configurado/desativado e instância desconectada. Pode-se pedir a ativação; conexão real e respostas automáticas continuam fora desta validação.
 - Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa. OpenRouter foi validado apenas localmente com mensagem fictícia.
 - O painel permanece autenticado; inscrições falham de forma segura sem Turnstile.
-- O último registro de publicação cobre o site; o consumidor de eventos precisa ser ativado para a operação UAZAPI.
+- Recebimento UAZAPI opera em fila/consumidor exclusivos, sem credenciais externas e sem respostas automáticas. O consumidor comercial permanece desativado.
 - O preflight comercial completo permanece bloqueado sem R2 e os demais requisitos de lançamento.
-- Nenhum envio ou cobrança externa foi autorizado.
-- Auditoria da onda 12 aponta 8 alertas altos transitivos em `braces`/`source-map-js` e dependentes; lockfile preservado e gate de auditoria continua integral.
+- Nesta janela, o usuário autorizou conversar individualmente com Ximenes sobre o webhook. Nenhum envio operacional pela integração, cobrança ou e-mail foi autorizado.
+- Auditoria atual aponta 9 alertas altos nas dependências existentes (incluindo Vite/launch-editor de desenvolvimento); lockfile preservado e gate de auditoria continua integral.
+
+## Onda 16 publicada
+
+- Implementação `ae1ad1b`, teste adicional `3036afe`; PR #5. Perfil Wrangler `newwed-production` autorizado e vinculado apenas ao checkout.
+- Secrets UAZAPI somente no Worker web; consumidor sem secrets, sem OpenRouter/envios/cobranças/e-mail e sem consumidor da fila comercial.
+- Gates: tipos/lint/TypeScript, 91 unitários, 30 Workers, invariantes D1, 52 visuais, build production, dry-run e varredura sem credenciais nos assets/Git. Auditoria herdada permanece com 9 alertas altos.
+- Smoke remoto: GET 200, duas rejeições 401, POST 200/queued=1 e repetição 200/queued=0; lote e mensagem processados uma vez, conversa HUMAN, zero saída. Fixture removida; quatro contagens de limpeza iguais a zero.
+- Ximenes confirmou ausência de ajuste anterior e recebeu retorno breve de conclusão; a ativação ainda não foi solicitada.
