@@ -5,7 +5,7 @@ import { adminApi as inboxApi } from "@/features/admin/api";
 import { AlertTriangle,Bot,RefreshCw,Search,Send,UserRound } from "lucide-react";
 
 type InboxItem = {
-  id:string;mode:"AGENT"|"HUMAN";external_id:string;claimed_by:string|null;claimed_by_name:string|null;agent_error:string|null;
+  id:string;contact_phone?:string|null;contact_name?:string|null;line_name?:string|null;mode:"AGENT"|"HUMAN";external_id:string;claimed_by:string|null;claimed_by_name:string|null;agent_error:string|null;
   opted_out_at:string|null;lead_name:string|null;lead_stage:string|null;edition_name:string|null;last_message:string|null;last_direction:string|null;
   last_status:string|null;last_message_at:string|null;updated_at:string;
 };
@@ -95,15 +95,15 @@ export function AdminInbox() {
         <div className="flex gap-2"><select value={mode} onChange={(event) => setMode(event.target.value as typeof mode)} className="flex-1 border border-black/15 bg-white px-3 py-2 text-xs"><option value="">Todos os modos</option><option value="AGENT">Agente</option><option value="HUMAN">Humano</option></select><label className="flex items-center gap-2 border border-black/15 px-3 text-[10px] uppercase tracking-[0.1em]"><input type="checkbox" checked={failuresOnly} onChange={(event) => setFailuresOnly(event.target.checked)}/> Falhas</label></div>
       </div>
       <div className="max-h-[calc(100vh-190px)] overflow-y-auto">{items.map((item) => <button key={item.id} onClick={() => { setSelectedId(item.id);setNotice(""); }} className={`w-full border-b border-black/5 p-4 text-left ${selectedId === item.id ? "bg-[#7A2535]/[0.07]" : "hover:bg-black/[0.025]"}`}>
-        <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate font-medium">{item.lead_name || item.external_id}</div><div className="mt-1 truncate text-xs text-black/45">{item.last_message || "Sem mensagens"}</div></div><ModeBadge mode={item.mode}/></div>
-        <div className="mt-3 flex items-center justify-between text-[9px] uppercase tracking-[0.1em] text-black/40"><span>{item.claimed_by_name || item.edition_name || "Sem responsável"}</span><span>{new Date(item.last_message_at || item.updated_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</span></div>
+        <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate font-medium">{item.lead_name || item.contact_name || item.contact_phone || item.external_id}</div><div className="mt-1 truncate text-xs text-black/45">{item.last_message || "Sem mensagens"}</div></div><ModeBadge mode={item.mode}/></div>
+        <div className="mt-3 flex items-center justify-between text-[9px] uppercase tracking-[0.1em] text-black/40"><span>{item.line_name || item.claimed_by_name || item.edition_name || "Sem responsável"}</span><span>{new Date(item.last_message_at || item.updated_at).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</span></div>
         {(item.agent_error || item.last_status === "FAILED") && <div className="mt-2 flex items-center gap-1 text-[10px] text-[#7A2535]"><AlertTriangle size={12}/> Falha requer atenção</div>}
       </button>)}</div>
     </aside>
     <div className="flex min-h-0 flex-col">
       {!conversation ? <div className="grid flex-1 place-items-center p-10 text-center text-sm text-black/35">Selecione uma conversa para abrir o histórico.</div> : <>
         <header className="flex flex-wrap items-start justify-between gap-4 border-b border-black/10 bg-white p-5">
-          <div><p className="text-[9px] uppercase tracking-[0.18em] text-[#2E8E8E]">{conversation.edition_name || "WhatsApp"}</p><h2 className="serif mt-1 text-3xl">{conversation.lead_name || conversation.external_id}</h2><p className="mt-1 text-xs text-black/45">{conversation.lead_stage?.replaceAll("_"," ")} · {conversation.claimed_by_name || "Sem responsável"}</p></div>
+          <div><p className="text-[9px] uppercase tracking-[0.18em] text-[#2E8E8E]">{[conversation.line_name,conversation.edition_name].filter(Boolean).join(" · ") || "WhatsApp"}</p><h2 className="serif mt-1 text-3xl">{conversation.lead_name || conversation.contact_name || conversation.contact_phone || conversation.external_id}</h2><p className="mt-1 text-xs text-black/45">{conversation.lead_stage?.replaceAll("_"," ")} · {conversation.claimed_by_name || "Sem responsável"}</p></div>
           <div className="flex gap-2">{conversation.mode === "AGENT" || !conversation.claimed_by ? <button onClick={claim} className="bg-[#191010] px-4 py-2 text-[9px] uppercase tracking-[0.13em] text-white">Assumir</button> : owned || me?.roles.some((role) => role === "admin" || role === "gestor") ? <button onClick={release} className="border border-black/20 px-4 py-2 text-[9px] uppercase tracking-[0.13em]">Devolver ao agente</button> : null}</div>
         </header>
         {(error || notice || conversation.agent_error || conversation.opted_out_at) && <div className="space-y-2 border-b border-black/10 p-4">{error && <Banner tone="error">{error}</Banner>}{notice && <Banner>{notice}</Banner>}{conversation.agent_error && <Banner tone="error">Agente pausado: {conversation.agent_error}</Banner>}{conversation.opted_out_at && <Banner tone="error">Contato com opt-out: novas mensagens estão bloqueadas.</Banner>}</div>}

@@ -24,3 +24,21 @@
 | Lançamento | IDs e bindings estáticos de staging/produção | `npm run preflight:launch -- <ambiente>` | bloqueio esperado enquanto IDs D1 forem marcadores |
 
 Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas extensas não devem ser copiadas para este arquivo.
+
+| UAZAPI | configuração, isolamento de segredos, parser de QR/estado, IDs por linha e limite de corpo | `tests/unit/uazapi.test.ts` | 8 cenários aprovados em 2026-10-19, incluindo redirect sem encaminhar token |
+| UAZAPI Workers | RBAC/origem, conexão/lock, autenticação/deduplicação, histórico/celular, envio/recibos e fan-out | `tests/workers/uazapi.test.ts` | 7 cenários aprovados em 2026-10-19 |
+| UAZAPI UI | QR/conexão/desconexão em 3 viewports e estado sem configuração/falha | `tests/visual/admin-whatsapp.spec.ts` | 4 cenários locais aprovados em 2026-10-19, provider sintético |
+
+## Onda 15 — OpenRouter e atendentes
+
+- Unitários: preços/modelos gratuitos, falta de chave, contrato JSON, baixa confiança, limites e sanitização.
+- Workers: rascunho sem linha, exclusividade/versão, RBAC/origem, teste sem mensagens persistidas, UAZAPI→OpenRouter→linha correta, deduplicação, resumos e pausa durante geração.
+- Visual/navegação: novo atendente, contexto/modelo, teste sem WhatsApp, vínculo/ativação/pausa/reload em 390/768/1440px; chave/catálogo indisponíveis.
+- Migration 0008 repetível e invariantes D1 anteriores preservadas. Providers simulados; segredo real nunca entra nos testes automatizados.
+
+## Onda 16 — Recebimento público UAZAPI
+
+- Diagnóstico GET sem segredos, autenticação obrigatória no POST, configuração de recebimento sem URL do provider e UI sem polling/QR nesse modo.
+- Consumidor dedicado: roteamento UAZAPI/comercial, processamento real D1 até conversa humana sem saída e cron que preserva outboxes comerciais.
+- Gates locais: 91 unitários, 30 Workers, migrations repetíveis e invariantes D1; regressão visual completa, build production e dry-run de ambos os Workers.
+- Smoke remoto: GET, token inválido, POST autenticado repetido, mensagem única/estado humano na Inbox e limpeza por identificadores sintéticos. Nenhum envio WhatsApp.

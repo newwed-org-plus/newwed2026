@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function Page() {
   try {
     const user = await requireAccessUser(new Request("https://newwed.internal/admin", { headers: await headers() }));
-    return <AdminDashboard userName={user.name}/>;
+    return <AdminDashboard userName={user.name} canManageWhatsApp={user.roles.some(role => role === "admin" || role === "gestor")}/>;
   } catch (error) {
     if (error instanceof HttpError && [401, 403].includes(error.status)) redirect("/admin/login");
     throw error;

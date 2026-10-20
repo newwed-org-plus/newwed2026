@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BarChart3,CalendarClock,Columns3,List,MessageSquare,RefreshCw,Search,X } from "lucide-react";
+import { AdminAgents } from "@/features/admin/AdminAgents";
+import { AdminWhatsApp } from "@/features/admin/AdminWhatsApp";
 import { AdminInbox } from "@/features/admin/AdminInbox";
 import { AdminNotifications } from "@/features/admin/AdminNotifications";
 import { AdminReports } from "@/features/admin/AdminReports";
@@ -16,8 +18,10 @@ type Detail = { lead: Record<string, unknown>; answers: Array<Record<string, unk
 
 function stageLabel(stage: string) { return stage.replaceAll("_", " "); }
 
-export function AdminDashboard({ userName }: { userName: string }) {
+export function AdminDashboard({ userName,canManageWhatsApp = false }: { userName: string;canManageWhatsApp?:boolean }) {
   const [signingOut, setSigningOut] = useState(false);
+  const [clientReady,setClientReady] = useState(false);
+  useEffect(() => { setClientReady(true); },[]);
   const logout = async () => {
     setSigningOut(true);
     try { await api("/api/auth/logout", { method: "POST" }); window.location.replace("/admin/login"); }
@@ -26,7 +30,7 @@ export function AdminDashboard({ userName }: { userName: string }) {
   const [leads,setLeads] = useState<Lead[]>([]);
   const [query,setQuery] = useState("");
   const [view,setView] = useState<"kanban"|"list">("kanban");
-  const [workspace,setWorkspace] = useState<"pipeline"|"inbox"|"reports">("pipeline");
+  const [workspace,setWorkspace] = useState<"pipeline"|"inbox"|"reports"|"whatsapp"|"agents">("pipeline");
   const [selected,setSelected] = useState<Detail|null>(null);
   const [users,setUsers] = useState<Array<{id:string;name:string}>>([]);
   const [editions,setEditions] = useState<Array<{id:string;name?:string;destination?:string}>>([]);
@@ -86,6 +90,8 @@ export function AdminDashboard({ userName }: { userName: string }) {
           <button onClick={() => setWorkspace("pipeline")} aria-label="Pipeline" className={`flex items-center gap-2 px-3 py-2 text-[9px] uppercase tracking-[0.12em] ${workspace === "pipeline" ? "bg-white text-[#191010]" : "text-white/65"}`}><Columns3 size={16}/> Pipeline</button>
           <button onClick={() => setWorkspace("inbox")} aria-label="Inbox" className={`flex items-center gap-2 px-3 py-2 text-[9px] uppercase tracking-[0.12em] ${workspace === "inbox" ? "bg-white text-[#191010]" : "text-white/65"}`}><MessageSquare size={16}/> Inbox</button>
           <button onClick={() => setWorkspace("reports")} aria-label="Relatórios" className={`flex items-center gap-2 px-3 py-2 text-[9px] uppercase tracking-[0.12em] ${workspace === "reports" ? "bg-white text-[#191010]" : "text-white/65"}`}><BarChart3 size={16}/> Relatórios</button>
+          {canManageWhatsApp && <button onClick={() => setWorkspace("agents")} aria-label="Atendentes" disabled={!clientReady} className={`px-3 py-2 text-[9px] uppercase tracking-[0.12em] ${workspace === "agents" ? "bg-white text-[#191010]" : "text-white/65"}`}>Atendentes</button>}
+          {canManageWhatsApp && <button onClick={() => setWorkspace("whatsapp")} aria-label="WhatsApp" disabled={!clientReady} className={`px-3 py-2 text-[9px] uppercase tracking-[0.12em] ${workspace === "whatsapp" ? "bg-white text-[#191010]" : "text-white/65"}`}>WhatsApp</button>}
           <AdminNotifications/>
           <span className="hidden text-xs text-white/60 lg:block">{userName}</span>
           <button onClick={logout} disabled={signingOut} className="px-2 py-2 text-xs text-white/70 disabled:opacity-40">{signingOut ? "Saindo…" : "Sair"}</button>
@@ -93,7 +99,7 @@ export function AdminDashboard({ userName }: { userName: string }) {
         </div>
       </div>
     </header>
-    {workspace === "inbox" ? <AdminInbox/> : workspace === "reports" ? <AdminReports/> : <section className="mx-auto max-w-[1600px] px-5 py-7 md:px-8">
+    {workspace === "agents" ? <AdminAgents/> : workspace === "whatsapp" ? <AdminWhatsApp/> : workspace === "inbox" ? <AdminInbox/> : workspace === "reports" ? <AdminReports/> : <section className="mx-auto max-w-[1600px] px-5 py-7 md:px-8">
       <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div><p className="text-[9px] uppercase tracking-[0.24em] text-[#2E8E8E]">Pipeline</p><h1 className="serif mt-2 text-4xl font-light md:text-5xl">Relacionamentos em movimento.</h1></div>
         <label className="flex min-w-72 items-center gap-3 border-b border-black/20 py-2"><Search size={16} className="text-black/40"/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar nome, e-mail ou telefone" className="w-full bg-transparent text-sm outline-none"/></label>

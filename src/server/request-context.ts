@@ -12,11 +12,24 @@ export function responseWithRequestId(response: Response, requestId: string) {
   return response;
 }
 
-export async function readJsonWithLimit(request: Request, maxBytes: number) {
+export async function readJsonWithLimit(request: Request | Response, maxBytes: number) {
   const declared = Number(request.headers.get("content-length") ?? 0);
   if (declared > maxBytes) throw new HttpError(413,"PAYLOAD_TOO_LARGE","O payload excede o limite permitido.");
-  const body = await request.arrayBuffer();
-  if (body.byteLength > maxBytes) throw new HttpError(413,"PAYLOAD_TOO_LARGE","O payload excede o limite permitido.");
+  const reader = request.body?.getReader();
+  const chunks:Uint8Array[] = [];
+  let size = 0;
+  if (reader) {
+    while (true) {
+      const {done,value} = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > maxBytes) { await reader.cancel();throw new HttpError(413,"PAYLOAD_TOO_LARGE","O payload excede o limite permitido."); }
+      chunks.push(value);
+    }
+  }
+  const body = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { body.set(chunk,offset);offset += chunk.byteLength; }
   try { return JSON.parse(new TextDecoder().decode(body)) as unknown; }
   catch { throw new HttpError(400,"INVALID_JSON","O payload JSON é inválido."); }
 }

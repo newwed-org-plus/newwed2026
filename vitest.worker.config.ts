@@ -11,6 +11,8 @@ export default defineConfig({
       d1Databases:["DB"],r2Buckets:["MEDIA"],queueProducers:{EVENTS_QUEUE:{queueName:"new-wed-events-test"}},
       durableObjects:{ADMIN_PASSWORD_VERIFIER:{className:"AdminPasswordVerifier",useSQLite:true}},
       bindings:{
+        UAZAPI_INSTANCES:JSON.stringify([{id:"vendas",name:"Vendas",baseUrl:"https://vendas.uazapi.test",token:"synthetic-vendas-token"},{id:"eventos",name:"Eventos",baseUrl:"https://eventos.uazapi.test",token:"synthetic-eventos-token"}]),
+        UAZAPI_WEBHOOK_BASE_URL:"https://newwed.test",
         TEST_MIGRATIONS:await readD1Migrations(path.join(import.meta.dirname,"migrations")),
         ENVIRONMENT:"development",ACCESS_TEAM_DOMAIN:"",ACCESS_AUD:"",ALLOW_LOCAL_ACCESS:"true",OPENAI_MODEL:"gpt-5-mini",
         OPENAI_API_KEY:"test-openai-key",ASAAS_API_URL:"https://api-sandbox.asaas.com/v3",ASAAS_API_KEY:"test-asaas-key",ASAAS_WEBHOOK_TOKEN:"test-asaas-webhook-token",

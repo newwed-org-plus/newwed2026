@@ -1,11 +1,13 @@
 # Status de execução
 
-Atualizado em: 2026-10-15
+Atualizado em: 2026-10-20
+
+Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e autorizou o Wrangler em perfil exclusivo New Wed. Receptor e consumidor dedicado publicados; autenticação, deduplicação, ingestão humana até a Inbox e limpeza sintética aprovadas. Detalhes em `checkpoints/CP-16.md`.
 
 ## Estado geral
 
-- Onda atual: onda 13, ajustes visuais solicitados em 2026-10-15.
-- Branch: `codex/wave-13-visual-feedback`; base `origin/main` em `906f412`.
+- Onda atual: onda 16, publicação do recebimento UAZAPI.
+- Branch: `codex/wave-16-uazapi-webhook-production`; base local na onda 15 em `8f30a6b`.
 - Dados legados: inexistentes; o projeto começa vazio.
 - Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
 
@@ -94,11 +96,41 @@ Atualizado em: 2026-10-15
 - Vídeo principal fica pendente de material; usuário confirmou que será incluído depois. Imagem atual do hero preservada.
 - Tipos, lint, TypeScript, 76 unitários, build production e 43 cenários visuais/navegação aprovados localmente; nove baselines macOS atualizados. Seis baselines Linux revisados no CI `38826677583`, que aprovou os gates funcionais; nova validação/publicação em acompanhamento.
 
+## Onda 14 validada localmente
+
+- Integração UAZAPI por linha, estado/QR efêmero, lock operacional, configuração server-side e RBAC admin/gestor; migration `0007`.
+- Webhooks autenticados por instância, payload normalizado sem tokens, outbox/fan-out limitado e deduplicação.
+- Histórico inicial e mensagens ao vivo entram nas tabelas e na Inbox existentes, com identidade de linha/contato; respostas manuais usam a linha correta. Recibos antecipados e fora de ordem preservam leitura.
+- Mensagens do celular pausam o agente; importação de histórico não dispara respostas. Conversas novas entram humanas.
+- Tipos Cloudflare, lint, TypeScript, 83 unitários, 21 Workers, migrations repetíveis, 18 invariantes D1 legadas e build aprovados. Suíte completa de 47 cenários visuais/navegação aprovada; inspeção visual mobile/desktop com QR sintético aprovada.
+- Guia operacional: `docs/UAZAPI.md`. Sem credenciais reais, pareamento, envio externo, deploy ou alterações de dependências.
+- OpenRouter/contexto por agente implementados na onda 15; contatos de demonstração/sincronização permanecem fora desta fatia.
+
+## Onda 15 validada localmente
+
+- Atendentes com nome/contexto/modelo, vínculo opcional e exclusivo por linha UAZAPI, versão otimista e RBAC admin/gestor; migration `0008` aplicada/repetida localmente.
+- Rascunhos e teste sem WhatsApp disponíveis antes da UAZAPI. Catálogo atual filtra modelos gratuitos de texto compatíveis com JSON; cada geração confirma preço zero e impõe teto zero/sem fallback pago.
+- Ingestão e Inbox existentes reaproveitadas: novos contatos podem entrar no agente; histórico/celular/conversas humanas preservam pausa. Contexto antigo, resumo e 12 mensagens recentes acompanham a resposta. Desativação/desvínculo e versão invalidam geração pendente.
+- Chave dedicada OpenRouter criada no Chrome com autorização explícita do usuário: teto US$ 0, expiração 2026-11-18, somente `.dev.vars` ignorado/0600. Não há chave no banco nem nos assets client.
+- Teste real fictício aprovado com `liquid/lfm-2.5-2.6b:free`, em português, sem envio WhatsApp. Tentativa anterior de roteador genérico encontrou saída inválida/limite; falhas tratadas sem envio.
+- Tipos, lint, TypeScript, 90 unitários, 28 Workers, 18 invariantes D1 anteriores e build aprovados. Regressão completa de 51 cenários visuais aprovada. Após ajuste do runtime/redirecionamento, os 8 cenários afetados foram repetidos e aprovados.
+- Teste real pelo painel confirmou os quatro projetos do contexto e continuidade com o atendente. Rascunho local Atendimento New Wed salvo/pausado, sem linha. Clientes OpenRouter/UAZAPI usam redirect manual e recusam 3xx, compatível com o runtime alvo.
+- Guia: `docs/OPENROUTER.md`. Nenhum deploy, push, migração remota ou WhatsApp real nesta onda.
+
 ## Riscos e bloqueios atuais
 
-- Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa.
+- UAZAPI: callback publicado em 2026-10-20; web version `e224bc76`, consumidor exclusivo `6043eaec`. Migrations 0007/0008 aplicadas. GET 200, token inválido 401, evento autenticado e repetido geraram uma única mensagem humana na Inbox; limpeza confirmada. Webhook do provider continua corretamente configurado/desativado e instância desconectada. Pode-se pedir a ativação; conexão real e respostas automáticas continuam fora desta validação.
+- Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa. OpenRouter foi validado apenas localmente com mensagem fictícia.
 - O painel permanece autenticado; inscrições falham de forma segura sem Turnstile.
-- O consumidor de eventos não será publicado nesta etapa de hospedagem do site.
+- Recebimento UAZAPI opera em fila/consumidor exclusivos, sem credenciais externas e sem respostas automáticas. O consumidor comercial permanece desativado.
 - O preflight comercial completo permanece bloqueado sem R2 e os demais requisitos de lançamento.
-- Nenhum envio ou cobrança externa foi autorizado.
-- Auditoria da onda 12 aponta 8 alertas altos transitivos em `braces`/`source-map-js` e dependentes; lockfile preservado e gate de auditoria continua integral.
+- Nesta janela, o usuário autorizou conversar individualmente com Ximenes sobre o webhook. Nenhum envio operacional pela integração, cobrança ou e-mail foi autorizado.
+- Auditoria atual aponta 9 alertas altos nas dependências existentes (incluindo Vite/launch-editor de desenvolvimento); lockfile preservado e gate de auditoria continua integral.
+
+## Onda 16 publicada
+
+- Implementação `ae1ad1b`, teste adicional `3036afe`; PR #5. Perfil Wrangler `newwed-production` autorizado e vinculado apenas ao checkout.
+- Secrets UAZAPI somente no Worker web; consumidor sem secrets, sem OpenRouter/envios/cobranças/e-mail e sem consumidor da fila comercial.
+- Gates: tipos/lint/TypeScript, 91 unitários, 30 Workers, invariantes D1, 52 visuais, build production, dry-run e varredura sem credenciais nos assets/Git. Auditoria herdada permanece com 9 alertas altos.
+- Smoke remoto: GET 200, duas rejeições 401, POST 200/queued=1 e repetição 200/queued=0; lote e mensagem processados uma vez, conversa HUMAN, zero saída. Fixture removida; quatro contagens de limpeza iguais a zero.
+- Ximenes confirmou ausência de ajuste anterior e recebeu retorno breve de conclusão; a ativação ainda não foi solicitada.

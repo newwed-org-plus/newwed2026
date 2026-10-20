@@ -5,6 +5,7 @@ import { applyAsaasPayment,asaasStatusEvent } from "@/server/integrations/asaas-
 import { processStoredAsaasWebhook,type StoredAsaasWebhook } from "@/server/integrations/asaas-webhook";
 import { publishOutbox } from "@/server/outbox";
 import { processNotificationEmail,type EmailEnv } from "@/server/notifications";
+import { processUazapiBatch,processUazapiStatus } from "@/server/uazapi-webhook";
 import type { RuntimeSecrets } from "@/server/secrets";
 
 type EventBody = { type:string;externalId?:string;checkoutId?:string;providerPaymentId?:string;id?:string;leadId?:string;resend?:boolean;conversationId?:string;messageId?:string;targetCount?:number;notificationId?:string;userId?:string;requestId?:string };
@@ -41,6 +42,9 @@ async function reconcileAsaas(env: WorkerEnv, providerPaymentId: string) {
 }
 
 async function handleEvent(env: WorkerEnv, body: EventBody) {
+  if (body.type === "uazapi.batch" && body.externalId) return processUazapiBatch(env,body.externalId,body.targetCount);
+  if (body.type === "uazapi.incoming" && body.externalId) return processIncomingWhatsApp(env,body.externalId,{},"uazapi");
+  if (body.type === "uazapi.status" && body.externalId) return processUazapiStatus(env,body.externalId);
   if (body.type === "whatsapp.incoming" && body.externalId) return processIncomingWhatsApp(env,body.externalId);
   if (body.type === "whatsapp.status" && body.externalId) return handleStatus(env,body.externalId);
   if (body.type === "checkout.create" && body.checkoutId && body.id) return processCheckoutCreation(env,body.checkoutId,body.id);

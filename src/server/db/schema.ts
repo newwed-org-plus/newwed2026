@@ -122,10 +122,38 @@ export const assignments = sqliteTable("assignments", {
   createdAt: text("created_at").notNull(),
 });
 
+export const whatsappInstances = sqliteTable("whatsapp_instances", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  provider: text("provider").notNull().default("uazapi"),
+  state: text("state").notNull().default("disconnected"),
+  phone: text("phone"),
+  profileName: text("profile_name"),
+  lastError: text("last_error"),
+  operationToken: text("operation_token"),
+  operationStartedAt: text("operation_started_at"),
+  ...timestamps,
+});
+
+export const whatsappAgents = sqliteTable("whatsapp_agents", {
+  id: text("id").primaryKey(),
+  instanceId: text("instance_id").unique().references(() => whatsappInstances.id),
+  name: text("name").notNull(),
+  instructions: text("instructions").notNull(),
+  model: text("model").notNull(),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(false),
+  version: integer("version").notNull().default(1),
+  updatedBy: text("updated_by").notNull(),
+  ...timestamps,
+});
+
 export const conversations = sqliteTable("conversations", {
   id: text("id").primaryKey(),
   leadId: text("lead_id").references(() => leads.id),
   channel: text("channel").notNull(),
+  whatsappInstanceId: text("whatsapp_instance_id").references(() => whatsappInstances.id),
+  contactPhone: text("contact_phone"),
+  contactName: text("contact_name"),
   externalId: text("external_id").notNull(),
   mode: text("mode").notNull().default("AGENT"),
   humanActive: integer("human_active", { mode: "boolean" }).notNull().default(false),
