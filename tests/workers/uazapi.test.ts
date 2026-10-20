@@ -51,11 +51,15 @@ describe("UAZAPI no runtime Workers",()=>{
     await receiver.queue(batch,inboundEnv);
     expect((await getQueueResult(batch,context)).explicitAcks).toContain("batch");
     const incoming=dedicatedSend.mock.calls[1][0];
+    const now=new Date().toISOString();
+    await env.DB.prepare("INSERT INTO whatsapp_agents (id,instance_id,name,instructions,model,enabled,version,updated_by,created_at,updated_at) VALUES ('inbound-agent','vendas','VALIDACAO','Contexto sintético','openrouter/free',1,1,'synthetic',?,?)").bind(now,now).run();
+    const externalFetch=vi.spyOn(globalThis,"fetch").mockRejectedValue(new Error("Unexpected external request"));
     const incomingBatch=createMessageBatch("uazapi-test",[{id:"incoming",timestamp:Date.now(),attempts:1,body:incoming}]);
     await receiver.queue(incomingBatch,{...inboundEnv,OPENROUTER_API_KEY:"synthetic-should-not-be-used"} as typeof inboundEnv);
     expect((await getQueueResult(incomingBatch,context)).explicitAcks).toContain("incoming");
     expect(await env.DB.prepare("SELECT mode FROM conversations WHERE whatsapp_instance_id='vendas'").first()).toMatchObject({mode:"HUMAN"});
     expect(await env.DB.prepare("SELECT count(*) AS count FROM messages WHERE direction='OUT'").first()).toMatchObject({count:0});
+    expect(externalFetch).not.toHaveBeenCalled();
     await env.DB.prepare("INSERT INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,created_at) VALUES ('commercial','checkout.send','checkout','commercial','{}',0,?)").bind(new Date().toISOString()).run();
     await env.DB.prepare("UPDATE outbox_events SET published_at=NULL WHERE type='uazapi.incoming'").run();
     dedicatedSend.mockClear();
