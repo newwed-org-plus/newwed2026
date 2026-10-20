@@ -95,3 +95,18 @@ test("WhatsApp mostra configuração pendente e falha de carregamento",async({pa
   await page.getByRole("button",{name:"Atualizar linhas",exact:true}).click();
   await expect(page.getByRole("alert")).toHaveText("Configuração indisponível.");
 });
+
+test("linha somente de recebimento não consulta provider nem oferece QR ativo",async({page})=>{
+  test.skip(Boolean(process.env.VISUAL_BASE_URL),"Validação somente local.");
+  let operations=0;
+  await page.route("**/api/admin/whatsapp**",route=>{
+    if(route.request().method()!=="GET"){operations++;return route.fulfill({status:503,json:{message:"URL do servidor pendente."}});}
+    return route.fulfill({json:{items:[{id:"atendimento",name:"Atendimento",state:"disconnected",phone:null,serverConfigured:false}]}});
+  });
+  await page.goto(`${origin}/admin`);await page.getByRole("button",{name:"WhatsApp",exact:true}).click();
+  await expect(page.getByRole("status")).toHaveText("Somente recebimento");
+  await expect(page.getByRole("button",{name:"Gerar QR Code",exact:true})).toBeDisabled();
+  await expect(page.getByRole("button",{name:"Atualizar estado",exact:true})).toBeDisabled();
+  await expect(page.getByText(/Recebimento preparado\. Informe a URL/)).toBeVisible();
+  expect(operations).toBe(0);
+});

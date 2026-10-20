@@ -57,3 +57,23 @@ O teste de uma conta real deve verificar pareamento, mensagem recebida, resposta
 Atendentes OpenRouter e contexto editável: consulte [OPENROUTER.md](OPENROUTER.md). Essa configuração substitui o caminho OpenAI para respostas UAZAPI, mantendo Meta compatível.
 
 Clientes UAZAPI e OpenRouter usam `redirect:manual` e rejeitam 3xx. A verificação real da onda 15 identificou que o runtime alvo não implementa `redirect:error`; tokens não são encaminhados para destinos de redirecionamento.
+
+## Publicar o recebimento antes de obter o servidor UAZAPI
+
+A linha pode ser configurada com `id`, `name` e `token`, omitindo `baseUrl` até o provedor informar a origem correta. Isso autentica e persiste webhooks sem inventar um servidor nem transmitir a credencial a um host desconhecido. QR, status remoto, desconexão e envios falham de forma explícita enquanto a URL não for preenchida; o painel mostra Somente recebimento e não faz polling do provider.
+
+`GET /api/webhooks/uazapi/atendimento` informa disponibilidade da configuração/schema, sem tokens, números ou estado privado. `POST` exige o token da instância no envelope JSON. O GET não comprova que a fila/consumidor processaram uma mensagem; a validação operacional deve verificar ingestão, deduplicação e Inbox com um evento sintético autorizado, sem enviar WhatsApp.
+
+## Diagnóstico público antes da publicação — 2026-10-20
+
+A consulta com Python recebeu HTTP 403 com `error code: 1010` da camada Cloudflare, antes da aplicação. Esse código indica bloqueio pela assinatura do cliente; não comprova que o webhook publicado rejeitaria o provedor. No mesmo endereço, o Chrome mostrou a página 404 do New Wed, e requisições Node HTTP GET e POST sem credencial também retornaram 404. A rota UAZAPI ainda não está no deploy público.
+
+A correção depende de publicar o código preparado, aplicar migrations e configurar o token da linha no ambiente correto. Não desative proteções globais para contornar o resultado de uma única ferramenta. Depois da publicação, valide GET de diagnóstico, POST sem token recusado, POST autenticado, deduplicação e processamento até a Inbox. Avalie qualquer bloqueio do provedor com evidência da requisição real e regra exata, preservando a autenticação do painel e do webhook.
+
+## Consumidor exclusivo de recebimento
+
+O Worker `new-wed-uazapi-receiver` é publicado por `npm run deploy:uazapi`, usando `wrangler.uazapi.jsonc`. Ele consome somente `new-wed-uazapi-production`, com falhas finais em `new-wed-uazapi-dead-production`. O Worker web publica eventos UAZAPI pelo binding `UAZAPI_EVENTS_QUEUE`; eventos comerciais preservam `EVENTS_QUEUE`. Ambientes locais sem o binding dedicado mantêm o fallback existente.
+
+O consumidor processa lotes, mensagens recebidas e recibos, força atendimento humano sem OpenRouter e recupera apenas outboxes UAZAPI no cron. Não executa envio manual, cobrança, e-mail ou resposta automática. Não precisa receber o token da instância nem chaves de provedores. Resumos e demais trabalhos comerciais permanecem na fila anterior, sem consumidor ativado nesta publicação.
+
+Configure `UAZAPI_INSTANCES` e `UAZAPI_WEBHOOK_BASE_URL` como secrets somente no Worker web. Validar o recebimento com evento sintético não envolve `/send/text`, QR, pareamento nem ativação do webhook no provedor. Só liberar a ativação depois de comprovar mensagem única na Inbox e limpar a validação.

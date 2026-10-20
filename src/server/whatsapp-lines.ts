@@ -16,7 +16,8 @@ export async function ensureWhatsAppLines(env: LineEnv) {
 export async function listWhatsAppLines(env: LineEnv) {
   const configured = await ensureWhatsAppLines(env);
   const rows = await env.DB.prepare("SELECT id,name,provider,state,phone,profile_name,last_error,updated_at FROM whatsapp_instances ORDER BY name").all();
-  return rows.results.filter(row => configured.some(instance => instance.id === row.id));
+  return rows.results.filter(row => configured.some(instance => instance.id === row.id))
+    .map(row=>({...row,serverConfigured:Boolean(configured.find(instance=>instance.id===row.id)?.baseUrl)}));
 }
 
 export async function operateWhatsAppLine(env: LineEnv,id: string,action:"refresh"|"connect"|"disconnect",actorId: string,fetcher: typeof fetch = fetch) {

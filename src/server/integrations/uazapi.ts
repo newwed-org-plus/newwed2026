@@ -8,7 +8,7 @@ const instanceSchema = z.object({
   baseUrl:z.url().refine(value => {
     const url = new URL(value);
     return url.protocol === "https:" && !url.username && !url.password && url.pathname === "/" && !url.search && !url.hash;
-  }),
+  }).optional(),
   token:z.string().min(8).max(512),
 });
 export type UazapiInstance = z.infer<typeof instanceSchema>;
@@ -36,6 +36,7 @@ export function uazapiMessageId(lineId: string,id: string) {
 }
 
 export async function uazapiRequest(instance: UazapiInstance,path: string,body?: unknown,fetcher: typeof fetch = fetch): Promise<unknown> {
+  if (!instance.baseUrl) throw new HttpError(503,"UAZAPI_SERVER_NOT_CONFIGURED","O recebimento está configurado. Informe a URL do servidor UAZAPI para gerar QR Code ou enviar mensagens.");
   let response:Response;
   try {
     response = await fetcher(new URL(path,instance.baseUrl),{

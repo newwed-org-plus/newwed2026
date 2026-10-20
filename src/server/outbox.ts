@@ -1,6 +1,6 @@
 export type QueueEvent = { id:string;type:string;checkoutId?:string;leadId?:string;externalId?:string;providerPaymentId?:string;resend?:boolean;conversationId?:string;messageId?:string;targetCount?:number;notificationId?:string;userId?:string;requestId?:string };
 
-type OutboxEnv = Pick<Env,"DB"|"EVENTS_QUEUE">;
+type OutboxEnv = Pick<Env,"DB"|"EVENTS_QUEUE"> & { UAZAPI_EVENTS_QUEUE?: Queue };
 
 function errorMessage(error: unknown) {
   return (error instanceof Error ? error.message : String(error)).slice(0,1000);
@@ -13,7 +13,8 @@ export function retryAt(attempt: number,now = new Date()) {
 
 export async function publishOutbox(env: OutboxEnv,event: QueueEvent) {
   try {
-    await env.EVENTS_QUEUE.send(event);
+    const queue = event.type.startsWith("uazapi.") ? env.UAZAPI_EVENTS_QUEUE ?? env.EVENTS_QUEUE : env.EVENTS_QUEUE;
+    await queue.send(event);
     await env.DB.prepare("UPDATE outbox_events SET published_at=?,attempts=attempts+1,next_attempt_at=NULL,last_error=NULL WHERE id=?")
       .bind(new Date().toISOString(),event.id).run();
     return true;

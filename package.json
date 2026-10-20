@@ -60,6 +60,7 @@
     "db:migrate:production": "wrangler d1 migrations apply new-wed-platform-production --remote --config dist/server/wrangler.json",
     "dev:events": "wrangler dev --config wrangler.events.jsonc",
     "deploy:events": "wrangler deploy --config wrangler.events.jsonc",
+    "deploy:uazapi": "wrangler deploy --config wrangler.uazapi.jsonc",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",

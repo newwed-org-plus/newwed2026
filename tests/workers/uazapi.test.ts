@@ -1,8 +1,9 @@
 import { env } from "cloudflare:workers";
+import { createExecutionContext,createMessageBatch,getQueueResult } from "cloudflare:test";
 import { afterEach,describe,expect,it,vi } from "vitest";
 import { GET as listLines } from "../../app/api/admin/whatsapp/route";
 import { POST as lineAction } from "../../app/api/admin/whatsapp/[id]/route";
-import { POST as receiveWebhook } from "../../app/api/webhooks/uazapi/[id]/route";
+import { GET as webhookHealth,POST as receiveWebhook } from "../../app/api/webhooks/uazapi/[id]/route";
 import { GET as listInbox } from "../../app/api/admin/conversations/route";
 import { GET as detailInbox } from "../../app/api/admin/conversations/[id]/route";
 import { POST as claim } from "../../app/api/admin/conversations/[id]/claim/route";
@@ -11,6 +12,8 @@ import { processIncomingWhatsApp,processManualConversationMessage } from "@/serv
 import { acceptUazapiWebhook,processUazapiBatch,processUazapiStatus } from "@/server/uazapi-webhook";
 import { operateWhatsAppLine } from "@/server/whatsapp-lines";
 import type { RuntimeSecrets } from "@/server/secrets";
+import receiver from "../../workers/uazapi-receiver";
+import { publishOutbox } from "@/server/outbox";
 
 const instances = [{id:"vendas",name:"Vendas",baseUrl:"https://vendas.uazapi.test",token:"synthetic-vendas-token"},{id:"eventos",name:"Eventos",baseUrl:"https://eventos.uazapi.test",token:"synthetic-eventos-token"}];
 const runtime = env as Env & RuntimeSecrets;
@@ -37,6 +40,40 @@ async function admin() {
 afterEach(()=>vi.restoreAllMocks());
 
 describe("UAZAPI no runtime Workers",()=>{
+  it("isola a fila de recebimento, processa até a Inbox e recupera somente eventos UAZAPI",async()=>{
+    const dedicatedSend=vi.fn<(event:unknown)=>Promise<void>>().mockResolvedValue(undefined);
+    const commercialSend=vi.fn<(event:unknown)=>Promise<void>>().mockResolvedValue(undefined);
+    const inboundEnv={...runtime,UAZAPI_EVENTS_QUEUE:{send:dedicatedSend} as unknown as Queue,EVENTS_QUEUE:{send:commercialSend} as unknown as Queue};
+    await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"messages",message:message("INBOUND-ONLY")},"request-inbound-only");
+    expect(dedicatedSend).toHaveBeenCalledTimes(1);expect(commercialSend).not.toHaveBeenCalled();
+    const context=createExecutionContext();
+    const batch=createMessageBatch("uazapi-test",[{id:"batch",timestamp:Date.now(),attempts:1,body:dedicatedSend.mock.calls[0][0]}]);
+    await receiver.queue(batch,inboundEnv);
+    expect((await getQueueResult(batch,context)).explicitAcks).toContain("batch");
+    const incoming=dedicatedSend.mock.calls[1][0];
+    const incomingBatch=createMessageBatch("uazapi-test",[{id:"incoming",timestamp:Date.now(),attempts:1,body:incoming}]);
+    await receiver.queue(incomingBatch,{...inboundEnv,OPENROUTER_API_KEY:"synthetic-should-not-be-used"} as typeof inboundEnv);
+    expect((await getQueueResult(incomingBatch,context)).explicitAcks).toContain("incoming");
+    expect(await env.DB.prepare("SELECT mode FROM conversations WHERE whatsapp_instance_id='vendas'").first()).toMatchObject({mode:"HUMAN"});
+    expect(await env.DB.prepare("SELECT count(*) AS count FROM messages WHERE direction='OUT'").first()).toMatchObject({count:0});
+    await env.DB.prepare("INSERT INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,created_at) VALUES ('commercial','checkout.send','checkout','commercial','{}',0,?)").bind(new Date().toISOString()).run();
+    await env.DB.prepare("UPDATE outbox_events SET published_at=NULL WHERE type='uazapi.incoming'").run();
+    dedicatedSend.mockClear();
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(dedicatedSend).toHaveBeenCalledTimes(1);expect(commercialSend).not.toHaveBeenCalled();
+    expect(await env.DB.prepare("SELECT published_at FROM outbox_events WHERE id='commercial'").first()).toMatchObject({published_at:null});
+    await publishOutbox(inboundEnv,{id:"commercial",type:"checkout.send"});
+    expect(commercialSend).toHaveBeenCalledTimes(1);
+  });
+  it("publica diagnóstico sem segredos e recebe antes de conhecer a URL do provider",async()=>{
+    const runtimeOnly={...runtime,UAZAPI_INSTANCES:JSON.stringify([{id:"atendimento",name:"Atendimento",token:"synthetic-inbound-token"}])};
+    const result=await acceptUazapiWebhook(runtimeOnly,"atendimento",{token:"synthetic-inbound-token",EventType:"messages",message:message("RECEIVE-ONLY")},"request-receive-only");
+    expect(result).toMatchObject({received:true,ignored:false});
+    const health=await webhookHealth(request("/api/webhooks/uazapi/vendas"),ctx("vendas"));
+    expect(health.status).toBe(200);expect(await health.json()).toEqual({provider:"uazapi",line:"vendas",status:"ready",method:"POST",authentication:"instance-token"});
+    expect((await webhookHealth(request("/api/webhooks/uazapi/unknown"),ctx("unknown"))).status).toBe(404);
+    await expect(acceptUazapiWebhook(runtimeOnly,"atendimento",{token:"wrong-token",EventType:"connection"},"request-invalid")).rejects.toMatchObject({status:401});
+  });
   it("lista linhas sem tokens e impede vendedor e solicitações cross-site de operar",async()=>{
     const response = await listLines(request("/api/admin/whatsapp"));
     const body = await response.text();

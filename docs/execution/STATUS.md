@@ -1,11 +1,13 @@
 # Status de execução
 
-Atualizado em: 2026-10-19
+Atualizado em: 2026-10-20
+
+Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e autorizou o Wrangler em perfil exclusivo New Wed. Receptor e consumidor dedicado validados localmente; publicação e smoke remoto em preparação. Detalhes em `checkpoints/CP-16.md`.
 
 ## Estado geral
 
-- Onda atual: onda 15, atendentes WhatsApp com OpenRouter gratuito.
-- Branch: `codex/wave-15-openrouter-agents`; base local na onda 14 em `a593cb5`.
+- Onda atual: onda 16, publicação do recebimento UAZAPI.
+- Branch: `codex/wave-16-uazapi-webhook-production`; base local na onda 15 em `8f30a6b`.
 - Dados legados: inexistentes; o projeto começa vazio.
 - Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
 
@@ -117,7 +119,7 @@ Atualizado em: 2026-10-19
 
 ## Riscos e bloqueios atuais
 
-- UAZAPI depende de URL/token de instância, callback HTTPS público e ativação do consumidor de eventos; nenhum deles foi validado com conta real nesta onda.
+- UAZAPI: URL/token da instância validados via GET em 2026-10-20 e salvos somente no arquivo local protegido. Instância desconectada e webhook do provedor corretamente configurado/desativado. Faltam publicar o callback, ativar o consumidor apropriado e validar ingestão; acesso à conta Cloudflare New Wed pendente.
 - Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa. OpenRouter foi validado apenas localmente com mensagem fictícia.
 - O painel permanece autenticado; inscrições falham de forma segura sem Turnstile.
 - O último registro de publicação cobre o site; o consumidor de eventos precisa ser ativado para a operação UAZAPI.

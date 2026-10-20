@@ -59,4 +59,12 @@ describe("contrato UAZAPI",() => {
     expect(calls).toBe(1);
   });
 
+  it("permite recebimento antes da URL sem inventar host nem transmitir token",async()=>{
+    const config={id:instance.id,name:instance.name,token:instance.token};
+    expect(configuredInstances({UAZAPI_INSTANCES:JSON.stringify([config])})).toEqual([config]);
+    let called=false;
+    await expect(uazapiRequest(config,"/instance/status",undefined,async()=>{called=true;return Response.json({});})).rejects.toMatchObject({code:"UAZAPI_SERVER_NOT_CONFIGURED"});
+    expect(called).toBe(false);
+  });
+
 });

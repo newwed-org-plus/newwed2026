@@ -70,7 +70,7 @@
       "vars": { "ENVIRONMENT": "production", "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "", "ALLOW_LOCAL_ACCESS": "false", "OPENAI_MODEL": "gpt-5-mini", "ASAAS_API_URL": "https://api.asaas.com/v3", "META_GRAPH_VERSION": "v23.0", "TURNSTILE_SITE_KEY": "", "META_CHECKOUT_TEMPLATE": "checkout_famtour" },
       "d1_databases": [{ "binding": "DB", "database_name": "new-wed-platform-production", "database_id": "2263d378-59c9-4e5a-8d9b-a6e0140767dd", "migrations_dir": "migrations" }],
       "r2_buckets": [],
-      "queues": { "producers": [{ "binding": "EVENTS_QUEUE", "queue": "new-wed-events-production" }] }
+      "queues": { "producers": [{ "binding": "EVENTS_QUEUE", "queue": "new-wed-events-production" }, { "binding": "UAZAPI_EVENTS_QUEUE", "queue": "new-wed-uazapi-production" }] }
     }
   }
 }
