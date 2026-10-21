@@ -42,3 +42,14 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Consumidor dedicado: roteamento UAZAPI/comercial, processamento real D1 até conversa humana sem saída e cron que preserva outboxes comerciais.
 - Gates locais: 91 unitários, 30 Workers, migrations repetíveis e invariantes D1; regressão visual completa, build production e dry-run de ambos os Workers.
 - Smoke remoto: GET, token inválido, POST autenticado repetido, mensagem única/estado humano na Inbox e limpeza por identificadores sintéticos. Nenhum envio WhatsApp.
+
+## Onda 17 — Estado conectado UAZAPI
+
+- Parser de status textual/legado e atualização persistida por refresh sem reconexão ou chamadas de envio.
+- Sem migration; validações sintéticas unitárias e Workers registradas em CP-17.
+
+## Onda 18 — Recuperação de QR UAZAPI
+
+- Unitários: `npm test` (92); Workers incluindo restart explícito, estado permitido e bloqueio fora de `connecting`: `npm run test:workers` (32).
+- Visual: `npm run test:visual` (52), incluindo novo QR nos viewports mobile/tablet/desktop. Migrações locais aplicadas pela preparação da suíte visual; sem migration nova.
+- `npm run cf:types`, lint, typecheck e build aprovados. `npm audit --omit=dev` mantém 9 alertas altos preexistentes descritos no CP-18.

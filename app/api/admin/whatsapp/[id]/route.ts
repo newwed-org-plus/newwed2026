@@ -14,7 +14,7 @@ export async function POST(request: Request,{ params }:{ params:Promise<{ id:str
     const actor = await requireAccessUser(request,["admin","gestor"]);
     requireSameOrigin(request);
     const { id } = await params;
-    const { action } = z.object({ action:z.enum(["refresh","connect","disconnect"]) }).parse(await readJsonWithLimit(request,2048));
+    const { action } = z.object({ action:z.enum(["refresh","connect","disconnect","restart"]) }).parse(await readJsonWithLimit(request,2048));
     await enforceRateLimit(env,{ scope:`whatsapp.${action}`,identity:`${actor.id}:${id}`,limit:action === "refresh" ? 30 : 5,windowSeconds:60 });
     return responseWithRequestId(json(await operateWhatsAppLine({ ...env,...getSecrets() },id,action,actor.id)),requestId);
   } catch (error) { return responseWithRequestId(errorResponse(error,requestId),requestId); }

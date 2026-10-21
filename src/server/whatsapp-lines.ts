@@ -20,9 +20,9 @@ export async function listWhatsAppLines(env: LineEnv) {
     .map(row=>({...row,serverConfigured:Boolean(configured.find(instance=>instance.id===row.id)?.baseUrl)}));
 }
 
-export async function operateWhatsAppLine(env: LineEnv,id: string,action:"refresh"|"connect"|"disconnect",actorId: string,fetcher: typeof fetch = fetch) {
+export async function operateWhatsAppLine(env: LineEnv,id: string,action:"refresh"|"connect"|"disconnect"|"restart",actorId: string,fetcher: typeof fetch = fetch) {
   const instance = configuredInstance(env,id);
-  const callbackUrl = action === "connect" ? webhookUrl(env,id) : null;
+  const callbackUrl = action === "connect" || action === "restart" ? webhookUrl(env,id) : null;
   await ensureWhatsAppLines(env);
   const now = new Date().toISOString();
   const lease = crypto.randomUUID();
@@ -37,9 +37,15 @@ export async function operateWhatsAppLine(env: LineEnv,id: string,action:"refres
       session = parseUazapiSession(await uazapiRequest(instance,"/instance/status",undefined,fetcher));
     } else {
       session = parseUazapiSession(await uazapiRequest(instance,"/instance/status",undefined,fetcher));
-      if (action === "connect") {
+      if (action === "restart") {
+        if (session.state !== "connecting") throw new HttpError(409,"WHATSAPP_QR_RESTART_NOT_AVAILABLE","Gere um QR Code novo somente quando houver uma tentativa de conexão em andamento.");
+        await uazapiRequest(instance,"/instance/disconnect",{},fetcher);
+        session = parseUazapiSession(await uazapiRequest(instance,"/instance/status",undefined,fetcher));
+        if (session.state !== "disconnected") throw new HttpError(409,"WHATSAPP_QR_RESTART_FAILED","A tentativa anterior ainda não foi encerrada. Atualize o estado e tente novamente.");
+      }
+      if (action === "connect" || action === "restart") {
         await uazapiRequest(instance,"/webhook",{ enabled:true,url:callbackUrl,events:["connection","messages","messages_update","history"],excludeMessages:["wasSentByApi","isGroupYes"],addUrlEvents:false,addUrlTypesMessages:false },fetcher);
-        if (session.state !== "connected" && session.state !== "connecting") {
+        if (action === "restart" || (session.state !== "connected" && session.state !== "connecting")) {
           await uazapiRequest(instance,"/instance/connect",{},fetcher);
           session = parseUazapiSession(await uazapiRequest(instance,"/instance/status",undefined,fetcher));
         }

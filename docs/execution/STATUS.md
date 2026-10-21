@@ -1,13 +1,13 @@
 # Status de execução
 
-Atualizado em: 2026-10-20
+Atualizado em: 2026-10-21
 
-Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e autorizou o Wrangler em perfil exclusivo New Wed. Receptor e consumidor dedicado publicados; autenticação, deduplicação, ingestão humana até a Inbox e limpeza sintética aprovadas. Detalhes em `checkpoints/CP-16.md`.
+Onda 16 publicou o receptor UAZAPI e o consumidor exclusivo de recebimento; gates e limpeza sintética estão registrados em `checkpoints/CP-16.md`. Em 2026-10-21, o usuário retomou localmente o fluxo de QR e relatou que o WhatsApp o rejeitou como inválido.
 
 ## Estado geral
 
-- Onda atual: onda 17, leitura do estado conectado UAZAPI.
-- Branch: `codex/wave-16-uazapi-webhook-production`; base local na onda 15 em `8f30a6b`.
+- Onda atual: onda 18, recuperação manual de QR UAZAPI rejeitado.
+- Branch: `codex/wave-18-uazapi-qr-retry`; base `aa8e087` da onda 17.
 - Dados legados: inexistentes; o projeto começa vazio.
 - Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
 
@@ -119,7 +119,7 @@ Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e aut
 
 ## Riscos e bloqueios atuais
 
-- UAZAPI: callback publicado em 2026-10-20; web version `e224bc76`, consumidor exclusivo `6043eaec`. Migrations 0007/0008 aplicadas. GET 200, token inválido 401, evento autenticado e repetido geraram uma única mensagem humana na Inbox; limpeza confirmada. Webhook do provider continua corretamente configurado/desativado e instância desconectada. Pode-se pedir a ativação; conexão real e respostas automáticas continuam fora desta validação.
+- UAZAPI: callback publicado em 2026-10-20; web version `e224bc76`, consumidor exclusivo `6043eaec`. Migrations 0007/0008 aplicadas. GET 200, token inválido 401, evento autenticado e repetido geraram uma única mensagem humana na Inbox; limpeza confirmada. A operação local de QR habilitou o webhook do provider para o callback configurado; nenhuma mensagem foi enviada. Estado atual: `connecting`, com QR PNG 256x256 exibido no painel local; nenhum número foi confirmado pelo agente.
 - Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa. OpenRouter foi validado apenas localmente com mensagem fictícia.
 - O painel permanece autenticado; inscrições falham de forma segura sem Turnstile.
 - Recebimento UAZAPI opera em fila/consumidor exclusivos, sem credenciais externas e sem respostas automáticas. O consumidor comercial permanece desativado.
@@ -135,8 +135,15 @@ Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e aut
 - Smoke remoto: GET 200, duas rejeições 401, POST 200/queued=1 e repetição 200/queued=0; lote e mensagem processados uma vez, conversa HUMAN, zero saída. Fixture removida; quatro contagens de limpeza iguais a zero.
 - Ximenes confirmou ausência de ajuste anterior e recebeu retorno breve de conclusão; a ativação ainda não foi solicitada.
 
-## Onda 17 em validação
+## Onda 17 validada localmente
 
 - Branch `codex/wave-17-uazapi-connected-status`, baseada em origin/main `78b99bb`. Sem migration.
 - Provider confirmou connected, mas o painel rejeitava status.jid textual com dispositivo. Parser corrigido para texto/objeto legado, com identidade individual validada e QR ausente após conectar.
-- Testes unitário e Workers reproduzem o retorno real com dados sintéticos e verificam persistência por refresh sem reconexão ou chamadas de envio. Gates finais em andamento; sem publicação desta correção ainda.
+- Testes unitário e Workers reproduzem o retorno real com dados sintéticos e verificam persistência por refresh sem reconexão ou chamadas de envio. Sem publicação desta correção.
+
+## Onda 18 validada localmente
+
+- QR idêntico em consultas consecutivas e estado posterior `disconnected` explicaram a falta de regeneração na UI; o texto anterior prometia atualização contínua que o provider não entregou.
+- Ação **Gerar novo QR Code** disponível em `connecting`: lock por linha, exige estado pendente, desconecta, confirma `disconnected` e inicia outro QR. Não há reinício automático.
+- Sem migration. `cf:types`, lint, typecheck, 92 unitários, 32 Workers, build, 52 visuais e verificações de QR passaram. `npm audit --omit=dev` mantém 9 alertas altos preexistentes.
+- Painel local em `http://localhost:4173/admin`; QR atual pendente de leitura pelo usuário. Webhook configurado para o callback existente; sem leitura/decodificação do QR ou mensagens de saída. Checkpoint: `checkpoints/CP-18.md`.

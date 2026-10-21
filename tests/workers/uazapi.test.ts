@@ -117,6 +117,27 @@ describe("UAZAPI no runtime Workers",()=>{
     expect(await operateWhatsAppLine(runtime,"vendas","disconnect",actorId,fetcher)).toMatchObject({state:"disconnected",qrCode:null});
     expect((await env.DB.prepare("SELECT count(*) AS total FROM messages").first<{total:number}>())?.total).toBe(1);
   });
+  it("gera um QR novo encerrando apenas uma tentativa pendente",async()=>{
+    const actorId=await admin();
+    let state="connecting";
+    const paths:string[]=[];
+    const fetcher=vi.fn(async(url:RequestInfo|URL)=>{
+      const path=new URL(String(url)).pathname;paths.push(path);
+      if(path==="/instance/disconnect"){state="disconnected";return Response.json({});}
+      if(path==="/webhook")return Response.json([]);
+      if(path==="/instance/connect"){state="connecting";return Response.json({response:"Connecting"});}
+      return Response.json({instance:{status:state,qrcode:state==="connecting"?"data:image/png;base64,bmV3LXFy":"",token:"never-return"},status:{jid:null}});
+    });
+    const result=await operateWhatsAppLine(runtime,"vendas","restart",actorId,fetcher);
+    expect(paths).toEqual(["/instance/status","/instance/disconnect","/instance/status","/webhook","/instance/connect","/instance/status"]);
+    expect(result).toMatchObject({state:"connecting",qrCode:"data:image/png;base64,bmV3LXFy"});
+    expect(JSON.stringify(result)).not.toContain("never-return");
+
+    state="connected";
+    paths.length=0;
+    await expect(operateWhatsAppLine(runtime,"vendas","restart",actorId,fetcher)).rejects.toMatchObject({code:"WHATSAPP_QR_RESTART_NOT_AVAILABLE"});
+    expect(paths).toEqual(["/instance/status"]);
+  });
   it("exclui operações simultâneas e libera o lock depois de falha sem vazar a resposta",async()=>{
     const actorId = await admin();
     await env.DB.prepare("UPDATE whatsapp_instances SET operation_token='busy',operation_started_at=? WHERE id='vendas'").bind(new Date().toISOString()).run();

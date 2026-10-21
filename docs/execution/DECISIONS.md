@@ -157,3 +157,7 @@ Em 2026-10-20, o usuário retomou a correção do webhook e autorizou o Wrangler
 ## D-038 — Estado conectado com JID textual UAZAPI
 
 Em 2026-10-20, a conexão real confirmou que `/instance/status` retorna `status.jid` textual com sufixo de dispositivo. O parser passa a aceitar texto e o objeto legado com user, sem alterar o estado no provider. O número é extraído somente de um JID individual válido e somente no estado connected; grupos/LIDs não viram telefones. Essa correção utiliza apenas refresh/GET e não reconecta, desconecta, gera QR nem envia mensagens.
+
+## D-039 — Novo QR somente por ação explícita
+
+Em 2026-10-21, o usuário relatou que o WhatsApp rejeitou o QR. As consultas consecutivas ao status retornaram a mesma imagem, e a tentativa passou a `disconnected`; a UI não tinha ação para substituir um QR de uma tentativa pendente. Quando o operador pedir outro QR, a UI oferece **Gerar novo QR Code** somente em `connecting`. O backend usa o lock por linha, confirma o estado antes de desconectar, verifica a desconexão e só então inicia uma nova conexão QR. Não há renovação automática nem envio de mensagens. A ação pode habilitar o webhook configurado para recebimento.

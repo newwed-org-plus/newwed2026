@@ -65,6 +65,10 @@ for (const [name,width,height] of [["mobile",390,844],["tablet",768,1024],["desk
     await expect(page.getByRole("img",{name:"QR Code para conectar o WhatsApp"})).toBeVisible();
     await expect(page.getByRole("button",{name:"Gerar QR Code",exact:true})).toHaveCount(0);
     expect(await page.getByRole("img",{name:"QR Code para conectar o WhatsApp"}).evaluate(node=>(node as HTMLImageElement).naturalWidth)).toBe(41);
+    await expect(page.getByRole("button",{name:"Gerar novo QR Code",exact:true})).toBeVisible();
+    await page.getByRole("button",{name:"Gerar novo QR Code",exact:true}).click();
+    await expect(page.getByRole("img",{name:"QR Code para conectar o WhatsApp"})).toBeVisible();
+    expect(actions.filter(action=>action==="restart")).toHaveLength(1);
     await page.evaluate(()=>window.scrollTo(0,0));
     await page.screenshot({path:`test-results/whatsapp-qr-synthetic-${name}.png`,fullPage:true});
     state="connected";
