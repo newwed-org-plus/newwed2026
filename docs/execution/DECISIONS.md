@@ -161,3 +161,7 @@ Em 2026-10-20, a conexão real confirmou que `/instance/status` retorna `status.
 ## D-039 — Novo QR somente por ação explícita
 
 Em 2026-10-21, o usuário relatou que o WhatsApp rejeitou o QR. As consultas consecutivas ao status retornaram a mesma imagem, e a tentativa passou a `disconnected`; a UI não tinha ação para substituir um QR de uma tentativa pendente. Quando o operador pedir outro QR, a UI oferece **Gerar novo QR Code** somente em `connecting`. O backend usa o lock por linha, confirma o estado antes de desconectar, verifica a desconexão e só então inicia uma nova conexão QR. Não há renovação automática nem envio de mensagens. A ação pode habilitar o webhook configurado para recebimento.
+
+## D-040 — Polling de status somente durante conexão
+
+Em 2026-10-21, o usuário confirmou a linha conectada e relatou o botão **Atualizar estado** sendo acionado repetidamente. A UI fazia refresh automático a cada cinco segundos sem considerar o estado. Faça uma consulta inicial ao abrir/selecionar a linha e mantenha polling somente enquanto `connecting`; pare ao conectar, desconectar ou pausar. A atualização manual permanece disponível. Não desconecte a linha nem altere o webhook.

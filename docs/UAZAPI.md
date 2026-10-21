@@ -19,7 +19,9 @@ Exemplo **estrutural**, com valores fictícios que devem ser substituídos somen
 
 ## Conexão
 
-No painel, abra **WhatsApp**, selecione a linha e clique em **Gerar QR Code**. O backend consulta `/instance/status`, configura o webhook da linha e chama `/instance/connect` sem `phone` apenas se não houver conexão ou tentativa em andamento. O QR vem de consultas a `/instance/status`, feitas a cada cinco segundos enquanto a tela está visível. Se o WhatsApp rejeitar o QR, clique em **Gerar novo QR Code**: essa ação só está disponível durante `connecting`, encerra a tentativa pendente, confirma `disconnected` e inicia outro fluxo QR. Se o encerramento não for confirmado, o painel pede para atualizar o estado antes de tentar novamente. Se uma chamada falhar, o QR anterior é retirado e o operador pode atualizar o estado.
+Ao abrir ou selecionar uma linha, o painel faz uma consulta inicial a `/instance/status`. Enquanto a resposta for `connecting`, consulta novamente a cada cinco segundos se a aba estiver visível; o polling automático para ao conectar, desconectar ou pausar a sessão. **Atualizar estado** continua disponível para consulta manual.
+
+Para conectar, clique em **Gerar QR Code**. O backend configura o webhook da linha e chama `/instance/connect` sem `phone` apenas se não houver conexão ou tentativa em andamento. Se o WhatsApp rejeitar o QR, clique em **Gerar novo QR Code**: essa ação só está disponível durante `connecting`, encerra a tentativa pendente, confirma `disconnected` e inicia outro fluxo QR. Se o encerramento não for confirmado, o painel pede para atualizar o estado antes de tentar novamente. Se uma chamada falhar, o QR anterior é retirado e o operador pode atualizar o estado.
 
 Se a instância já estiver conectada ao cadastrar sua credencial, use **Ativar recebimento** para configurar ou atualizar o callback sem desconectar nem iniciar um novo pareamento. A mesma ação pode ser usada após uma mudança do endereço público.
 

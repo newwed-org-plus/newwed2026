@@ -30,37 +30,46 @@ export function AdminWhatsApp() {
   },[]);
   useEffect(() => { void load();return invalidate; },[load,invalidate]);
   const serverConfigured=lines.find(item=>item.id===selectedId)?.serverConfigured!==false;
+  const line = lines.find(item => item.id === selectedId);
+  const state = session?.state ?? line?.state;
 
-  const operate = useCallback(async (action:"refresh"|"connect"|"disconnect"|"restart") => {
-    if (!selectedId || !serverConfigured || inFlight.current) return;
+  const operate = useCallback(async (action:"refresh"|"connect"|"disconnect"|"restart"):Promise<Session|null> => {
+    if (!selectedId || !serverConfigured || inFlight.current) return null;
     inFlight.current = true;
     setBusy(true);
     const version = generation.current;
     try {
       const result = await adminApi<Session>(`/api/admin/whatsapp/${selectedId}`,{method:"POST",body:JSON.stringify({action})});
-      if (version !== generation.current) return;
+      if (version !== generation.current) return null;
       setSession(result);setError("");if (action !== "refresh") setConfirmDisconnect(false);
       setLines(current => current.map(line => line.id === result.id ? {...line,state:result.state,phone:result.phone,profile_name:result.profileName,last_error:null,updated_at:result.updatedAt} : line));
+      return result;
     } catch (reason) {
       if (version === generation.current) {
         setSession(null);
         setError(reason instanceof Error ? reason.message : "Não foi possível atualizar a conexão.");
       }
+      return null;
     } finally { inFlight.current = false;if (version === generation.current) setBusy(false); }
   },[selectedId,serverConfigured]);
   useEffect(() => {
     if (!selectedId || !serverConfigured) return;
+    void operate("refresh");
+  },[selectedId,serverConfigured,operate]);
+  useEffect(() => {
+    if (!selectedId || !serverConfigured || state !== "connecting") return;
     let stopped = false;
     let timer:ReturnType<typeof setTimeout>;
     const poll = async () => {
-      if (document.visibilityState === "visible") await operate("refresh");
+      if (document.visibilityState === "visible") {
+        const result = await operate("refresh");
+        if (result && result.state !== "connecting") return;
+      }
       if (!stopped) timer = setTimeout(poll,5000);
     };
-    void poll();
+    timer = setTimeout(poll,5000);
     return () => { stopped = true;clearTimeout(timer); };
-  },[selectedId,serverConfigured,operate]);
-  const line = lines.find(item => item.id === selectedId);
-  const state = session?.state ?? line?.state;
+  },[selectedId,serverConfigured,operate,state]);
   const changeLine = (id: string) => { invalidate();setSelectedId(id);setSession(null);setBusy(false);setError("");setConfirmDisconnect(false); };
 
   return <section className="mx-auto max-w-5xl px-5 py-8 md:px-8">

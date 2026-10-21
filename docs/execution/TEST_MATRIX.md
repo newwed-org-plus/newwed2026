@@ -53,3 +53,9 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Unitários: `npm test` (92); Workers incluindo restart explícito, estado permitido e bloqueio fora de `connecting`: `npm run test:workers` (32).
 - Visual: `npm run test:visual` (52), incluindo novo QR nos viewports mobile/tablet/desktop. Migrações locais aplicadas pela preparação da suíte visual; sem migration nova.
 - `npm run cf:types`, lint, typecheck e build aprovados. `npm audit --omit=dev` mantém 9 alertas altos preexistentes descritos no CP-18.
+
+## Onda 19 — Polling de status UAZAPI
+
+- UI: uma consulta inicial por seleção e polling a cada cinco segundos somente em `connecting`; teste visual focado passou (6/6) e garante que linha conectada não repete refresh após 5,5 s.
+- Sem migration. Tipos Cloudflare, lint, typecheck, 92 unitários, build e suíte visual completa (53) passaram; linha real permaneceu conectada.
+- `npm audit --omit=dev` reporta os 9 alertas altos preexistentes (braces, source-map-js e vite/launch-editor); nenhuma dependência foi alterada.

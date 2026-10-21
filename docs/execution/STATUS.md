@@ -6,8 +6,8 @@ Onda 16 publicou o receptor UAZAPI e o consumidor exclusivo de recebimento; gate
 
 ## Estado geral
 
-- Onda atual: onda 18, recuperação manual de QR UAZAPI rejeitado.
-- Branch: `codex/wave-18-uazapi-qr-retry`; base `aa8e087` da onda 17.
+- Onda atual: onda 19, encerramento de polling após conexão UAZAPI.
+- Branch: `codex/wave-19-stop-connected-polling`; base `b9bc161` da onda 18.
 - Dados legados: inexistentes; o projeto começa vazio.
 - Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
 
@@ -119,7 +119,7 @@ Onda 16 publicou o receptor UAZAPI e o consumidor exclusivo de recebimento; gate
 
 ## Riscos e bloqueios atuais
 
-- UAZAPI: callback publicado em 2026-10-20; web version `e224bc76`, consumidor exclusivo `6043eaec`. Migrations 0007/0008 aplicadas. GET 200, token inválido 401, evento autenticado e repetido geraram uma única mensagem humana na Inbox; limpeza confirmada. A operação local de QR habilitou o webhook do provider para o callback configurado; nenhuma mensagem foi enviada. Estado atual: `connecting`, com QR PNG 256x256 exibido no painel local; nenhum número foi confirmado pelo agente.
+- UAZAPI: callback publicado em 2026-10-20; web version `e224bc76`, consumidor exclusivo `6043eaec`. Migrations 0007/0008 aplicadas. GET 200, token inválido 401, evento autenticado e repetido geraram uma única mensagem humana na Inbox; limpeza confirmada. A operação local de QR habilitou o webhook do provider para o callback configurado. O usuário confirmou conexão da linha; nenhuma mensagem foi enviada pelo agente.
 - Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa. OpenRouter foi validado apenas localmente com mensagem fictícia.
 - O painel permanece autenticado; inscrições falham de forma segura sem Turnstile.
 - Recebimento UAZAPI opera em fila/consumidor exclusivos, sem credenciais externas e sem respostas automáticas. O consumidor comercial permanece desativado.
@@ -135,15 +135,14 @@ Onda 16 publicou o receptor UAZAPI e o consumidor exclusivo de recebimento; gate
 - Smoke remoto: GET 200, duas rejeições 401, POST 200/queued=1 e repetição 200/queued=0; lote e mensagem processados uma vez, conversa HUMAN, zero saída. Fixture removida; quatro contagens de limpeza iguais a zero.
 - Ximenes confirmou ausência de ajuste anterior e recebeu retorno breve de conclusão; a ativação ainda não foi solicitada.
 
-## Onda 17 validada localmente
+## Ondas 17–18 validadas localmente
 
-- Branch `codex/wave-17-uazapi-connected-status`, baseada em origin/main `78b99bb`. Sem migration.
-- Provider confirmou connected, mas o painel rejeitava status.jid textual com dispositivo. Parser corrigido para texto/objeto legado, com identidade individual validada e QR ausente após conectar.
-- Testes unitário e Workers reproduzem o retorno real com dados sintéticos e verificam persistência por refresh sem reconexão ou chamadas de envio. Sem publicação desta correção.
+- 17 corrigiu o parser de JID conectado; 18 adicionou recuperação explícita para QR rejeitado, sem migration ou publicação. Evidências em `checkpoints/CP-17.md` e `CP-18.md`.
+- Onda 18: `cf:types`, lint, typecheck, 92 unitários, 32 Workers, build e 52 visuais passaram. `npm audit --omit=dev` mantém 9 alertas altos preexistentes. Commit `a883168`.
 
-## Onda 18 validada localmente
+## Onda 19 validada localmente
 
-- QR idêntico em consultas consecutivas e estado posterior `disconnected` explicaram a falta de regeneração na UI; o texto anterior prometia atualização contínua que o provider não entregou.
-- Ação **Gerar novo QR Code** disponível em `connecting`: lock por linha, exige estado pendente, desconecta, confirma `disconnected` e inicia outro QR. Não há reinício automático.
-- Commit `a883168`; sem migration. `cf:types`, lint, typecheck, 92 unitários, 32 Workers, build, 52 visuais e verificações de QR passaram. `npm audit --omit=dev` mantém 9 alertas altos preexistentes.
-- Painel local em `http://localhost:4173/admin`; QR atual pendente de leitura pelo usuário. Webhook configurado para o callback existente; sem leitura/decodificação do QR ou mensagens de saída. Checkpoint: `checkpoints/CP-18.md`.
+- O usuário confirmou a linha conectada e relatou consultas repetidas. A causa é polling incondicional a cada cinco segundos.
+- Implementado refresh inicial e polling automático somente enquanto `connecting`; a ação manual permanece disponível. Sem desconexão, migration ou deploy.
+- Gates: tipos Cloudflare, lint, typecheck, 92 testes unitários, build, regressão UAZAPI (6) e 53 cenários visuais aprovados.
+- `npm audit --omit=dev` mantém os 9 alertas altos preexistentes; lockfile não alterado. Evidências em `checkpoints/CP-19.md`.

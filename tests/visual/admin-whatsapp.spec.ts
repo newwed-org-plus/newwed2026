@@ -114,3 +114,20 @@ test("linha somente de recebimento não consulta provider nem oferece QR ativo",
   await expect(page.getByText(/Recebimento preparado\. Informe a URL/)).toBeVisible();
   expect(operations).toBe(0);
 });
+
+test("linha conectada faz uma consulta inicial e para o polling automático",async({page})=>{
+  test.skip(Boolean(process.env.VISUAL_BASE_URL),"Provider simulado somente em ambiente local.");
+  let refreshes=0;
+  await page.route("**/api/admin/whatsapp**",route=>{
+    if(route.request().method()==="GET")return route.fulfill({json:{items:[{id:"validacao",name:"VALIDACAO Atendimento",state:"connected",phone:null,profile_name:null,last_error:null,updated_at:new Date().toISOString()}]}});
+    const {action}=route.request().postDataJSON();
+    if(action==="refresh")refreshes++;
+    return route.fulfill({json:{id:"validacao",name:"VALIDACAO Atendimento",state:"connected",qrCode:null,phone:null,profileName:null,updatedAt:new Date().toISOString()}});
+  });
+  await page.goto(`${origin}/admin`);
+  await page.getByRole("button",{name:"WhatsApp",exact:true}).click();
+  await expect(page.getByRole("heading",{name:"VALIDACAO Atendimento",exact:true})).toBeVisible();
+  await expect.poll(()=>refreshes).toBe(1);
+  await page.waitForTimeout(5500);
+  expect(refreshes).toBe(1);
+});
