@@ -77,3 +77,7 @@ O Worker `new-wed-uazapi-receiver` é publicado por `npm run deploy:uazapi`, usa
 O consumidor processa lotes, mensagens recebidas e recibos, força atendimento humano sem OpenRouter e recupera apenas outboxes UAZAPI no cron. Não executa envio manual, cobrança, e-mail ou resposta automática. Não precisa receber o token da instância nem chaves de provedores. Resumos e demais trabalhos comerciais permanecem na fila anterior, sem consumidor ativado nesta publicação.
 
 Configure `UAZAPI_INSTANCES` e `UAZAPI_WEBHOOK_BASE_URL` como secrets somente no Worker web. Validar o recebimento com evento sintético não envolve `/send/text`, QR, pareamento nem ativação do webhook no provedor. Só liberar a ativação depois de comprovar mensagem única na Inbox e limpar a validação.
+
+## Estado após conectar
+
+A resposta de `/instance/status` pode trazer `status.jid` como texto WhatsApp (`número:dispositivo@s.whatsapp.net`) ou como objeto legado com `user`. O parser aceita os dois formatos, extrai somente um telefone individual válido e ignora JIDs de grupo/LID como identidade telefônica. A confirmação vem de `instance.status`; nenhuma identidade é exibida antes do estado connected. QR é removido da resposta normalizada quando a conexão está concluída.

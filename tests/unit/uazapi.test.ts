@@ -20,6 +20,16 @@ describe("contrato UAZAPI",() => {
     expect(parseUazapiSession({instance:{...base.instance,status:"connected"},status:{jid:{user:"5581999999999"}}})).toMatchObject({state:"connected",qrCode:null,phone:"5581999999999"});
     expect(() => parseUazapiSession({token:"secret"})).toThrow("estado");
   });
+  it("reconhece sessão conectada com JID textual do provider sem expor QR ou token",()=>{
+    const instance={status:"connected",qrcode:"data:image/png;base64,c3ludGhldGlj",token:"synthetic-secret",profileName:"VALIDACAO"};
+    for(const jid of ["5581999999999@s.whatsapp.net","5581999999999:42@s.whatsapp.net"]){
+      expect(parseUazapiSession({instance,status:{connected:true,loggedIn:true,jid}})).toEqual({state:"connected",qrCode:null,phone:"5581999999999",profileName:"VALIDACAO"});
+    }
+    for(const jid of ["123@lid","5581999999999@g.us","not-a-jid"]){
+      expect(parseUazapiSession({instance,status:{jid}})).toMatchObject({state:"connected",qrCode:null,phone:null});
+    }
+    expect(parseUazapiSession({instance:{...instance,status:"connecting"},status:{jid:"5581999999999@s.whatsapp.net"}}).phone).toBeNull();
+  });
   it("mantém o token em header e não repete automaticamente operações",async () => {
     let calls = 0;
     const fetcher = (async (url:RequestInfo|URL,init?:RequestInit) => {
