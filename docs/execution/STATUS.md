@@ -6,7 +6,7 @@ Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e aut
 
 ## Estado geral
 
-- Onda atual: onda 16, publicação do recebimento UAZAPI.
+- Onda atual: onda 17, leitura do estado conectado UAZAPI.
 - Branch: `codex/wave-16-uazapi-webhook-production`; base local na onda 15 em `8f30a6b`.
 - Dados legados: inexistentes; o projeto começa vazio.
 - Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
@@ -134,3 +134,9 @@ Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e aut
 - Gates: tipos/lint/TypeScript, 91 unitários, 30 Workers, invariantes D1, 52 visuais, build production, dry-run e varredura sem credenciais nos assets/Git. Auditoria herdada permanece com 9 alertas altos.
 - Smoke remoto: GET 200, duas rejeições 401, POST 200/queued=1 e repetição 200/queued=0; lote e mensagem processados uma vez, conversa HUMAN, zero saída. Fixture removida; quatro contagens de limpeza iguais a zero.
 - Ximenes confirmou ausência de ajuste anterior e recebeu retorno breve de conclusão; a ativação ainda não foi solicitada.
+
+## Onda 17 em validação
+
+- Branch `codex/wave-17-uazapi-connected-status`, baseada em origin/main `78b99bb`. Sem migration.
+- Provider confirmou connected, mas o painel rejeitava status.jid textual com dispositivo. Parser corrigido para texto/objeto legado, com identidade individual validada e QR ausente após conectar.
+- Testes unitário e Workers reproduzem o retorno real com dados sintéticos e verificam persistência por refresh sem reconexão ou chamadas de envio. Gates finais em andamento; sem publicação desta correção ainda.

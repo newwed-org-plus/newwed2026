@@ -153,3 +153,7 @@ A validação real no painel identificou que o workerd alvo aceita apenas `follo
 ## D-037 — Publicação UAZAPI limitada ao recebimento
 
 Em 2026-10-20, o usuário retomou a correção do webhook e autorizou o Wrangler na conta New Wed, em perfil exclusivo. Publicar o receptor e migrations 0007/0008 sem ativar as integrações comerciais: eventos UAZAPI usam fila/consumidor próprios, com DLQ, e o cron recupera apenas essa família. O consumidor força atendimento humano sem chave OpenRouter, não processa envios, e-mail ou cobrança e não recebe credenciais de provedores. A fila comercial permanece sem consumidor. A ativação do webhook no provedor deve aguardar autenticação, deduplicação, ingestão até a Inbox e limpeza de um evento sintético; QR, pareamento e mensagens reais não fazem parte desta autorização.
+
+## D-038 — Estado conectado com JID textual UAZAPI
+
+Em 2026-10-20, a conexão real confirmou que `/instance/status` retorna `status.jid` textual com sufixo de dispositivo. O parser passa a aceitar texto e o objeto legado com user, sem alterar o estado no provider. O número é extraído somente de um JID individual válido e somente no estado connected; grupos/LIDs não viram telefones. Essa correção utiliza apenas refresh/GET e não reconecta, desconecta, gera QR nem envia mensagens.

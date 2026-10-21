@@ -128,6 +128,18 @@ describe("UAZAPI no runtime Workers",()=>{
     const stored = await env.DB.prepare("SELECT operation_token,last_error FROM whatsapp_instances WHERE id='vendas'").first<{operation_token:string|null;last_error:string}>();
     expect(stored?.operation_token).toBeNull();expect(stored?.last_error).not.toContain("provider-secret");
   });
+  it("persiste conexão confirmada por JID textual usando somente consulta de estado",async()=>{
+    const actorId=await admin();
+    const fetcher=vi.fn(async(url:RequestInfo|URL,init?:RequestInit)=>{
+      expect(new URL(String(url)).pathname).toBe("/instance/status");expect(init?.method).toBe("GET");
+      return Response.json({instance:{status:"connected",profileName:"VALIDACAO",token:"synthetic-private-token"},status:{connected:true,loggedIn:true,jid:"5581999999999:42@s.whatsapp.net"}});
+    });
+    const result=await operateWhatsAppLine(runtime,"vendas","refresh",actorId,fetcher);
+    expect(result).toMatchObject({state:"connected",phone:"5581999999999",qrCode:null});
+    expect(JSON.stringify(result)).not.toContain("synthetic-private-token");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(await env.DB.prepare("SELECT state,phone,last_error,operation_token FROM whatsapp_instances WHERE id='vendas'").first()).toEqual({state:"connected",phone:"5581999999999",last_error:null,operation_token:null});
+  });
   it("autentica webhooks por linha, remove credenciais, deduplica e separa o mesmo contato entre números",async()=>{
     expect((await webhook("vendas",{token:instances[1].token,EventType:"messages",message:message()})).status).toBe(401);
     const event = message();

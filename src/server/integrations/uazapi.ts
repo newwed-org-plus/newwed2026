@@ -74,13 +74,15 @@ export async function uazapiRequest(instance: UazapiInstance,path: string,body?:
 
 export function parseUazapiSession(value: unknown): UazapiSession {
   const result = z.object({ instance:z.object({ status:z.enum(["disconnected","connecting","connected","hibernated"]),qrcode:z.string().nullish(),profileName:z.string().nullish() }),
-    status:z.object({ jid:z.object({ user:z.string() }).nullish() }).optional() }).safeParse(value);
+    status:z.object({ jid:z.union([z.string(),z.object({ user:z.string() })]).nullish() }).optional() }).safeParse(value);
   if (!result.success) throw new HttpError(502,"UAZAPI_INVALID_RESPONSE","O estado da instância não pôde ser reconhecido.");
   const { instance,status } = result.data;
+  const jid = status?.jid;
+  const phone = typeof jid === "string" ? /^(\d{10,15})(?::\d+)?@s\.whatsapp\.net$/.exec(jid)?.[1] : jid?.user;
   const rawQr = instance.qrcode ?? "";
   const qrCode = /^data:image\/png;base64,[A-Za-z0-9+/=\r\n]+$/.test(rawQr) ? rawQr : /^[A-Za-z0-9+/=\r\n]{32,}$/.test(rawQr) ? `data:image/png;base64,${rawQr}` : null;
   return { state:instance.status,qrCode:instance.status === "connecting" ? qrCode : null,
-    phone:instance.status === "connected" && /^\d{10,15}$/.test(status?.jid?.user ?? "") ? status!.jid!.user : null,
+    phone:instance.status === "connected" && /^\d{10,15}$/.test(phone ?? "") ? phone! : null,
     profileName:instance.profileName?.slice(0,120) ?? null };
 }
 
