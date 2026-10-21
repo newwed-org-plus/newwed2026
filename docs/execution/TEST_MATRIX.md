@@ -59,3 +59,10 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - UI: uma consulta inicial por seleção e polling a cada cinco segundos somente em `connecting`; teste visual focado passou (6/6) e garante que linha conectada não repete refresh após 5,5 s.
 - Sem migration. Tipos Cloudflare, lint, typecheck, 92 unitários, build e suíte visual completa (53) passaram; linha real permaneceu conectada.
 - `npm audit --omit=dev` reporta os 9 alertas altos preexistentes (braces, source-map-js e vite/launch-editor); nenhuma dependência foi alterada.
+
+## Onda 20 — Importação resiliente do histórico UAZAPI
+
+- Worker: histórico processado diretamente no D1 em grupos de dez; recuperação cron de lotes e mensagens históricas pendentes não depende da Queue.
+- Recebimento comum permanece assíncrono. A recuperação histórica força atendimento humano e não chama agente ou endpoint de envio.
+- Testes: regressões focadas 13/13 e Worker completo 34/34; `cf:types`, lint, typecheck, 92 unitários, build e 53 visuais passaram. `db:migrate:local` confirmou nenhuma migration pendente.
+- `npm audit --omit=dev` continua com 9 alertas altos preexistentes; lockfile/dependências não alterados. Detalhes em `checkpoints/CP-20.md`.

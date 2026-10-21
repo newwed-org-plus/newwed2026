@@ -230,4 +230,35 @@ describe("UAZAPI no runtime Workers",()=>{
     expect(await acceptUazapiWebhook({...runtime,EVENTS_QUEUE:offlineQueue},"vendas",{token:instances[0].token,EventType:"messages",message:message("QUEUE-RETRY")},"req-uazapi-retry")).toMatchObject({received:true,queued:0});
     expect((await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE type='uazapi.batch' AND published_at IS NULL AND attempts=1").first<{total:number}>())?.total).toBe(1);
   });
+  it("processa histórico em lotes D1 sem enfileirar uma mensagem por item",async()=>{
+    const queueSend=vi.fn(async()=>{});
+    const inboundEnv={...runtime,UAZAPI_EVENTS_QUEUE:{send:queueSend} as unknown as Queue,EVENTS_QUEUE:{send:vi.fn(async()=>{})} as unknown as Queue};
+    const response=await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"history",event:"messages",messages:Array.from({length:25},(_,i)=>message(`DIRECT-${i}`))},"req-history-direct");
+    expect(response.queued).toBe(25);
+    const batch=await env.DB.prepare("SELECT external_id FROM webhook_events WHERE event_type='uazapi.batch'").first<{external_id:string}>();
+    const processHistory=async(externalId:string)=>{
+      const result=await processIncomingWhatsApp({...inboundEnv,OPENROUTER_API_KEY:undefined},externalId,{},"uazapi");
+      expect(result.processed).toBe(true);
+    };
+    await processUazapiBatch(inboundEnv,batch!.external_id,0,{processHistory});
+    await processUazapiBatch(inboundEnv,batch!.external_id,10,{processHistory});
+    await processUazapiBatch(inboundEnv,batch!.external_id,20,{processHistory});
+    expect(queueSend).toHaveBeenCalledTimes(3); // One parent plus two continuations, not 25 leaf messages.
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM messages").first<{total:number}>())?.total).toBe(25);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM conversations WHERE mode='HUMAN'").first<{total:number}>())?.total).toBe(1);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM webhook_events WHERE event_type='uazapi.incoming' AND processed_at IS NULL").first<{total:number}>())?.total).toBe(0);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE type='uazapi.incoming'").first<{total:number}>())?.total).toBe(0);
+  });
+  it("recupera o histórico no cron quando a Queue recusa escritas",async()=>{
+    const queueSend=vi.fn().mockRejectedValue(new Error("Synthetic daily write limit"));
+    const inboundEnv={...runtime,UAZAPI_EVENTS_QUEUE:{send:queueSend} as unknown as Queue,EVENTS_QUEUE:{send:queueSend} as unknown as Queue};
+    const result=await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"history",event:"messages",messages:Array.from({length:3},(_,i)=>message(`RECOVER-${i}`))},"req-history-recovery");
+    expect(result).toMatchObject({received:true,queued:0});
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(queueSend).toHaveBeenCalledTimes(1);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM messages").first<{total:number}>())?.total).toBe(3);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM conversations WHERE mode='HUMAN'").first<{total:number}>())?.total).toBe(1);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM webhook_events WHERE event_type='uazapi.incoming' AND processed_at IS NULL").first<{total:number}>())?.total).toBe(0);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE type='uazapi.batch' AND published_at IS NULL").first<{total:number}>())?.total).toBe(0);
+  });
 });

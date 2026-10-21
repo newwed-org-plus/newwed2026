@@ -6,8 +6,8 @@ Onda 16 publicou o receptor UAZAPI e o consumidor exclusivo de recebimento; gate
 
 ## Estado geral
 
-- Onda atual: onda 19, encerramento de polling após conexão UAZAPI.
-- Branch: `codex/wave-19-stop-connected-polling`; base `b9bc161` da onda 18.
+- Onda atual: onda 20, importação resiliente do histórico UAZAPI.
+- Branch: `codex/wave-20-uazapi-history-batches`; base `c43faa6` da onda 19.
 - Dados legados: inexistentes; o projeto começa vazio.
 - Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
 
@@ -140,9 +140,9 @@ Onda 16 publicou o receptor UAZAPI e o consumidor exclusivo de recebimento; gate
 - 17 corrigiu o parser de JID conectado; 18 adicionou recuperação explícita para QR rejeitado, sem migration ou publicação. Evidências em `checkpoints/CP-17.md` e `CP-18.md`.
 - Onda 18: `cf:types`, lint, typecheck, 92 unitários, 32 Workers, build e 52 visuais passaram. `npm audit --omit=dev` mantém 9 alertas altos preexistentes. Commit `a883168`.
 
-## Onda 19 validada localmente
+## Ondas 19–20
 
-- O usuário confirmou a linha conectada e relatou consultas repetidas. A causa é polling incondicional a cada cinco segundos.
-- Implementado refresh inicial e polling automático somente enquanto `connecting`; a ação manual permanece disponível. Sem desconexão, migration ou deploy.
-- Commit `5cdff96`; gates: tipos Cloudflare, lint, typecheck, 92 testes unitários, build, regressão UAZAPI (6) e 53 cenários visuais aprovados.
-- `npm audit --omit=dev` mantém os 9 alertas altos preexistentes; lockfile não alterado. Evidências em `checkpoints/CP-19.md`.
+- 19 encerrou o polling depois da conexão; commits `5cdff96` e `c43faa6`, gates locais aprovados em `checkpoints/CP-19.md`.
+- 20 confirmou que `localhost:4173` tem D1 vazio e que o callback vai ao domínio publicado; D1 publicado tem 236 conversas/9.401 mensagens para a linha.
+- 201 mensagens históricas estavam pendentes após limite diário de escrita da Queue; implementação em lotes D1 e recuperação pelo cron validada localmente, sem migration ou deploy.
+- Gates da onda 20 aprovados: tipos Cloudflare, lint, typecheck, 92 unitários, 34 Workers, build e 53 visuais; auditoria mantém 9 alertas altos preexistentes. Evidências em `checkpoints/CP-20.md`.

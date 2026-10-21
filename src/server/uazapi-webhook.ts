@@ -75,31 +75,48 @@ export async function acceptUazapiWebhook(env: WebhookEnv,lineId: string,input: 
 }
 
 type NormalizedEvent = {externalId:string;type:string;payload:unknown};
-export async function processUazapiBatch(env: WebhookEnv,externalId: string,offset = 0) {
+type ProcessBatchOptions = { processHistory?: (externalId:string)=>Promise<void>;publishContinuation?: boolean };
+function isHistoryPayload(payload: unknown) {
+  return Boolean(payload && typeof payload === "object" && (payload as {event?:{history?:unknown}}).event?.history === true);
+}
+
+export async function processUazapiBatch(env: WebhookEnv,externalId: string,offset = 0,options: ProcessBatchOptions = {}) {
   const stored = await env.DB.prepare("SELECT id,payload_json,request_id FROM webhook_events WHERE provider='uazapi' AND external_id=?")
     .bind(externalId).first<{id:string;payload_json:string;request_id:string}>();
-  if (!stored) return;
+  if (!stored) return {nextOffset:null};
   const candidates = JSON.parse(stored.payload_json) as NormalizedEvent[];
   const chunk = candidates.slice(offset,offset+10);
-  if (!chunk.length) return;
+  if (!chunk.length) {
+    await env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=? AND processed_at IS NULL").bind(new Date().toISOString(),stored.id).run();
+    return {nextOffset:null};
+  }
   const now = new Date().toISOString();
   const statements = chunk.flatMap(item => [
     env.DB.prepare("INSERT OR IGNORE INTO webhook_events (id,provider,external_id,event_type,payload_json,request_id,created_at) VALUES (?,'uazapi',?,?,?,?,?)")
       .bind(crypto.randomUUID(),item.externalId,item.type,JSON.stringify(item.payload),stored.request_id,now),
-    env.DB.prepare("INSERT OR IGNORE INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,request_id,created_at) SELECT ?,?,?,?,?,0,?,? WHERE changes()=1")
-      .bind(`uazapi:${item.externalId}`,item.type,item.externalId,`uazapi:${item.externalId}`,JSON.stringify({externalId:item.externalId,requestId:stored.request_id}),stored.request_id,now),
+    ...(options.processHistory && isHistoryPayload(item.payload) ? [] : [env.DB.prepare("INSERT OR IGNORE INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,request_id,created_at) SELECT ?,?,?,?,?,0,?,? WHERE changes()=1")
+      .bind(`uazapi:${item.externalId}`,item.type,item.externalId,`uazapi:${item.externalId}`,JSON.stringify({externalId:item.externalId,requestId:stored.request_id}),stored.request_id,now)]),
   ]);
   const next = offset+chunk.length;
   const continuationId = `uazapi.batch:${externalId}:${next}`;
   if (next < candidates.length) statements.push(env.DB.prepare("INSERT OR IGNORE INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,request_id,created_at) VALUES (?,'uazapi.batch',?,?,?,0,?,?)")
     .bind(continuationId,externalId,continuationId,JSON.stringify({externalId,targetCount:next,requestId:stored.request_id}),stored.request_id,now));
-  else statements.push(env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=?").bind(now,stored.id));
   await env.DB.batch(statements);
   for (const item of chunk) {
-    // Repeated publication is safe: each leaf event has a persistent processed marker.
-    await publishOutbox(env,{id:`uazapi:${item.externalId}`,type:item.type,externalId:item.externalId,requestId:stored.request_id});
+    if (options.processHistory && isHistoryPayload(item.payload)) {
+      await options.processHistory(item.externalId);
+      // Older deployments created one outbox row per historical message. Mark it handled
+      // after direct D1 processing so quota recovery does not enqueue it again.
+      await env.DB.prepare("UPDATE outbox_events SET published_at=coalesce(published_at,?),next_attempt_at=NULL,last_error=NULL WHERE id=?")
+        .bind(now,`uazapi:${item.externalId}`).run();
+    } else {
+      // Repeated publication is safe: each leaf event has a persistent processed marker.
+      await publishOutbox(env,{id:`uazapi:${item.externalId}`,type:item.type,externalId:item.externalId,requestId:stored.request_id});
+    }
   }
-  if (next < candidates.length) await publishOutbox(env,{id:continuationId,type:"uazapi.batch",externalId,targetCount:next,requestId:stored.request_id});
+  if (next < candidates.length && options.publishContinuation !== false) await publishOutbox(env,{id:continuationId,type:"uazapi.batch",externalId,targetCount:next,requestId:stored.request_id});
+  if (next >= candidates.length) await env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=? AND processed_at IS NULL").bind(now,stored.id).run();
+  return {nextOffset:next < candidates.length ? next : null};
 }
 
 export async function processUazapiStatus(env: Pick<Env,"DB">,externalId: string) {

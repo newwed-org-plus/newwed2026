@@ -35,10 +35,14 @@ Somente a imagem PNG do QR e os campos necessários chegam ao navegador. QR, pai
 - `messages` registra recebidos e mensagens enviadas pelo celular. Ecos da API e grupos são filtrados na configuração e também na aplicação. Uma mensagem nova enviada pelo celular pausa o agente da conversa.
 - `history` com `event=messages` importa os lotes disponíveis após o pareamento, sem disparar respostas. Preserva o timestamp e não regride a data da última mensagem. A disponibilidade e extensão desse histórico dependem do WhatsApp/UAZAPI; isso não promete a importação completa da agenda ou do histórico antigo.
 - Cada conversa UAZAPI tem identidade de linha + telefone. IDs de mensagem incluem a linha; o mesmo contato em dois números não compartilha uma conversa. O vínculo com um lead existente é feito pelo telefone normalizado, sem criar leads comerciais artificialmente.
-- Ingressão salva um lote normalizado e uma outbox atomicamente; o consumidor divide o trabalho em grupos de dez antes de publicar eventos individuais. O cron existente recupera publicações pendentes. Repetições são deduplicadas no webhook e em `messages`.
+- Ingestão salva um lote normalizado e uma outbox atomicamente. O consumidor persiste mensagens históricas em grupos de dez, sem enfileirar um evento por mensagem; mensagens novas continuam no fluxo assíncrono normal. O cron recupera lotes e mensagens de histórico já persistidos quando a Queue recusa gravações. Repetições são deduplicadas no webhook e em `messages`.
 - Respostas da Inbox continuam exigindo claim, dono da conversa, ausência de opt-out e ausência de resposta automática em andamento. O consumidor escolhe UAZAPI pela linha da conversa; conversas Meta continuam usando a integração anterior. O envio UAZAPI usa `/send/text` sem retry automático de um envio incerto.
 - `messages_update` atualiza entrega/leitura sem regredir `READ`. Recibos recebidos antes da gravação da mensagem são reaplicados quando o envio ou eco é persistido.
 - Grupos, canais, chats identificados somente por LID, download de anexos, sincronização completa de contatos e checkout por UAZAPI ficam fora desta fatia. Anexos sem texto aparecem como marcadores na Inbox; legendas disponíveis são preservadas como texto. O checkout anterior continua usando Meta.
+
+## Ambientes local e publicado
+
+O painel `localhost:4173` usa o D1 local. `UAZAPI_WEBHOOK_BASE_URL` define para onde a UAZAPI envia mensagens e histórico: se apontar para `newwed.com.br`, os eventos são persistidos no D1 publicado e não aparecem na Inbox local. Para consultar conversas reais, use o Admin publicado; não copie histórico real para o banco local nem redirecione o webhook da linha ativa para um túnel de desenvolvimento.
 
 ## Validação sem serviços reais
 

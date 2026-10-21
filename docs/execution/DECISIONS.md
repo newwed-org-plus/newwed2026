@@ -165,3 +165,7 @@ Em 2026-10-21, o usuário relatou que o WhatsApp rejeitou o QR. As consultas con
 ## D-040 — Polling de status somente durante conexão
 
 Em 2026-10-21, o usuário confirmou a linha conectada e relatou o botão **Atualizar estado** sendo acionado repetidamente. A UI fazia refresh automático a cada cinco segundos sem considerar o estado. Faça uma consulta inicial ao abrir/selecionar a linha e mantenha polling somente enquanto `connecting`; pare ao conectar, desconectar ou pausar. A atualização manual permanece disponível. Não desconecte a linha nem altere o webhook.
+
+## D-041 — Importação de histórico sem Queue por mensagem
+
+Em 2026-10-21, a UAZAPI confirmou a linha conectada, mas a Inbox local estava vazia. O callback configurado apontava ao domínio publicado, enquanto `localhost:4173` usa um D1 isolado; a consulta somente de contagens encontrou 236 conversas e 9.401 mensagens no D1 publicado, contra zero local. Também havia 201 mensagens históricas pendentes após a Queue exceder o limite diário de escrita. Processe o histórico em grupos limitados diretamente no D1 e recupere eventos pendentes pelo cron, sem respostas automáticas ou cópia de dados reais para o D1 local.
