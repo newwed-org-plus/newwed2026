@@ -143,6 +143,6 @@ Onda 16 publicou o receptor UAZAPI e o consumidor exclusivo de recebimento; gate
 ## Ondas 19–20
 
 - 19 encerrou o polling depois da conexão; commits `5cdff96` e `c43faa6`, gates locais aprovados em `checkpoints/CP-19.md`.
-- 20 confirmou que `localhost:4173` tem D1 vazio e que o callback vai ao domínio publicado; D1 publicado tem 236 conversas/9.401 mensagens para a linha.
-- 201 mensagens históricas estavam pendentes após limite diário de escrita da Queue; implementação em lotes D1 e recuperação pelo cron validada localmente, sem migration ou deploy.
-- Gates da onda 20 aprovados: tipos Cloudflare, lint, typecheck, 92 unitários, 34 Workers, build e 53 visuais; auditoria mantém 9 alertas altos preexistentes. Evidências em `checkpoints/CP-20.md`.
+- 20 confirmou que `localhost:4173` usa D1 local vazio e que o callback vai ao domínio publicado; D1 publicado tinha 236 conversas/9.401 mensagens para a linha.
+- Importação em lotes de dez e recuperação pelo cron validadas localmente e publicadas em `35f48c1`; Worker `new-wed-uazapi-receiver` versão `b06cb9e7-72ac-4c71-b15a-cc612327dba6`. A Queue e o D1 Free atingiram limites diários de escrita; a recuperação do histórico retoma após reset às 00:00 UTC (21:00 Recife). Última contagem agregada: 211 mensagens históricas e 139 lotes pendentes.
+- Gates da onda 20 aprovados: tipos Cloudflare, lint, typecheck, 92 unitários, 34 Workers, build e 53 visuais; auditoria mantém 9 alertas altos preexistentes. Nenhuma mensagem ou QR foi lido; nenhuma desconexão ou mensagem WhatsApp ocorreu. Evidências em `checkpoints/CP-20.md`.
