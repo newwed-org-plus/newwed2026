@@ -145,5 +145,5 @@ Onda 16 publicou o receptor UAZAPI e o consumidor exclusivo de recebimento; gate
 
 - QR idêntico em consultas consecutivas e estado posterior `disconnected` explicaram a falta de regeneração na UI; o texto anterior prometia atualização contínua que o provider não entregou.
 - Ação **Gerar novo QR Code** disponível em `connecting`: lock por linha, exige estado pendente, desconecta, confirma `disconnected` e inicia outro QR. Não há reinício automático.
-- Sem migration. `cf:types`, lint, typecheck, 92 unitários, 32 Workers, build, 52 visuais e verificações de QR passaram. `npm audit --omit=dev` mantém 9 alertas altos preexistentes.
+- Commit `a883168`; sem migration. `cf:types`, lint, typecheck, 92 unitários, 32 Workers, build, 52 visuais e verificações de QR passaram. `npm audit --omit=dev` mantém 9 alertas altos preexistentes.
 - Painel local em `http://localhost:4173/admin`; QR atual pendente de leitura pelo usuário. Webhook configurado para o callback existente; sem leitura/decodificação do QR ou mensagens de saída. Checkpoint: `checkpoints/CP-18.md`.
