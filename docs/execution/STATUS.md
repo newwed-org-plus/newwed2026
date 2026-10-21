@@ -144,5 +144,5 @@ Onda 16 publicou o receptor UAZAPI e o consumidor exclusivo de recebimento; gate
 
 - O usuário confirmou a linha conectada e relatou consultas repetidas. A causa é polling incondicional a cada cinco segundos.
 - Implementado refresh inicial e polling automático somente enquanto `connecting`; a ação manual permanece disponível. Sem desconexão, migration ou deploy.
-- Gates: tipos Cloudflare, lint, typecheck, 92 testes unitários, build, regressão UAZAPI (6) e 53 cenários visuais aprovados.
+- Commit `5cdff96`; gates: tipos Cloudflare, lint, typecheck, 92 testes unitários, build, regressão UAZAPI (6) e 53 cenários visuais aprovados.
 - `npm audit --omit=dev` mantém os 9 alertas altos preexistentes; lockfile não alterado. Evidências em `checkpoints/CP-19.md`.
