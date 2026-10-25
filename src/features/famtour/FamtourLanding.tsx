@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { SiteShell } from "@/features/famtour/components/SiteShell";
 import { HeroSplit } from "@/features/famtour/components/HeroSplit";
@@ -59,16 +59,22 @@ export function FamtourLanding() {
     famtourNome: string;
   } | null>(null);
 
-  const scrollTo = (id: string) => {
+  const scrollTo = useCallback((id: string) => {
     if (typeof document !== "undefined") {
       const el = document.getElementById(id);
-      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      el?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
     }
-  };
+  },[]);
+
+  useEffect(()=>{
+    if(!edicao)return;
+    const frame=requestAnimationFrame(()=>scrollTo("form"));
+    return()=>cancelAnimationFrame(frame);
+  },[edicao,scrollTo]);
 
   const handleRequestInformation = (slug: string) => {
-    router.push(`/famtour?edicao=${encodeURIComponent(slug)}#form`);
-    setTimeout(() => scrollTo("form"), 50);
+    router.push(`/famtour?edicao=${encodeURIComponent(slug)}#form`,{scroll:false});
+    scrollTo("form");
   };
 
   const handleViewEdition = (slug: string) => {
