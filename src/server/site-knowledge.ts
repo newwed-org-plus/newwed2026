@@ -54,6 +54,8 @@ export function publishedProductAnswer(message:string,focus=resolveProductFocus(
   if(price||dates||stock)return verified('Você quer informações de qual projeto: Feira Tendência, FAMTOUR/Destinos, Guia ou Workshop? No FAMTOUR, pode informar também o destino.');
   return null;
  }
+ const requestedYears=Array.from(text.matchAll(/\b20\d{2}\b/g),m=>m[0]);const years=requestedYears.length?requestedYears:focus.requestedYears??[];
+ if(focus.projects.includes('destinos')&&years.some(year=>!siteKnowledge.publishedEditions.some(e=>e.startsAt.startsWith(year)))&&!/edicoes anteriores/.test(text))return verified(`Os preços e períodos anunciados nesta base são das edições FAMTOUR ${[...new Set(siteKnowledge.publishedEditions.map(e=>e.startsAt.slice(0,4)))].join(' e ')}. Não há tabela pública confirmada aqui para o ano solicitado; não vou aplicar valores de outra edição. A equipe precisa confirmar.`);
  if(focus.projects.some(p=>p!=='destinos')){
   if(price)return verified(focus.projects.flatMap(p=>p==='destinos'?siteKnowledge.publishedEditions.map(e=>`${e.name}: ${e.publishedCash} à vista ou ${e.publishedInstallment}.`):[`${homeProjects.find(x=>x.id===p)?.name??p}: investimento sob consulta; não há preço publicado.`]).join('\n')+'\nValores de referência publicados; disponibilidade, validade e reserva dependem da equipe.');
   if(dates||stock||policy)return verified('Não há datas, vagas restantes ou condições comerciais publicadas para essa solicitação. A equipe precisa confirmar esses detalhes; não posso garantir valores ou disponibilidade.');
@@ -61,8 +63,6 @@ export function publishedProductAnswer(message:string,focus=resolveProductFocus(
  }
  const editions=siteKnowledge.publishedEditions.filter(e=>!focus.editionSlugs.length||focus.editionSlugs.includes(e.slug));
  if(/edicoes anteriores/.test(text))return verified('Galerias de edições anteriores: '+famtourInformation.previousEditions.map(e=>`${e.destino} (${e.ano})`).join(', ')+'. São registros de edições passadas; não representam ofertas ou preços atuais.');
- const requestedYears=Array.from(text.matchAll(/\b20\d{2}\b/g),m=>m[0]);
- if(requestedYears.some(year=>!editions.some(e=>e.startsAt.startsWith(year))))return verified('Os preços e períodos anunciados nesta base são das edições FAMTOUR 2027. Não há tabela pública confirmada aqui para o ano solicitado; não vou aplicar valores de outra edição. A equipe precisa confirmar.');
  if(/inscri/.test(text)&&!price)return verified(`${famtourInformation.registration.interest}\n${famtourInformation.registration.detailPage}\nVocê pode solicitar informações em /famtour#form.`);
  const lines:string[]=[];
  if(price)lines.push(...editions.map(e=>`${e.name}: à vista ${e.publishedCash} ou ${e.publishedInstallment}${dates?` · ${e.period}`:''}.`));

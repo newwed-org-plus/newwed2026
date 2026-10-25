@@ -1,18 +1,20 @@
 import {publishedFamtourEditions} from '@/content/famtour-editions';
 
 export const normalizeKnowledgeText=(value:string)=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-export type ProductFocus={projects:string[];editionSlugs:string[];source:'current-message'|'conversation-history'|'none';ambiguous:boolean;cleared?:true;incomplete?:true};
+export type ProductFocus={projects:string[];editionSlugs:string[];source:'current-message'|'conversation-history'|'none';ambiguous:boolean;requestedYears?:string[];cleared?:true;incomplete?:true};
 const empty=():ProductFocus=>({projects:[],editionSlugs:[],source:'none',ambiguous:false});
 function isProductFocus(raw:unknown):raw is ProductFocus{
  if(!raw||typeof raw!=='object')return false;const value=raw as Partial<ProductFocus>;
  return Array.isArray(value.projects)&&value.projects.length<=4&&value.projects.every(p=>['feira','destinos','guia','workshop'].includes(p))
   &&Array.isArray(value.editionSlugs)&&value.editionSlugs.length<=4&&value.editionSlugs.every(s=>publishedFamtourEditions.some(e=>e.slug===s))
-  &&(!value.editionSlugs.length||value.projects.includes('destinos'));
+  &&(!value.editionSlugs.length||value.projects.includes('destinos'))
+  &&(value.requestedYears===undefined||Array.isArray(value.requestedYears)&&value.requestedYears.length<=4&&value.requestedYears.every(year=>typeof year==='string'&&/^20\d{2}$/.test(year)));
 }
 export function focusFromMessage(message:string):ProductFocus{
  const text=normalizeKnowledgeText(message);
+ const years=Array.from(new Set(text.match(/\b20\d{2}\b/g)??[])).slice(0,4);const requestedYears=years.length?{requestedYears:years}:{};
  if(/ignore|instruc|prompt|system|finja|finge/.test(text))return empty();
- if(/quais? (?:os |sao os )?(?:produtos|servicos|projetos)|o que (?:voce|voces|vcs).*(?:vende|oferece)|todos (?:os )?(?:produtos|servicos|projetos)/.test(text))return {projects:['feira','destinos','guia','workshop'],editionSlugs:[],source:'current-message',ambiguous:true};
+ if(/quais? (?:os |sao os )?(?:produtos|servicos|projetos)|o que (?:voce|voces|vcs).*(?:vende|oferece)|todos (?:os )?(?:produtos|servicos|projetos)/.test(text))return {projects:['feira','destinos','guia','workshop'],editionSlugs:[],source:'current-message',ambiguous:true,...requestedYears};
  const projects=['feira','guia','workshop'].filter(key=>new RegExp(`(?:^|[^a-z-])${key}(?:$|[^a-z])`).test(text));
  const positive=text.replace(/(?:nao (?:quero|tenho interesse (?:em|no))|esqueca|desconsidere)\s+(?:o |a )?(?:famtour\s+)?(?:de\s+)?(?:fernando de noronha|noronha|alagoas|ceara|rio grande do norte|rn|feira|guia|workshop|famtour|destinos)/g,'');
  const editionSlugs=publishedFamtourEditions.filter(e=>{
@@ -22,17 +24,21 @@ export function focusFromMessage(message:string):ProductFocus{
  const filtered=projects.filter(key=>new RegExp(`(?:^|[^a-z-])${key}(?:$|[^a-z])`).test(positive));
  if(editionSlugs.length||/\bfamtour\b|\bdestinos\b/.test(positive))filtered.push('destinos');
  if(!filtered.length&&(positive!==text||/mudar de assunto|esqueca (?:isso|o destino|esse destino|o produto)/.test(text)))return {...empty(),cleared:true};
- return {projects:filtered,editionSlugs,source:filtered.length?'current-message':'none',ambiguous:filtered.length>1||editionSlugs.length>1};
+ return {projects:filtered,editionSlugs,source:filtered.length?'current-message':'none',ambiguous:filtered.length>1||editionSlugs.length>1,...requestedYears};
 }
 export function resolveProductFocus(message:string,memory?:ProductFocus|null):ProductFocus{
  const current=focusFromMessage(message);
  if(current.cleared)return current;
  if(current.projects.length){
   // A general FAMTOUR follow-up retains the selected edition. Explicit lists do not.
-  if(current.projects.length===1&&current.projects[0]==='destinos'&&!current.editionSlugs.length&&!/todos|todas|quais|edicoes|destinos/.test(normalizeKnowledgeText(message))&&memory?.projects.length===1&&memory.projects[0]==='destinos')return {...current,editionSlugs:memory.editionSlugs};
+  if(current.projects.length===1&&current.projects[0]==='destinos'&&memory?.projects.length===1&&memory.projects[0]==='destinos'){
+   const sameEdition=JSON.stringify(current.editionSlugs)===JSON.stringify(memory.editionSlugs);
+   if(!current.editionSlugs.length&&!/todos|todas|quais|edicoes|destinos/.test(normalizeKnowledgeText(message)))return {...current,editionSlugs:memory.editionSlugs,requestedYears:current.requestedYears??memory.requestedYears};
+   if(sameEdition)return {...current,requestedYears:current.requestedYears??memory.requestedYears};
+  }
   return current;
  }
- return memory?.projects.length?{...memory,source:'conversation-history'}:empty();
+ return memory?.projects.length?{...memory,source:'conversation-history',requestedYears:current.requestedYears??memory.requestedYears}:empty();
 }
 export function productFocusForQuestion(message:string,memory?:ProductFocus|null):ProductFocus{
  const focus=resolveProductFocus(message,memory);const text=normalizeKnowledgeText(message);
@@ -66,7 +72,7 @@ export async function loadProductMemory(env:Pick<Env,'DB'>,conversationId:string
   AND (lower(body) LIKE '%famtour%' OR lower(body) LIKE '%destinos%' OR lower(body) LIKE '%noronha%' OR lower(body) LIKE '%alagoas%'
    OR lower(body) LIKE '%cear%' OR lower(body) LIKE '%rio grande do norte%' OR lower(body) LIKE '% rn%' OR lower(body)='rn'
    OR lower(body) LIKE '%feira%' OR lower(body) LIKE '%guia%' OR lower(body) LIKE '%workshop%' OR lower(body) LIKE '%assunto%' OR lower(body) LIKE '%esque%' OR lower(body) LIKE '%desconsidere%'
-   OR lower(body) LIKE '%produtos%' OR lower(body) LIKE '%servi%' OR lower(body) LIKE '%projetos%')
+   OR lower(body) LIKE '%produtos%' OR lower(body) LIKE '%servi%' OR lower(body) LIKE '%projetos%' OR body GLOB '*20[0-9][0-9]*')
   ORDER BY created_at,id LIMIT 129`).bind(conversationId,afterAt,afterAt,afterId,latest.created_at,latest.created_at,latest.id).all<{id:string;created_at:string;body:string;direction:string}>();
   const more=rows.results.length>128;const page=rows.results.slice(0,128);const focus=productFocusFromHistory(page,initial);const cursor=more?page.at(-1)!:latest;
   const changed=await env.DB.prepare(`INSERT INTO conversation_product_memory(conversation_id,focus_json,last_message_at,last_message_id,updated_at)
@@ -83,5 +89,5 @@ export function productFocusForContext(message:string,context:unknown):ProductFo
  const raw=data.productMemory as Partial<ProductFocus>|undefined;
  const valid=isProductFocus(raw);
  const recent=Array.isArray(data.recentMessages)?data.recentMessages.filter((row):row is {body:string;direction?:string}=>row&&typeof row==='object'&&typeof row.body==='string'):[];
- return productFocusForQuestion(message,valid?{projects:raw.projects!,editionSlugs:raw.editionSlugs!,ambiguous:raw.projects!.length>1||raw.editionSlugs!.length>1,source:'conversation-history',...(raw.cleared?{cleared:true as const}:{})}:productFocusFromHistory(recent));
+ return productFocusForQuestion(message,valid?{projects:raw.projects!,editionSlugs:raw.editionSlugs!,requestedYears:raw.requestedYears,ambiguous:raw.projects!.length>1||raw.editionSlugs!.length>1,source:'conversation-history',...(raw.cleared?{cleared:true as const}:{})}:productFocusFromHistory(recent));
 }

@@ -49,6 +49,12 @@ describe('conhecimento comercial com continuidade',()=>{
   const r=verifiedSiteAnswer('Quais edições anteriores do FAMTOUR?');expect(r?.reply).toContain('2026');expect(r?.reply).toContain('não representam ofertas');
  });
  it('não aplica preços de 2027 à edição histórica ou a outro ano',()=>{const r=verifiedSiteAnswer('Qual o preço do FAMTOUR Noronha 2026?');expect(r?.reply).toContain('não vou aplicar valores de outra edição');expect(r?.reply).not.toContain('R$');});
+ it('lembra o ano do assunto e só muda a referência quando o cliente corrige',()=>{
+  const previous=productFocusFromHistory([{body:'Quero informações do FAMTOUR Noronha 2026',direction:'IN'}]);
+  expect(verifiedSiteAnswer('E o valor?',previous)?.reply).not.toContain('R$');
+  const corrected=productFocusFromHistory([{body:'Noronha 2026',direction:'IN'},{body:'Agora quero 2027',direction:'IN'}]);
+  expect(verifiedSiteAnswer('E o valor?',corrected)?.reply).toContain('R$ 7.997,00');
+ });
 });
 describe('bloqueio de afirmações comerciais sem fonte',()=>{
  it('remove preços privados do contexto e impede que instrução antiga sobrescreva a tabela pública',async()=>{

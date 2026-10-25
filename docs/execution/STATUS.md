@@ -102,7 +102,7 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Memória D1 guarda apenas projetos/destinos e cursor/revisão por conversa; IN define assunto, OUT não. Correção, mudança e esquecimento são preservados. Reconstrução limitada e retomável adia a resposta até concluir, sem inventar seleção.
 - FAQ comercial e prévia utilizam fonte direta sem geração. Prompt retira preços privados; guard bloqueia valores/parcelas/juros/desconto/datas/estoque/promessas sem fonte. Resposta automática registra versão e hash da base.
 - Gestão pode consultar preços, formatos e pendências de informação em Atendentes → Ver conhecimento dos produtos. API somente leitura, sem dados de clientes. Prévia gratuita real comparou corretamente formatos de Guia e Workshop; sem novo WhatsApp.
-- Verificações locais: 160 unitários, 82 Workers, 69 visuais, D1/recuperação, tipos/lint/build, auditoria zero e preflights. CP-30. Stack local/túnel preservados, automação continua restrita ao contato autorizado.
+- Verificações locais: 161 unitários, 83 Workers, 69 visuais, D1/recuperação, tipos/lint/build, auditoria zero e preflights. CP-30. Stack local/túnel preservados, automação continua restrita ao contato autorizado.
 
 ## Bloqueios externos
 

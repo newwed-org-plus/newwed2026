@@ -9,7 +9,7 @@ function moneyCents(value:string){
 export function guardPublishedFacts(result:AgentResult,message:string,context:unknown):AgentResult{
  const focus=productFocusForContext(message,context);const answer=normalizeKnowledgeText(result.reply);
  const editions=siteKnowledge.publishedEditions.filter(e=>!focus.editionSlugs.length||focus.editionSlugs.includes(e.slug));
- const canQuoteFamtour=focus.projects.includes('destinos');
+ const canQuoteFamtour=focus.projects.includes('destinos')&&!(focus.requestedYears??[]).some(year=>!editions.some(e=>e.startsAt.startsWith(year)));
  const allowed=new Set(canQuoteFamtour?editions.flatMap(e=>[e.publishedCashCents,e.publishedInstallmentCents]):[]);
  const matches=Array.from(result.reply.matchAll(/R\$\s*([\d.,]+)|(\d[\d.,]*)\s*reais\b|\b\d{1,2}\s*(?:x|parcelas)(?:\s+de)?\s*(?:R\$\s*)?([\d.,]+)/gi));
  const unknownMoney=matches.some(match=>!allowed.has(moneyCents(match[1]??match[2]??match[3])));

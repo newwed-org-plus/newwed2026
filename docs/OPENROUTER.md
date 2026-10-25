@@ -67,3 +67,5 @@ Somente preços publicados podem ser citados. Contexto editável e histórico n�
 Em **Atendentes → Ver conhecimento dos produtos**, admin/gestor consulta cobertura, preços, fontes e informações sob consulta. `GET /api/admin/knowledge` é somente leitura e não expõe dados de clientes, linhas ou segredos. O fingerprint SHA-256 da base identifica a fonte usada no payload da resposta automática. Alterações no conteúdo compartilhado são refletidas sem reescrever os contextos individuais ou depender do modelo escolhido.
 
 Perguntas não publicadas devem indicar necessidade de confirmação; não dizer que itens estão excluídos só por não haver especificação. Não cadastrar valores fictícios nem enviar testes WhatsApp para validar memória. Testes Workers usam dados sintéticos e demonstram continuidade, isolamento, concorrência, reconstrução e geração adiada. A prévia real do operador não consulta histórico de clientes nem envia mensagens.
+
+O ano solicitado acompanha o assunto persistido. Valores de uma edição atual não são usados como preço de edição histórica ou de outro ano; o cliente pode corrigir o ano explicitamente.

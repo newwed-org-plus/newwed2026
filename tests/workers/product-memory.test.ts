@@ -66,6 +66,11 @@ describe('conhecimento e memória no D1',()=>{
   await env.DB.prepare("INSERT INTO messages(id,conversation_id,direction,type,body,status,created_at) VALUES('change','c','IN','text','Não quero Noronha, quero Ceará','RECEIVED','2026-03-01T00:00:00Z')").run();expect((await loadProductMemory(runtime,'c')).editionSlugs).toEqual(['famtour-ceara-agosto-2027']);
   await env.DB.prepare("INSERT INTO messages(id,conversation_id,direction,type,body,status,created_at) VALUES('clear','c','IN','text','Esqueça esse destino','RECEIVED','2026-03-02T00:00:00Z')").run();expect((await loadProductMemory(runtime,'c')).projects).toEqual([]);expect((await loadProductMemory({...runtime},'c')).projects).toEqual([]);
  });
+ it('ano e sua correção persistem entre perguntas e runtimes',async()=>{
+  await setup();await env.DB.prepare("UPDATE messages SET body='Noronha 2026' WHERE id='selection'").run();expect((await loadProductMemory(runtime,'c')).requestedYears).toEqual(['2026']);
+  expect((await loadProductMemory({...runtime},'c')).requestedYears).toEqual(['2026']);
+  await env.DB.prepare("INSERT INTO messages(id,conversation_id,direction,type,body,status,created_at) VALUES('year','c','IN','text','Agora quero 2027','RECEIVED','2026-03-01T00:00:00Z')").run();expect((await loadProductMemory(runtime,'c')).requestedYears).toEqual(['2027']);
+ });
  it('prévia de preço publicado ou desconhecido continua funcionando mesmo com provider limitado',async()=>{
   await setup();const provider=vi.fn(async()=>{throw new Error('No provider available');});
   expect((await previewLineAgent(runtime,'agent','Qual valor do FAMTOUR Alagoas?',provider)).reply).toContain('R$ 7.697,00');
