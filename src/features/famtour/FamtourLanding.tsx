@@ -16,6 +16,7 @@ import { PreInscricaoForm } from "@/features/famtour/components/PreInscricaoForm
 import { SuccessScreen } from "@/features/famtour/components/SuccessScreen";
 import { FAMTOUR_EDITIONS, toLegacyFamTour } from "@/features/famtour/lib/famtours";
 import type { PreInscricaoData } from "@/features/famtour/lib/schemas/preInscricao";
+import {famtourInformation} from '@/content/famtour-information';
 
 function Divisor({ children }: { children: React.ReactNode }) {
   return (
@@ -129,10 +130,7 @@ export function FamtourLanding() {
                   textAlign: "center",
                 }}
               >
-                O Famtour New Wed é uma experiência fechada e curada para
-                assessores e profissionais de casamentos que querem entrar no
-                mercado de Destination Wedding com autoridade, guiada por quem
-                tem autoridade no Nordeste.
+                {famtourInformation.landingDescription}
               </p>
               <button
                 type="button"

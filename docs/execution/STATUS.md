@@ -16,7 +16,7 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Ondas 0–16: funcionalidades e publicações em CP-00 a CP-16.
 - Ondas 17–20: parser de conexão, renovação explícita de QR, fim do polling conectado e recuperação de histórico; CP-17 a CP-20.
 - Último receptor publicado: versão `b06cb9e7-72ac-4c71-b15a-cc612327dba6`.
-- Migrations remotas até 0008; locais até 0016; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
+- Migrations remotas até 0008; locais até 0017; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
 - Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`, perfil Wrangler `newwed-production`.
 
 ## Onda 21 concluída
@@ -94,6 +94,15 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Corrida entre pull de cache e callback corrigida: somente o envelope ao vivo autenticado pode promover a mesma mensagem já importada. Histórico isolado nunca responde.
 - Teste real autorizado: pergunta de produtos retomada uma vez, resposta READ; nova pergunta sobre Feira recebeu resposta DELIVERED. Conversa permanece AGENT. Prévia gratuita real aprovada sobre quatro projetos, formatos, combos e datas; dados privados somente em `.local-runtime`.
 - Gate aprovado: 126 unitários, 76 Workers (após correção final), 66 visuais, D1/recuperação, tipos/lint, build, auditoria zero e preflights. CI da implementação `756061f` aprovado. Ajustes finais: rotação persistida entre ciclos e indisponibilidade de endpoint, com prévia comercial real aprovada.
+
+## Onda 30 — Conhecimento público e memória de assunto
+
+- Branch `codex/wave-30-product-memory`, base `4db2426`; CP-30. Migration 0017 somente local, aditiva; sem deploy, merge ou contratação.
+- Usuário determinou usar somente preços publicados. Quatro edições FAMTOUR com valores à vista/12 parcelas; Feira, Guia e Workshop sob consulta. D-050. Conteúdo comum inclui formulários e galerias anteriores, sem ofertas legadas.
+- Memória D1 guarda apenas projetos/destinos e cursor/revisão por conversa; IN define assunto, OUT não. Correção, mudança e esquecimento são preservados. Reconstrução limitada e retomável adia a resposta até concluir, sem inventar seleção.
+- FAQ comercial e prévia utilizam fonte direta sem geração. Prompt retira preços privados; guard bloqueia valores/parcelas/juros/desconto/datas/estoque/promessas sem fonte. Resposta automática registra versão e hash da base.
+- Gestão pode consultar preços, formatos e pendências de informação em Atendentes → Ver conhecimento dos produtos. API somente leitura, sem dados de clientes. Prévia gratuita real comparou corretamente formatos de Guia e Workshop; sem novo WhatsApp.
+- Verificações locais: 161 unitários, 83 Workers, 69 visuais, D1/recuperação, tipos/lint/build, auditoria zero e preflights. CP-30. Stack local/túnel preservados, automação continua restrita ao contato autorizado.
 
 ## Bloqueios externos
 

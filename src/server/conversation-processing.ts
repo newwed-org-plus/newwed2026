@@ -1,4 +1,6 @@
-import {verifiedSiteAnswer} from './site-knowledge';
+import {verifiedSiteAnswer,siteKnowledge} from './site-knowledge';
+import {sha256} from './normalization';
+import {loadProductMemory} from './product-memory';
 import {OpenRouterDeferred,recoveryEnabled} from './ai-availability';
 import {uncertainSend} from "./send-outcome";
 import {publishOutbox} from "./outbox";
@@ -51,7 +53,7 @@ async function storeAndSendReply(env: ConversationWorkerEnv,input: {
   const startedAt = new Date().toISOString();
   const inserted=await env.DB.prepare(`INSERT OR IGNORE INTO messages (id,conversation_id,in_reply_to,direction,type,body,status,payload_json,request_id,created_at)
     VALUES (?,?,?,'OUT','text',?,'SENDING',?,?,?)`)
-    .bind(messageId,input.conversation.id,input.inReplyTo,input.reply.reply,JSON.stringify({ source:"agent",confidence:input.reply.confidence,handoff:input.reply.handoff,reason:input.reply.reason }),input.conversation.request_id,startedAt).run();
+    .bind(messageId,input.conversation.id,input.inReplyTo,input.reply.reply,JSON.stringify({ source:"agent",confidence:input.reply.confidence,handoff:input.reply.handoff,reason:input.reply.reason,knowledge:{version:siteKnowledge.version,fingerprint:await sha256(JSON.stringify(siteKnowledge))} }),input.conversation.request_id,startedAt).run();
   if(!inserted.meta.changes){
     const prior=await env.DB.prepare('SELECT id,status FROM messages WHERE conversation_id=? AND in_reply_to=?').bind(input.conversation.id,input.inReplyTo).first<{id:string;status:string}>();
     await env.DB.prepare('UPDATE conversations SET agent_processing_token=NULL,agent_processing_started_at=NULL WHERE id=? AND agent_processing_token=?').bind(input.conversation.id,input.token).run();
@@ -195,9 +197,11 @@ export async function processIncomingWhatsApp(env: ConversationWorkerEnv,externa
     reply = { reply:"Entendi. Vou transferir seu atendimento para uma pessoa da equipe New Wed.",confidence:1,handoff:true,reason:"Intenção sensível detectada pela política local" };
   } else {
     try {
-      const known=provider==='uazapi'&&recoveryEnabled(env)?verifiedSiteAnswer(text):null;
+      const productMemory=provider==='uazapi'&&recoveryEnabled(env)?await loadProductMemory(env,conversation.id):undefined;
+      if(productMemory?.incomplete)throw new OpenRouterDeferred(new Date(Date.now()+5000).toISOString(),'local','PRODUCT_MEMORY_RECOVERY');
+      const known=provider==='uazapi'&&recoveryEnabled(env)?verifiedSiteAnswer(text,productMemory):null;
       reply = known??(lineAgent
-        ? await answerWithOpenRouter(env,{...lineAgent,message:text,context:await loadAgentContext(env,{leadId:conversation.lead_id,conversationId:conversation.id})},dependencies.openrouterFetcher)
+        ? await answerWithOpenRouter(env,{...lineAgent,message:text,context:await loadAgentContext(env,{leadId:conversation.lead_id,conversationId:conversation.id,productMemory})},dependencies.openrouterFetcher)
         : await answerWithAgent(env,{ message:text,leadId:conversation.lead_id,conversationId:conversation.id },dependencies.openaiFetcher));
     } catch (error) {
       if(error instanceof OpenRouterDeferred&&recoveryEnabled(env)){
