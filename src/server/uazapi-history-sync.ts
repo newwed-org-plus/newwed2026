@@ -1,3 +1,4 @@
+import {normalizeDeliveryStatus,observeUazapiDelivery} from './uazapi-delivery';
 import {z} from 'zod';
 import {HttpError} from './http';
 import {configuredInstance,configuredInstances,uazapiRequest,type UazapiEnv} from './integrations/uazapi';
@@ -47,6 +48,7 @@ export async function processPendingHistorySyncs(env:HistoryEnv,fetcher:typeof f
     const externalId=`message:${normalized.event.id}`;const timestamp=new Date().toISOString();
     await env.DB.prepare("INSERT OR IGNORE INTO webhook_events(id,provider,external_id,event_type,payload_json,request_id,created_at) VALUES (?,'uazapi',?,'uazapi.incoming',?,?,?)").bind(`pull:${normalized.event.id}`,externalId,JSON.stringify(normalized),job.id,timestamp).run();
     await processIncomingWhatsApp(env,externalId,{},'uazapi','receive-only');
+    const status=parsed.success&&normalizeDeliveryStatus(parsed.data.status);if(normalized.event.fromMe&&status)await observeUazapiDelivery(env,job.line_id,normalized.event.id,status,timestamp);
    }
    const more=page.pagination?.hasMore??page.hasMore??page.messages.length===limit;
    const offset=page.pagination?.nextOffset??page.nextOffset??job.provider_offset+page.messages.length;
@@ -75,6 +77,7 @@ export async function reconcileRecentLocalMessages(env:HistoryEnv,fetcher:typeof
    const externalId=`message:${normalized.event.id}`;const now=new Date().toISOString();
    const created=await env.DB.prepare("INSERT OR IGNORE INTO webhook_events(id,provider,external_id,event_type,payload_json,created_at) VALUES (?,'uazapi',?,'uazapi.incoming',?,?)").bind(`pull:${normalized.event.id}`,externalId,JSON.stringify(normalized),now).run();
    if(created.meta.changes)await processIncomingWhatsApp(env,externalId,{},'uazapi','receive-only');
+   const status=parsed.success&&normalizeDeliveryStatus(parsed.data.status);if(normalized.event.fromMe&&status)await observeUazapiDelivery(env,line.id,normalized.event.id,status,now);
   }
  }
 }

@@ -23,6 +23,7 @@
     "node_modules",
     ".vinext",
     ".wrangler",
+    ".local-runtime",
     "dist",
     "playwright-report",
     "test-results"

@@ -15,6 +15,6 @@ describe('configuração local isolada',()=>{
   expect(await restoreOwnedWebhook([{id:'hook',url:'https://changed.test'}],original,owned,update)).toBe(false);expect(update).not.toHaveBeenCalled();expect(await restoreOwnedWebhook([{id:'hook',url:owned}],original,owned,update)).toBe(true);expect(update).toHaveBeenCalledWith(original);
  });
  it('normaliza segundos e bloqueia destinatário vazio no teste local',()=>{
-  const value=normalizeUazapiMessage('vendas',{messageid:'OLD',chatid:'5581999999999@s.whatsapp.net',messageTimestamp:1700000000},true);expect(value?.event.createdAt).toBe(new Date(1700000000000).toISOString());expect(localRecipientAllowed({ENVIRONMENT:'development',LOCAL_TEST_MODE:'true'},'')).toBe(false);
+  const value=normalizeUazapiMessage('vendas',{messageid:'OLD',chatid:'5581999999999@s.whatsapp.net',messageTimestamp:1700000000},true);expect(value?.event.createdAt).toBe(new Date(1700000000000).toISOString());expect(localRecipientAllowed({ENVIRONMENT:'development',LOCAL_TEST_MODE:'true'},'')).toBe(false);expect(localRecipientAllowed({ENVIRONMENT:'development',LOCAL_TEST_MODE:'true',LOCAL_WHATSAPP_ALLOWED_RECIPIENTS:'5581999999999'},'558199999999')).toBe(true);
  });
 });

@@ -69,7 +69,8 @@
     "D1_WRITE_BUDGET": "",
     "D1_BUDGET_WINDOW": "day",
     "QUEUE_BUDGET": "",
-    "ENABLE_HISTORY_SYNC": "false"
+    "ENABLE_HISTORY_SYNC": "false",
+    "ENABLE_MESSAGE_STATUS_SYNC": "false"
   },
   "d1_databases": [
     {
@@ -133,7 +134,8 @@
         "D1_WRITE_BUDGET": "",
         "D1_BUDGET_WINDOW": "day",
         "QUEUE_BUDGET": "",
-        "ENABLE_HISTORY_SYNC": "false"
+        "ENABLE_HISTORY_SYNC": "false",
+    "ENABLE_MESSAGE_STATUS_SYNC": "false"
       },
       "d1_databases": [
         {
@@ -206,7 +208,8 @@
         "D1_WRITE_BUDGET": "",
         "D1_BUDGET_WINDOW": "day",
         "QUEUE_BUDGET": "",
-        "ENABLE_HISTORY_SYNC": "false"
+        "ENABLE_HISTORY_SYNC": "false",
+    "ENABLE_MESSAGE_STATUS_SYNC": "false"
       },
       "d1_databases": [
         {

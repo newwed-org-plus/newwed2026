@@ -194,6 +194,7 @@ export const messages = sqliteTable("messages", {
   lastError: text("last_error"),
   sendStartedAt:text("send_started_at"),
   acceptedAt: text("accepted_at"),
+  sentAt:text("sent_at"),deliveredAt:text("delivered_at"),readAt:text("read_at"),statusUpdatedAt:text("status_updated_at"),statusCheckedAt:text("status_checked_at"),statusCheckError:text("status_check_error"),
   failedAt: text("failed_at"),
   requestId: text("request_id"),
   createdAt: text("created_at").notNull(),
@@ -201,6 +202,7 @@ export const messages = sqliteTable("messages", {
   uniqueIndex("messages_external_uidx").on(table.externalId),
   index("messages_conversation_page_idx").on(table.conversationId,sql`${table.createdAt} DESC`,sql`${table.id} DESC`),
   index("messages_checkout_idx").on(table.checkoutId),
+  index("messages_delivery_poll_idx").on(table.statusCheckedAt,table.createdAt).where(sql`${table.direction}='OUT' AND ${table.status} IN ('ACCEPTED','SENT','DELIVERED','SEND_UNKNOWN')`),
 ]);
 
 export const checkouts = sqliteTable("checkouts", {

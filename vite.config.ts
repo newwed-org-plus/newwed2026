@@ -1,3 +1,4 @@
+import {localRuntimeErrors} from "./config/local-runtime-errors";
 import {prepareLocalWorkers} from "./config/local-stack";
 import { defineConfig } from "vite";
 import vinext from "vinext";
@@ -18,6 +19,7 @@ export default defineConfig(({command}) => {
         childEnvironments: ["ssr"],
       },
     }),
+    ...(local?[localRuntimeErrors()]:[]),
   ],
 };
 });

@@ -52,7 +52,7 @@ export async function startLocalTunnel() {
   let runtimeReady=false;for(let attempt=0;attempt<30&&!runtimeReady;attempt++){try{const response=await fetch('http://127.0.0.1:4173/api/local/cron',{method:'POST',headers:{'x-local-cron-token':env.LOCAL_CRON_TOKEN??''},signal:AbortSignal.timeout(15000)});const result=await response.json() as {inboundHost?:string};runtimeReady=response.ok&&result.inboundHost===new URL(origin).hostname;}catch{/* Local runtime can be restarting. */}if(!runtimeReady)await new Promise(resolve=>setTimeout(resolve,500));}
   if(!runtimeReady)throw new Error('Runtime local ainda não aplicou o novo destino.');
   stage='ativação do callback';
-  await provider('POST',{...project(current[0]),enabled:true,url:ownedUrl,events:Array.from(new Set([...(current[0].events??[]),'connection','messages','messages_update','history'])),addUrlEvents:false,addUrlTypesMessages:false});
+  await provider('POST',{...project(current[0]),enabled:true,url:ownedUrl,excludeMessages:(current[0].excludeMessages??[]).filter(value=>value!=='wasSentByApi'),events:Array.from(new Set([...(current[0].events??[]),'connection','messages','messages_update','history'])),addUrlEvents:false,addUrlTypesMessages:false});
   if(!hooks(await provider('GET')).some(hook=>hook.enabled&&hook.url===ownedUrl))throw new Error('Callback local não confirmado.');
   writeFileSync('.local-runtime/tunnel-origin',origin,{mode:0o600});console.log('Linha UAZAPI direcionada ao receptor local; callback anterior será restaurado ao encerrar.');
   tunnel.once('exit',()=>{if(!closing)void stop();});return {stop};

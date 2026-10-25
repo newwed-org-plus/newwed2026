@@ -1,3 +1,4 @@
+import {syncUazapiDelivery} from "@/server/uazapi-delivery";
 import {processPendingHistorySyncs,reconcileRecentLocalMessages} from "@/server/uazapi-history-sync";
 import {collectUsage,monitorCron} from "@/server/operations";
 import {sendPaidConfirmation} from "@/server/checkout-confirmation";
@@ -113,6 +114,7 @@ export default {
     }
     if(capabilityEnabled(workerEnv,"checkout"))await expireCheckoutReservations(workerEnv);
     await workerEnv.DB.prepare("DELETE FROM rate_limit_buckets WHERE expires_at<?").bind(now).run();
+    await syncUazapiDelivery(workerEnv);
     const imported=await processPendingHistorySyncs(workerEnv);
     if(!imported)await reconcileRecentLocalMessages(workerEnv).catch(()=>console.error(JSON.stringify({event:"local.history.reconcile.unavailable"})));
     await collectUsage(workerEnv).catch(()=>console.error(JSON.stringify({event:"operations.usage.unavailable"})));

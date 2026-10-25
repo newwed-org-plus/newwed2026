@@ -95,3 +95,12 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Smokes reais somente de leitura: callback autorizado do provider, webhook público pronto, painel não exposto e cron local funcional. Mensagem do operador não é reenviada pelo agente.
 - Checkout mobile/desktop segura o catálogo até após a escolha da conversa e simula responsáveis indisponíveis; botão deve permanecer bloqueado até haver oferta, sem depender da lista de responsáveis.
 - Histórico do celular pendente por indisponibilidade do aparelho; testes simulados não são evidência de recuperação completa nem entrega real.
+
+
+## Onda 28 — Indisponibilidade local e entrega verificável
+
+- Middleware exercitado em servidor Vite real: falha de transporte vira 503 estável sem overlay; SyntaxError continua no overlay. Cliente repete leitura limitada e não repete POST.
+- Workers: snapshot por ID/linha/contato, nono dígito brasileiro, Sent → Delivered → Read, recibo antecipado, duplicatas, falha/estado antigo sem regressão, cooldown e proteção de outra conversa na atualização de páginas antigas.
+- Entrada autorizada sem nono dígito recebe elegibilidade de IA; a allowlist não libera contatos diferentes.
+- Visuais: estados em português, entrega sem reenvio, recuperação de 503 e atualização de mensagem carregada de página antiga.
+- Teste externo aprovado pelo usuário: uma mensagem manual chegou (Delivered no provider e DELIVERED na API local). IA local usa somente modelo gratuito; teste real aguarda pergunta enviada pelo usuário, sem injeção de mensagem.
