@@ -1,49 +1,41 @@
 "use client";
-
 declare global {
-  interface Window {
-    turnstile?: {
-      render: (element: HTMLElement,options:Record<string,unknown>) => string;
-      execute: (widgetId:string) => void;
-      remove: (widgetId:string) => void;
-    };
-  }
+ interface Window {turnstile?:{render:(element:HTMLElement,options:Record<string,unknown>)=>string;execute:(id:string)=>void;reset:(id:string)=>void;remove:(id:string)=>void};}
 }
-
-let scriptPromise: Promise<void> | undefined;
-
+type Widget={id:string;resolve?: (token:string)=>void;reject?:(error:Error)=>void;timer?:ReturnType<typeof setTimeout>};
+const widgets=new WeakMap<HTMLElement,Widget>();let scriptPromise:Promise<void>|undefined;
 function loadScript() {
-  if (window.turnstile) return Promise.resolve();
-  if (!scriptPromise) scriptPromise = new Promise((resolve,reject) => {
-    const script = document.createElement("script");
-    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Não foi possível carregar a verificação de segurança."));
-    document.head.appendChild(script);
-  });
-  return scriptPromise;
+ if(window.turnstile)return Promise.resolve();
+ if(!scriptPromise)scriptPromise=new Promise<void>((resolve,reject)=>{
+  const script=document.createElement('script');script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';script.async=true;script.defer=true;
+  script.onload=()=>window.turnstile?resolve():reject(new Error('A verificação de segurança não iniciou.'));
+  script.onerror=()=>{script.remove();reject(new Error('Não foi possível carregar a verificação de segurança.'));};document.head.appendChild(script);
+ }).catch(error=>{scriptPromise=undefined;throw error;});
+ return scriptPromise;
 }
-
-export async function getTurnstileToken(): Promise<string | undefined> {
-  const config = await fetch("/api/public/config").then((response) => response.json()) as { turnstileSiteKey?: string };
-  if (!config.turnstileSiteKey) return undefined;
-  await loadScript();
-  return new Promise<string>((resolve,reject) => {
-    const element = document.createElement("div");
-    Object.assign(element.style,{ position:"fixed",left:"-9999px",top:"0",width:"1px",height:"1px",overflow:"hidden" });
-    document.body.appendChild(element);
-    let widgetId = "";
-    const cleanup = () => { if (widgetId) window.turnstile?.remove(widgetId); element.remove(); };
-    widgetId = window.turnstile!.render(element,{
-      sitekey:config.turnstileSiteKey,
-      size:"invisible",
-      execution:"execute",
-      callback:(token:string) => { cleanup();resolve(token); },
-      "error-callback":() => { cleanup();reject(new Error("Falha na verificação de segurança.")); },
-      "expired-callback":() => { cleanup();reject(new Error("A verificação expirou. Tente novamente.")); },
-    });
-    window.turnstile!.execute(widgetId);
-  });
+export function resetTurnstile(element:HTMLElement|null) {
+ const widget=element?widgets.get(element):undefined;if(!widget)return;
+ clearTimeout(widget.timer);widget.resolve=undefined;widget.reject=undefined;window.turnstile?.reset(widget.id);
+}
+export function removeTurnstile(element:HTMLElement|null) {
+ if(!element)return;const widget=widgets.get(element);if(!widget)return;
+ clearTimeout(widget.timer);widget.reject?.(new Error('Verificação interrompida.'));window.turnstile?.remove(widget.id);widgets.delete(element);
+}
+export async function getTurnstileToken(element:HTMLElement|null):Promise<string|undefined> {
+ const response=await fetch('/api/public/config');if(!response.ok)throw new Error('Não foi possível iniciar a verificação.');
+ const config=await response.json() as {turnstileSiteKey?:string;leadSubmissionEnabled:boolean};
+ if(!config.leadSubmissionEnabled)throw new Error('As inscrições estão temporariamente indisponíveis.');
+ if(!config.turnstileSiteKey)return undefined;
+ if(!element)throw new Error('A verificação de segurança não iniciou. Atualize a página.');await loadScript();
+ let widget=widgets.get(element);
+ if(!widget) {
+  const state:Widget={id:''};widgets.set(element,state);
+  const complete=(token?:string,error?:Error)=>{clearTimeout(state.timer);const resolve=state.resolve;const reject=state.reject;state.resolve=undefined;state.reject=undefined;if(error)reject?.(error);else if(token)resolve?.(token);};
+  state.id=window.turnstile!.render(element,{sitekey:config.turnstileSiteKey,action:'public_lead',size:'flexible',execution:'execute',appearance:'interaction-only',callback:(token:string)=>complete(token),'error-callback':()=>complete(undefined,new Error('Falha na verificação. Tente novamente.')),'expired-callback':()=>complete(undefined,new Error('A verificação expirou. Tente novamente.'))});widget=state;
+ }
+ resetTurnstile(element);
+ return new Promise<string>((resolve,reject)=>{
+  widget.resolve=resolve;widget.reject=reject;widget.timer=setTimeout(()=>{widget.reject=undefined;widget.resolve=undefined;reject(new Error('A verificação demorou demais. Tente novamente.'));},120000);
+  window.turnstile!.execute(widget.id);
+ });
 }

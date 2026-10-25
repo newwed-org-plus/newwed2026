@@ -40,20 +40,24 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Paginação estável, erros globais, polling serial e ambiente visível.
 - Gate aprovado: 96 unitários, 39 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-23.
 
-## Onda atual
+## Onda 24 concluída
 
 - Onda 24, `codex/wave-24-safe-commercial-processing`, migration local 0011.
 - Outbox com retenção/lease/conclusão, flags independentes e intake separado de respostas.
 - Envios incertos não são repetidos; revisão e reconciliação auditadas.
 - Gate aprovado: 96 unitários, 46 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-24.
 
-## Próximas ondas
+## Onda atual
 
-1. 22 concluída localmente; publicação remota de schema ainda não feita.
-2. 23: paginação, erros, polling e identificação de ambiente na Inbox.
-3. 24: processamento comercial durável, retenção do backlog e controles por função.
-4. 25: Turnstile, checkout/confirmacão UAZAPI e Asaas.
-5. 26: métricas, runbooks, gates finais e preparação do piloto.
+- Onda 25, `codex/wave-25-uazapi-checkout`, migration local 0012.
+- Checkout e confirmação na mesma conversa/linha UAZAPI, conciliação de envio incerto e estorno concluído terminal.
+- Formulário/Turnstile e vínculo de checkout corrigidos; legado Meta preservado.
+- Gate aprovado: 97 unitários, 49 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-25.
+- PRs 7–10 com CI aprovado; sem merge/deploy automático durante validação local.
+
+## Próxima onda
+
+- 26: métricas reais, alertas, recuperação, documentação e preparação local do piloto.
 
 ## Bloqueios externos
 

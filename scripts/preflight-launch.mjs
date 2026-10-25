@@ -37,6 +37,7 @@ for (const name of ["ENABLE_MANUAL_SEND","ENABLE_AGENT","ENABLE_CHECKOUT","ENABL
 if (enabled("ENABLE_AGENT") && receiver?.vars?.ENABLE_AGENT !== app.vars.ENABLE_AGENT) errors.push("ENABLE_AGENT: receptor divergente");
 if (enabled("ENABLE_PUBLIC_LEADS") && (!app.vars.TURNSTILE_SITE_KEY || !app.vars.TURNSTILE_HOSTNAMES)) errors.push("Turnstile: site key ou hostnames ausentes");
 if (enabled("ENABLE_CHECKOUT")) {
+  if(app.vars.CHECKOUT_CHANNEL!=="uazapi" || events?.vars?.CHECKOUT_CHANNEL!=="uazapi") errors.push("Checkout novo deve usar UAZAPI");
   const origin = target === "production" ? "https://api.asaas.com/v3" : "https://api-sandbox.asaas.com/v3";
   if (app.vars.ASAAS_API_URL !== origin || events?.vars?.ASAAS_API_URL !== origin) errors.push("Asaas: origem incompatível com ambiente");
 }

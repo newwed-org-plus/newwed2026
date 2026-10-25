@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       env.DB.prepare("SELECT * FROM pipeline_history WHERE lead_id=? ORDER BY created_at DESC").bind(id).all(),
       env.DB.prepare("SELECT a.*,u.name AS assignee_name FROM activities a LEFT JOIN users u ON u.id=a.assigned_to WHERE a.lead_id=? ORDER BY a.completed_at IS NOT NULL,a.due_at IS NULL,a.due_at,a.created_at DESC").bind(id).all(),
       env.DB.prepare("SELECT * FROM conversations WHERE lead_id=? ORDER BY updated_at DESC").bind(id).all(),
-      env.DB.prepare("SELECT * FROM checkouts WHERE lead_id=? ORDER BY created_at DESC").bind(id).all(),
+      env.DB.prepare("SELECT c.*,(SELECT status FROM messages WHERE id='confirmation:'||c.id) AS confirmation_status FROM checkouts c WHERE lead_id=? ORDER BY created_at DESC").bind(id).all(),
     ]);
     return json({ lead, answers: answers.results, history: history.results, activities: activities.results, conversations: conversations.results, checkouts: checkouts.results });
   } catch (error) { return errorResponse(error); }

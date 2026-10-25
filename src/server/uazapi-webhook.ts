@@ -1,3 +1,4 @@
+import {markCheckoutDelivered} from "./checkout-delivery";
 import { z } from "zod";
 import { configuredInstance,uazapiMessageId,type UazapiEnv } from "@/server/integrations/uazapi";
 import { ensureWhatsAppLines } from "@/server/whatsapp-lines";
@@ -129,6 +130,7 @@ export async function processUazapiStatus(env: Pick<Env,"DB">,externalId: string
     env.DB.prepare("UPDATE messages SET status=CASE WHEN status='READ' THEN 'READ' ELSE ? END WHERE external_id=? AND direction='OUT'").bind(status,messageId),
     env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=?").bind(new Date().toISOString(),stored.id),
   ]);
+  await reconcileUazapiReceipt(env,messageId);
 }
 
 export async function reconcileUazapiReceipt(env: Pick<Env,"DB">,messageId: string) {
@@ -138,4 +140,6 @@ export async function reconcileUazapiReceipt(env: Pick<Env,"DB">,messageId: stri
     WHEN status!='READ' AND EXISTS(SELECT 1 FROM webhook_events WHERE provider='uazapi' AND external_id=?) THEN 'DELIVERED'
     ELSE status END WHERE external_id=? AND direction='OUT'`)
     .bind(`status:${messageId}:READ`,`status:${messageId}:DELIVERED`,messageId).run();
+  const delivered=await env.DB.prepare("SELECT checkout_id,type FROM messages WHERE external_id=? AND status IN ('DELIVERED','READ')").bind(messageId).first<{checkout_id:string|null;type:string}>();
+  if(delivered?.checkout_id && delivered.type!=="payment_confirmation")await markCheckoutDelivered(env,delivered.checkout_id,null,"Entrega confirmada pela UAZAPI");
 }

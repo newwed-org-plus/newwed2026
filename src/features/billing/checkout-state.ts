@@ -53,4 +53,5 @@ export const checkoutSendStatusSchema = z.enum([
   "ACCEPTED",
   "DELIVERED",
   "FAILED",
+  "UNKNOWN",
 ]);

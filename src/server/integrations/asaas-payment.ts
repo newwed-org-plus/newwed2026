@@ -1,3 +1,4 @@
+import {ensurePaidConfirmation} from "../checkout-confirmation";
 import { resolveCheckoutStatus,type PaymentStatus } from "@/features/billing/payment-state";
 import { HttpError } from "@/server/http";
 import type { AsaasPaymentSnapshot } from "@/server/integrations/asaas";
@@ -23,7 +24,7 @@ type CheckoutSnapshot = {
 export function asaasStatusEvent(status: string): string {
   const normalized = status.toUpperCase();
   if (["RECEIVED","CONFIRMED","RECEIVED_IN_CASH"].includes(normalized)) return "PAYMENT_RECEIVED";
-  if (["REFUNDED","REFUND_REQUESTED","REFUND_IN_PROGRESS"].includes(normalized)) return "PAYMENT_REFUNDED";
+  if (normalized === "REFUNDED") return "PAYMENT_REFUNDED";
   if (normalized === "OVERDUE") return "PAYMENT_OVERDUE";
   if (["DELETED","CANCELLED","CREDIT_CARD_CAPTURE_REFUSED"].includes(normalized)) return "PAYMENT_DELETED";
   return `PAYMENT_${normalized}`;
@@ -86,13 +87,17 @@ export async function applyAsaasPayment(env: Pick<Env,"DB"|"EVENTS_QUEUE">,event
   if (!checkout) return { found:false as const };
   validatePayment(checkout,payment);
 
+  if(["PAYMENT_REFUND_REQUESTED","PAYMENT_REFUND_IN_PROGRESS","PAYMENT_PARTIALLY_REFUNDED"].includes(event)) {
+    await env.DB.prepare("UPDATE checkouts SET last_error_code=?,last_error='Estorno pendente ou parcial; conferir conciliação no Asaas.',last_error_at=?,updated_at=? WHERE id=? AND status!='REFUNDED'").bind(event,new Date().toISOString(),new Date().toISOString(),checkout.id).run();
+    return {found:true as const,checkoutId:checkout.id,status:checkout.status,paymentStatus:normalizeAsaasPaymentStatus(payment.status)};
+  }
   const paymentStatus = normalizeAsaasPaymentStatus(payment.status);
   const nextStatus = resolveCheckoutStatus(checkout.status,event);
   const now = new Date().toISOString();
   await paymentUpsert(env,checkout.id,paymentStatus,payment,rawPayload,now).run();
 
   if (nextStatus === checkout.status && (checkout.status === "PAID" || checkout.status === "REFUNDED")) {
-    if (checkout.status === "PAID") await ensurePaidNotification(env,checkout.id,requestId);
+    if (checkout.status === "PAID") {await ensurePaidNotification(env,checkout.id,requestId);await ensurePaidConfirmation(env,checkout.id,requestId);}
     return { found:true as const,checkoutId:checkout.id,status:checkout.status,paymentStatus };
   }
 
@@ -120,6 +125,7 @@ export async function applyAsaasPayment(env: Pick<Env,"DB"|"EVENTS_QUEUE">,event
       }
     }
     await ensurePaidNotification(env,checkout.id,requestId);
+    await ensurePaidConfirmation(env,checkout.id,requestId);
     return { found:true as const,checkoutId:checkout.id,status:"PAID" as const,paymentStatus };
   }
 

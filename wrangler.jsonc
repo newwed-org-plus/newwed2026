@@ -62,7 +62,8 @@
     "ENABLE_CHECKOUT": "false",
     "ENABLE_CONFIRMATION": "false",
     "ENABLE_EMAIL": "false",
-    "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1"
+    "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1",
+    "CHECKOUT_CHANNEL": "uazapi"
   },
   "d1_databases": [
     {
@@ -119,7 +120,8 @@
         "ENABLE_CHECKOUT": "false",
         "ENABLE_CONFIRMATION": "false",
         "ENABLE_EMAIL": "false",
-        "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1"
+        "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1",
+        "CHECKOUT_CHANNEL": "uazapi"
       },
       "d1_databases": [
         {
@@ -185,7 +187,8 @@
         "ENABLE_CHECKOUT": "false",
         "ENABLE_CONFIRMATION": "false",
         "ENABLE_EMAIL": "false",
-        "TURNSTILE_HOSTNAMES": "newwed.com.br,www.newwed.com.br"
+        "TURNSTILE_HOSTNAMES": "newwed.com.br,www.newwed.com.br",
+        "CHECKOUT_CHANNEL": "uazapi"
       },
       "d1_databases": [
         {

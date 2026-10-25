@@ -12,6 +12,6 @@ export async function adminApi<T>(url:string,init?:RequestInit):Promise<T> {
   let body:T & {message?:string;code?:string};
   try {body=await response.json();}
   catch {throw new AdminApiError('O serviço retornou uma resposta inválida. Tente novamente.',response.status);}
-  if(!response.ok)throw new AdminApiError(body.message??'Falha na solicitação.',response.status,body.code);
+  if(!response.ok)throw new AdminApiError((body&&typeof body==='object'?body.message:undefined)??'Falha na solicitação.',response.status,body&&typeof body==='object'?body.code:undefined);
   return body;
 }
