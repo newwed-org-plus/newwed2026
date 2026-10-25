@@ -71,7 +71,7 @@ export async function collectUsage(env:OperationsEnv,fetcher:typeof fetch=fetch)
  return {configured:true,cached:false};
 }
 export async function importHasHeadroom(env:Pick<Env,'DB'>) {
- return !await env.DB.prepare("SELECT resource FROM resource_usage WHERE observed_at>=? AND window_end=? AND budget>0 AND used>=budget*0.8 LIMIT 1").bind(new Date(Date.now()-1800000).toISOString(),new Date().toISOString().slice(0,10)).first();
+ return !await env.DB.prepare("SELECT resource FROM resource_usage WHERE source='cloudflare-account-graphql' AND budget>0 AND (used>=budget*0.8 OR observed_at<? OR window_end!=?) LIMIT 1").bind(new Date(Date.now()-1800000).toISOString(),new Date().toISOString().slice(0,10)).first();
 }
 
 export async function collectQueueBacklog(env:OperationsEnv,service:Service) {

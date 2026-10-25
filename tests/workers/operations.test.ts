@@ -34,7 +34,8 @@ describe('observabilidade e recuperação operacional',()=>{
   expect(await collectUsage(runtime,provider)).toMatchObject({configured:true,cached:false});
   expect(await collectUsage(runtime,provider)).toMatchObject({cached:true});expect(provider).toHaveBeenCalledTimes(1);expect(await importHasHeadroom(env)).toBe(false);
   expect(await env.DB.prepare("SELECT count(*) AS total FROM notifications WHERE type='OPERATION_ALERT'").first()).toEqual({total:1});
-  await env.DB.prepare('UPDATE resource_usage SET observed_at=?').bind('2020-01-01T00:00:00.000Z').run();expect(await importHasHeadroom(env)).toBe(true);
+  await env.DB.prepare('UPDATE resource_usage SET observed_at=?').bind('2020-01-01T00:00:00.000Z').run();expect(await importHasHeadroom(env)).toBe(false);
+  await env.DB.prepare('UPDATE resource_usage SET used=0,observed_at=?,window_end=?').bind(now(),now().slice(0,10)).run();expect(await importHasHeadroom(env)).toBe(true);
  });
  it('concilia e-mail incerto sem enviar e só então aceita nova tentativa auditada',async()=>{
   const user=await actor();await env.DB.batch([

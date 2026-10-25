@@ -13,7 +13,7 @@ O código usa UAZAPI, OpenRouter gratuito, login próprio, D1 e filas separadas.
 
 | Serviço | Configuração necessária |
 | --- | --- |
-| Web | `UAZAPI_INSTANCES` para autenticar callbacks; `UAZAPI_WEBHOOK_BASE_URL`; `TURNSTILE_SECRET_KEY` quando inscrição ativa; `ASAAS_WEBHOOK_TOKEN` para Asaas |
+| Web | `OPENROUTER_API_KEY` para catálogo/teste administrativo de atendentes; `UAZAPI_INSTANCES` para autenticar callbacks; `UAZAPI_WEBHOOK_BASE_URL`; `TURNSTILE_SECRET_KEY` quando inscrição ativa; `ASAAS_WEBHOOK_TOKEN` para Asaas |
 | Receptor UAZAPI | Sem credenciais de envio, Asaas ou IA. D1, filas e flags de agente/e-mail apenas |
 | Comercial | `UAZAPI_INSTANCES` com URL HTTPS e token de cada linha autorizada; `OPENROUTER_API_KEY`; `ASAAS_API_KEY`; binding EMAIL verificado quando ativado |
 | Métricas comercial | `CLOUDFLARE_ANALYTICS_TOKEN` restrito a Account Analytics Read e à conta correta; `CLOUDFLARE_ACCOUNT_ID`; orçamentos de leitura/escrita D1 e operações Queue |
@@ -50,3 +50,5 @@ Definir `D1_READ_BUDGET`, `D1_WRITE_BUDGET`, `QUEUE_BUDGET` e `D1_BUDGET_WINDOW=
 ## Ativação
 
 Executar preflight estático e o checklist. Ativar progressivamente recebimento → manual → IA → checkout → confirmação → e-mail. App/comercial devem ter flags iguais; receptor acompanha agente/e-mail. Revisar individualmente operações antigas retidas; nenhuma ativação libera backlog automaticamente.
+
+Importação permanece pausada se a medição de um orçamento já configurado ficar desatualizada, até uma coleta nova confirmar a disponibilidade. Uma medição antiga em 80% nunca libera importação por envelhecer. Pendências históricas legadas usam backoff crescente por tentativa.
