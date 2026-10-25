@@ -169,3 +169,15 @@ Em 2026-10-21, o usuário confirmou a linha conectada e relatou o botão **Atual
 ## D-041 — Importação de histórico sem Queue por mensagem
 
 Em 2026-10-21, a UAZAPI confirmou a linha conectada, mas a Inbox local estava vazia. O callback configurado apontava ao domínio publicado, enquanto `localhost:4173` usa um D1 isolado; a consulta somente de contagens encontrou 236 conversas e 9.401 mensagens no D1 publicado, contra zero local. Também havia 201 mensagens históricas pendentes após a Queue exceder o limite diário de escrita. Processe o histórico em grupos limitados diretamente no D1 e recupere eventos pendentes pelo cron, sem respostas automáticas ou cópia de dados reais para o D1 local.
+
+## D-042 — Conclusão comercial com UAZAPI
+
+Em 2026-10-25, o usuário aprovou atendimento, checkout e confirmação textual na mesma linha UAZAPI. Qualificação e autorização de cobrança continuam humanas. Novos checkouts vinculam conversa e linha; checkouts Meta anteriores permanecem conciliáveis. Anexos, agenda, grupos e LID ficam fora desta versão. Manter a imagem do hero até receber o vídeo.
+
+## D-043 — Liberação progressiva e proteção do backlog
+
+Envio manual, agente, checkout, confirmação e e-mail possuem controles independentes, desligados por padrão. Operações anteriores à ativação ficam retidas para revisão, nunca são disparadas só porque o consumidor foi publicado. Aceite incerto exige reconciliação e não reenvio automático. O receptor de entrada continua sem credenciais externas.
+
+## D-044 — Capacidade e validação local
+
+Otimizar e medir antes de propor capacidade paga; contratação exige orçamento aprovado. Homologação usa D1 e filas isolados, sem R2. O usuário escolheu testar localmente; Asaas sandbox e e-mail ainda precisam ser preparados. Validar código com fixtures sintéticas sem substituir testes externos por resultados simulados. Não redirecionar o webhook da linha ativa ao localhost.

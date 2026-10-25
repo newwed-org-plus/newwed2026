@@ -3,8 +3,15 @@
   "name": "new-wed-platform-events",
   "main": "workers/events.ts",
   "compatibility_date": "2026-09-11",
-  "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true, "traces": { "enabled": true } },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "observability": {
+    "enabled": true,
+    "traces": {
+      "enabled": true
+    }
+  },
   "vars": {
     "ENVIRONMENT": "development",
     "OPENAI_MODEL": "gpt-5-mini",
@@ -13,37 +20,171 @@
     "META_CHECKOUT_TEMPLATE": "checkout_famtour",
     "EMAIL_FROM": "marketing@newwed.com.br",
     "EMAIL_REPLY_TO": "marketing@newwed.com.br",
-    "EMAIL_ALLOWED_RECIPIENT_DOMAINS": "newwed.com.br,gruponewwed.com.br"
+    "EMAIL_ALLOWED_RECIPIENT_DOMAINS": "newwed.com.br,gruponewwed.com.br",
+    "ENABLE_PUBLIC_LEADS": "false",
+    "ENABLE_MANUAL_SEND": "false",
+    "ENABLE_AGENT": "false",
+    "ENABLE_CHECKOUT": "false",
+    "ENABLE_CONFIRMATION": "false",
+    "ENABLE_EMAIL": "false",
+    "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1"
   },
-  "send_email": [{
-    "name": "EMAIL",
-    "allowed_sender_addresses": ["marketing@newwed.com.br"],
-    "allowed_destination_addresses": ["marketing@newwed.com.br", "contato@gruponewwed.com.br"]
-  }],
-  "d1_databases": [{ "binding": "DB", "database_name": "new-wed-platform-development", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }],
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "allowed_sender_addresses": [
+        "marketing@newwed.com.br"
+      ],
+      "allowed_destination_addresses": [
+        "marketing@newwed.com.br",
+        "contato@gruponewwed.com.br"
+      ]
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "new-wed-platform-development",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
   "queues": {
-    "producers": [{ "binding": "EVENTS_QUEUE", "queue": "new-wed-events-development" }],
-    "consumers": [{ "queue": "new-wed-events-development", "max_batch_size": 10, "max_batch_timeout": 5, "max_retries": 5, "dead_letter_queue": "new-wed-events-dead-development" }]
+    "producers": [
+      {
+        "binding": "EVENTS_QUEUE",
+        "queue": "new-wed-events-development"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "new-wed-events-development",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_retries": 5,
+        "dead_letter_queue": "new-wed-events-dead-development"
+      }
+    ]
   },
-  "triggers": { "crons": ["*/5 * * * *"] },
+  "triggers": {
+    "crons": [
+      "*/5 * * * *"
+    ]
+  },
   "env": {
     "staging": {
-      "vars": { "ENVIRONMENT": "staging", "OPENAI_MODEL": "gpt-5-mini", "ASAAS_API_URL": "https://api-sandbox.asaas.com/v3", "META_GRAPH_VERSION": "v23.0", "META_CHECKOUT_TEMPLATE": "checkout_famtour", "EMAIL_FROM": "marketing@newwed.com.br", "EMAIL_REPLY_TO": "marketing@newwed.com.br", "EMAIL_ALLOWED_RECIPIENT_DOMAINS": "newwed.com.br,gruponewwed.com.br" },
-      "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["marketing@newwed.com.br"], "allowed_destination_addresses": ["marketing@newwed.com.br", "contato@gruponewwed.com.br"] }],
-      "d1_databases": [{ "binding": "DB", "database_name": "new-wed-platform-staging", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }],
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "OPENAI_MODEL": "gpt-5-mini",
+        "ASAAS_API_URL": "https://api-sandbox.asaas.com/v3",
+        "META_GRAPH_VERSION": "v23.0",
+        "META_CHECKOUT_TEMPLATE": "checkout_famtour",
+        "EMAIL_FROM": "marketing@newwed.com.br",
+        "EMAIL_REPLY_TO": "marketing@newwed.com.br",
+        "EMAIL_ALLOWED_RECIPIENT_DOMAINS": "newwed.com.br,gruponewwed.com.br",
+        "ENABLE_PUBLIC_LEADS": "false",
+        "ENABLE_MANUAL_SEND": "false",
+        "ENABLE_AGENT": "false",
+        "ENABLE_CHECKOUT": "false",
+        "ENABLE_CONFIRMATION": "false",
+        "ENABLE_EMAIL": "false",
+        "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1"
+      },
+      "send_email": [
+        {
+          "name": "EMAIL",
+          "allowed_sender_addresses": [
+            "marketing@newwed.com.br"
+          ],
+          "allowed_destination_addresses": [
+            "marketing@newwed.com.br",
+            "contato@gruponewwed.com.br"
+          ]
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "new-wed-platform-staging",
+          "database_id": "d67175d9-52b6-47f7-b7a0-4a75a05af32d",
+          "migrations_dir": "migrations"
+        }
+      ],
       "queues": {
-        "producers": [{ "binding": "EVENTS_QUEUE", "queue": "new-wed-events-staging" }],
-        "consumers": [{ "queue": "new-wed-events-staging", "max_batch_size": 10, "max_batch_timeout": 5, "max_retries": 5, "dead_letter_queue": "new-wed-events-dead-staging" }]
-      }
+        "producers": [
+          {
+            "binding": "EVENTS_QUEUE",
+            "queue": "new-wed-events-staging"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "new-wed-events-staging",
+            "max_batch_size": 10,
+            "max_batch_timeout": 5,
+            "max_retries": 5,
+            "dead_letter_queue": "new-wed-events-dead-staging"
+          }
+        ]
+      },
+      "account_id": "41245f76790f4922487ec395c9e3bcec",
+      "r2_buckets": []
     },
     "production": {
       "account_id": "41245f76790f4922487ec395c9e3bcec",
-      "vars": { "ENVIRONMENT": "production", "OPENAI_MODEL": "gpt-5-mini", "ASAAS_API_URL": "https://api.asaas.com/v3", "META_GRAPH_VERSION": "v23.0", "META_CHECKOUT_TEMPLATE": "checkout_famtour", "EMAIL_FROM": "marketing@newwed.com.br", "EMAIL_REPLY_TO": "marketing@newwed.com.br", "EMAIL_ALLOWED_RECIPIENT_DOMAINS": "newwed.com.br,gruponewwed.com.br" },
-      "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["marketing@newwed.com.br"], "allowed_destination_addresses": ["marketing@newwed.com.br", "contato@gruponewwed.com.br"] }],
-      "d1_databases": [{ "binding": "DB", "database_name": "new-wed-platform-production", "database_id": "2263d378-59c9-4e5a-8d9b-a6e0140767dd", "migrations_dir": "migrations" }],
+      "vars": {
+        "ENVIRONMENT": "production",
+        "OPENAI_MODEL": "gpt-5-mini",
+        "ASAAS_API_URL": "https://api.asaas.com/v3",
+        "META_GRAPH_VERSION": "v23.0",
+        "META_CHECKOUT_TEMPLATE": "checkout_famtour",
+        "EMAIL_FROM": "marketing@newwed.com.br",
+        "EMAIL_REPLY_TO": "marketing@newwed.com.br",
+        "EMAIL_ALLOWED_RECIPIENT_DOMAINS": "newwed.com.br,gruponewwed.com.br",
+        "ENABLE_PUBLIC_LEADS": "false",
+        "ENABLE_MANUAL_SEND": "false",
+        "ENABLE_AGENT": "false",
+        "ENABLE_CHECKOUT": "false",
+        "ENABLE_CONFIRMATION": "false",
+        "ENABLE_EMAIL": "false",
+        "TURNSTILE_HOSTNAMES": "newwed.com.br,www.newwed.com.br"
+      },
+      "send_email": [
+        {
+          "name": "EMAIL",
+          "allowed_sender_addresses": [
+            "marketing@newwed.com.br"
+          ],
+          "allowed_destination_addresses": [
+            "marketing@newwed.com.br",
+            "contato@gruponewwed.com.br"
+          ]
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "new-wed-platform-production",
+          "database_id": "2263d378-59c9-4e5a-8d9b-a6e0140767dd",
+          "migrations_dir": "migrations"
+        }
+      ],
       "queues": {
-        "producers": [{ "binding": "EVENTS_QUEUE", "queue": "new-wed-events-production" }],
-        "consumers": [{ "queue": "new-wed-events-production", "max_batch_size": 10, "max_batch_timeout": 5, "max_retries": 5, "dead_letter_queue": "new-wed-events-dead-production" }]
+        "producers": [
+          {
+            "binding": "EVENTS_QUEUE",
+            "queue": "new-wed-events-production"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "new-wed-events-production",
+            "max_batch_size": 10,
+            "max_batch_timeout": 5,
+            "max_retries": 5,
+            "dead_letter_queue": "new-wed-events-dead-production"
+          }
+        ]
       }
     }
   }

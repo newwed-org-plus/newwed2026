@@ -4,14 +4,101 @@
   "main": "workers/uazapi-receiver.ts",
   "account_id": "41245f76790f4922487ec395c9e3bcec",
   "compatibility_date": "2026-10-20",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "workers_dev": false,
-  "observability": {"enabled": true, "traces": {"enabled": true}},
-  "vars": {"ENVIRONMENT": "production"},
-  "d1_databases": [{"binding": "DB", "database_name": "new-wed-platform-production", "database_id": "2263d378-59c9-4e5a-8d9b-a6e0140767dd", "migrations_dir": "migrations"}],
-  "queues": {
-    "producers": [{"binding": "EVENTS_QUEUE", "queue": "new-wed-events-production"}, {"binding": "UAZAPI_EVENTS_QUEUE", "queue": "new-wed-uazapi-production"}],
-    "consumers": [{"queue": "new-wed-uazapi-production", "max_batch_size": 10, "max_batch_timeout": 5, "max_retries": 5, "dead_letter_queue": "new-wed-uazapi-dead-production"}]
+  "observability": {
+    "enabled": true,
+    "traces": {
+      "enabled": true
+    }
   },
-  "triggers": {"crons": ["*/5 * * * *"]}
+  "vars": {
+    "ENVIRONMENT": "production"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "new-wed-platform-production",
+      "database_id": "2263d378-59c9-4e5a-8d9b-a6e0140767dd",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "EVENTS_QUEUE",
+        "queue": "new-wed-events-production"
+      },
+      {
+        "binding": "UAZAPI_EVENTS_QUEUE",
+        "queue": "new-wed-uazapi-production"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "new-wed-uazapi-production",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_retries": 5,
+        "dead_letter_queue": "new-wed-uazapi-dead-production"
+      }
+    ]
+  },
+  "triggers": {
+    "crons": [
+      "*/5 * * * *"
+    ]
+  },
+  "env": {
+    "staging": {
+      "name": "new-wed-uazapi-receiver-staging",
+      "account_id": "41245f76790f4922487ec395c9e3bcec",
+      "workers_dev": false,
+      "observability": {
+        "enabled": true,
+        "traces": {
+          "enabled": true
+        }
+      },
+      "vars": {
+        "ENVIRONMENT": "staging"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "new-wed-platform-staging",
+          "database_id": "d67175d9-52b6-47f7-b7a0-4a75a05af32d",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "EVENTS_QUEUE",
+            "queue": "new-wed-events-staging"
+          },
+          {
+            "binding": "UAZAPI_EVENTS_QUEUE",
+            "queue": "new-wed-uazapi-staging"
+          }
+        ],
+        "consumers": [
+          {
+            "queue": "new-wed-uazapi-staging",
+            "max_batch_size": 10,
+            "max_batch_timeout": 5,
+            "max_retries": 5,
+            "dead_letter_queue": "new-wed-uazapi-dead-staging"
+          }
+        ]
+      },
+      "triggers": {
+        "crons": [
+          "*/5 * * * *"
+        ]
+      }
+    }
+  }
 }

@@ -6,8 +6,22 @@
     "nodejs_compat"
   ],
   "main": "workers/web.ts",
-  "durable_objects": { "bindings": [{ "name": "ADMIN_PASSWORD_VERIFIER", "class_name": "AdminPasswordVerifier" }] },
-  "migrations": [{ "tag": "admin-password-v1", "new_sqlite_classes": ["AdminPasswordVerifier"] }],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "ADMIN_PASSWORD_VERIFIER",
+        "class_name": "AdminPasswordVerifier"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "admin-password-v1",
+      "new_sqlite_classes": [
+        "AdminPasswordVerifier"
+      ]
+    }
+  ],
   "assets": {
     "directory": "dist/client",
     "not_found_handling": "none",
@@ -18,7 +32,9 @@
   },
   "observability": {
     "enabled": true,
-    "traces": { "enabled": true }
+    "traces": {
+      "enabled": true
+    }
   },
   "vars": {
     "ENVIRONMENT": "development",
@@ -29,7 +45,14 @@
     "ASAAS_API_URL": "https://api-sandbox.asaas.com/v3",
     "META_GRAPH_VERSION": "v23.0",
     "TURNSTILE_SITE_KEY": "",
-    "META_CHECKOUT_TEMPLATE": "checkout_famtour"
+    "META_CHECKOUT_TEMPLATE": "checkout_famtour",
+    "ENABLE_PUBLIC_LEADS": "false",
+    "ENABLE_MANUAL_SEND": "false",
+    "ENABLE_AGENT": "false",
+    "ENABLE_CHECKOUT": "false",
+    "ENABLE_CONFIRMATION": "false",
+    "ENABLE_EMAIL": "false",
+    "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1"
   },
   "d1_databases": [
     {
@@ -45,32 +68,128 @@
       "bucket_name": "new-wed-platform-development"
     }
   ],
-  "images": { "binding": "IMAGES" },
+  "images": {
+    "binding": "IMAGES"
+  },
   "queues": {
     "producers": [
-      { "binding": "EVENTS_QUEUE", "queue": "new-wed-events-development" }
+      {
+        "binding": "EVENTS_QUEUE",
+        "queue": "new-wed-events-development"
+      }
     ]
   },
   "env": {
     "staging": {
-      "durable_objects": { "bindings": [{ "name": "ADMIN_PASSWORD_VERIFIER", "class_name": "AdminPasswordVerifier" }] },
-      "vars": { "ENVIRONMENT": "staging", "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "", "ALLOW_LOCAL_ACCESS": "false", "OPENAI_MODEL": "gpt-5-mini", "ASAAS_API_URL": "https://api-sandbox.asaas.com/v3", "META_GRAPH_VERSION": "v23.0", "TURNSTILE_SITE_KEY": "", "META_CHECKOUT_TEMPLATE": "checkout_famtour" },
-      "d1_databases": [{ "binding": "DB", "database_name": "new-wed-platform-staging", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }],
-      "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "new-wed-platform-staging" }],
-      "queues": { "producers": [{ "binding": "EVENTS_QUEUE", "queue": "new-wed-events-staging" }] }
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "ADMIN_PASSWORD_VERIFIER",
+            "class_name": "AdminPasswordVerifier"
+          }
+        ]
+      },
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "ACCESS_TEAM_DOMAIN": "",
+        "ACCESS_AUD": "",
+        "ALLOW_LOCAL_ACCESS": "false",
+        "OPENAI_MODEL": "gpt-5-mini",
+        "ASAAS_API_URL": "https://api-sandbox.asaas.com/v3",
+        "META_GRAPH_VERSION": "v23.0",
+        "TURNSTILE_SITE_KEY": "",
+        "META_CHECKOUT_TEMPLATE": "checkout_famtour",
+        "ENABLE_PUBLIC_LEADS": "false",
+        "ENABLE_MANUAL_SEND": "false",
+        "ENABLE_AGENT": "false",
+        "ENABLE_CHECKOUT": "false",
+        "ENABLE_CONFIRMATION": "false",
+        "ENABLE_EMAIL": "false",
+        "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "new-wed-platform-staging",
+          "database_id": "d67175d9-52b6-47f7-b7a0-4a75a05af32d",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "r2_buckets": [],
+      "queues": {
+        "producers": [
+          {
+            "binding": "EVENTS_QUEUE",
+            "queue": "new-wed-events-staging"
+          },
+          {
+            "binding": "UAZAPI_EVENTS_QUEUE",
+            "queue": "new-wed-uazapi-staging"
+          }
+        ]
+      },
+      "account_id": "41245f76790f4922487ec395c9e3bcec"
     },
     "production": {
-      "durable_objects": { "bindings": [{ "name": "ADMIN_PASSWORD_VERIFIER", "class_name": "AdminPasswordVerifier" }] },
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "ADMIN_PASSWORD_VERIFIER",
+            "class_name": "AdminPasswordVerifier"
+          }
+        ]
+      },
       "account_id": "41245f76790f4922487ec395c9e3bcec",
       "workers_dev": true,
       "routes": [
-        { "pattern": "newwed.com.br/*", "zone_name": "newwed.com.br" },
-        { "pattern": "www.newwed.com.br/*", "zone_name": "newwed.com.br" }
+        {
+          "pattern": "newwed.com.br/*",
+          "zone_name": "newwed.com.br"
+        },
+        {
+          "pattern": "www.newwed.com.br/*",
+          "zone_name": "newwed.com.br"
+        }
       ],
-      "vars": { "ENVIRONMENT": "production", "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "", "ALLOW_LOCAL_ACCESS": "false", "OPENAI_MODEL": "gpt-5-mini", "ASAAS_API_URL": "https://api.asaas.com/v3", "META_GRAPH_VERSION": "v23.0", "TURNSTILE_SITE_KEY": "", "META_CHECKOUT_TEMPLATE": "checkout_famtour" },
-      "d1_databases": [{ "binding": "DB", "database_name": "new-wed-platform-production", "database_id": "2263d378-59c9-4e5a-8d9b-a6e0140767dd", "migrations_dir": "migrations" }],
+      "vars": {
+        "ENVIRONMENT": "production",
+        "ACCESS_TEAM_DOMAIN": "",
+        "ACCESS_AUD": "",
+        "ALLOW_LOCAL_ACCESS": "false",
+        "OPENAI_MODEL": "gpt-5-mini",
+        "ASAAS_API_URL": "https://api.asaas.com/v3",
+        "META_GRAPH_VERSION": "v23.0",
+        "TURNSTILE_SITE_KEY": "",
+        "META_CHECKOUT_TEMPLATE": "checkout_famtour",
+        "ENABLE_PUBLIC_LEADS": "false",
+        "ENABLE_MANUAL_SEND": "false",
+        "ENABLE_AGENT": "false",
+        "ENABLE_CHECKOUT": "false",
+        "ENABLE_CONFIRMATION": "false",
+        "ENABLE_EMAIL": "false",
+        "TURNSTILE_HOSTNAMES": "newwed.com.br,www.newwed.com.br"
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "new-wed-platform-production",
+          "database_id": "2263d378-59c9-4e5a-8d9b-a6e0140767dd",
+          "migrations_dir": "migrations"
+        }
+      ],
       "r2_buckets": [],
-      "queues": { "producers": [{ "binding": "EVENTS_QUEUE", "queue": "new-wed-events-production" }, { "binding": "UAZAPI_EVENTS_QUEUE", "queue": "new-wed-uazapi-production" }] }
+      "queues": {
+        "producers": [
+          {
+            "binding": "EVENTS_QUEUE",
+            "queue": "new-wed-events-production"
+          },
+          {
+            "binding": "UAZAPI_EVENTS_QUEUE",
+            "queue": "new-wed-uazapi-production"
+          }
+        ]
+      }
     }
   }
 }
