@@ -7,6 +7,7 @@ import { readJsonWithLimit } from "@/server/request-context";
 import type { RuntimeSecrets } from "@/server/secrets";
 
 const endpoint = "https://openrouter.ai/api/v1";
+const temporaryAvailability=(status:number)=>[404,408,429,502,503,504].includes(status);
 async function routerRequest(path:string,apiKey:string|undefined,body:unknown,fetcher:typeof fetch) {
   let response:Response;
   try {
@@ -18,10 +19,10 @@ async function routerRequest(path:string,apiKey:string|undefined,body:unknown,fe
   } catch { throw new OpenRouterDeferred(new Date(Date.now()+60000).toISOString(),'account','OPENROUTER_UNAVAILABLE'); }
   let payload:unknown;
   try{payload=await readJsonWithLimit(response,path==="/models"?4*1024*1024:64*1024);}
-  catch{if(response.status===429||response.status===503)throw rateLimitError(response.status,response.headers,null);if(!response.ok)throw new HttpError(502,`OPENROUTER_HTTP_${response.status}`,"O modelo gratuito não está disponível. Tente novamente em instantes.");throw new HttpError(502,"OPENROUTER_INVALID_RESPONSE","O OpenRouter retornou uma resposta inválida.");}
+  catch{if(temporaryAvailability(response.status))throw rateLimitError(response.status,response.headers,null);if(!response.ok)throw new HttpError(502,`OPENROUTER_HTTP_${response.status}`,"O modelo gratuito não está disponível. Tente novamente em instantes.");throw new HttpError(502,"OPENROUTER_INVALID_RESPONSE","O OpenRouter retornou uma resposta inválida.");}
   const embedded=payload&&typeof payload==='object'?(payload as {error?:{code?:number}}).error?.code:undefined;
   const status=response.ok?(embedded??response.status):response.status;
-  if(status===429||status===503)throw rateLimitError(status,response.headers,payload);
+  if(temporaryAvailability(status))throw rateLimitError(status,response.headers,payload);
   if(!response.ok||embedded){
     const message=status===401?"A chave OpenRouter não foi aceita. Confira a configuração no servidor.":"O modelo gratuito não está disponível. Tente outro modelo ou encaminhe para a equipe.";
     throw new HttpError(502,`OPENROUTER_HTTP_${status}`,message);
@@ -50,7 +51,15 @@ export async function openRouterJson(env:RouterEnv,modelId:string,policy:string,
   const models=await listFreeModels(fetcher);const verified=new Set(models.map(model=>model.id));
   if(!recovery&&!verified.has(selected))throw new HttpError(409,"FREE_MODEL_UNAVAILABLE","Este modelo não está disponível como gratuito. Atualize a lista e escolha outro.");
   const preferred=[selected,'google/gemma-4-26b-a4b-it:free','google/gemma-4-31b-it:free','nvidia/nemotron-3-super-120b-a12b:free','openrouter/free',...models.map(model=>model.id)];
-  const candidates=[...new Set(preferred)].filter(id=>verified.has(id)).slice(0,recovery?8:1);
+  let candidates=[...new Set(preferred)].filter(id=>verified.has(id));
+  if(recovery&&env.DB){
+    const failures=await env.DB.prepare("SELECT scope,updated_at FROM ai_provider_cooldowns WHERE scope LIKE 'openrouter:model:%'").all<{scope:string;updated_at:string}>();
+    const lastFailure=new Map(failures.results.map(row=>[row.scope.slice('openrouter:model:'.length),Date.parse(row.updated_at)||0]));
+    // Rotate through the verified pool across cron runs instead of repeatedly
+    // exhausting the same first three models when their cooldowns expire together.
+    candidates=candidates.sort((a,b)=>(lastFailure.get(a)??0)-(lastFailure.get(b)??0));
+  }
+  candidates=candidates.slice(0,recovery?8:1);
   let attempts=0;let deferred:OpenRouterDeferred|undefined;
   for(const model of candidates){
     const cooldown=await getCooldown(env,`openrouter:model:${model}`);

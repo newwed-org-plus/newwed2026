@@ -53,3 +53,5 @@ Aplicar as migrations até **0016** antes de usar esta versão. `ENABLE_FREE_AI_
 A prévia pode usar até três tentativas gratuitas quando houver falha de upstream. Sem disponibilidade gratuita, é necessário aguardar; não há promessa de respostas ilimitadas. Testes em `free-ai-recovery.test.ts` cobrem limites, teto zero, persistência, retomada, concorrência, deduplicação e conteúdo compartilhado. Referência: [erros e Retry-After](https://openrouter.ai/docs/api_reference/errors-and-debugging).
 
 Quando a busca de cache chega antes do callback, somente o envelope ao vivo autenticado da mesma mensagem pode promover o registro e iniciar uma resposta elegível. O histórico isolado nunca inicia automação; o recebimento ao vivo posterior mantém deduplicação e controles humanos.
+
+Indisponibilidade de endpoint gratuito (404), timeout (408) e 502/503/504 entram na mesma recuperação de geração. A seleção prioriza modelos ainda não tentados ou com falha mais antiga entre ciclos, evitando insistência permanente no mesmo trio após expirar o cooldown. Chave recusada e saída inválida continuam falhas explícitas. Prévia manual não é uma mensagem agendada.

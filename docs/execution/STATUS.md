@@ -87,13 +87,13 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 
 ## Onda 29 — IA gratuita com retomada e conhecimento oficial
 
-- Branch `codex/wave-29-free-ai-knowledge`, base `4952a9b`; CP-29. Migration 0016 somente local; sem deploy, merge ou contratação.
+- Branch `codex/wave-29-free-ai-knowledge`, base `4952a9b`; CP-29. Migration 0016 somente local; sem deploy ou contratação. PR 15 mesclada externamente na branch 28; ajustes complementares nesta branch, sem merge pelo agente.
 - 429/503 transitórios usam espera durável, cooldown por conta/modelo, pacing e até três alternativas gratuitas verificadas com teto zero. Cota global exige aguardar; flag remota desligada. D-049 substitui o handoff por limite de D-048 quando habilitada.
 - Respostas deduplicadas por pergunta, lease recuperável somente antes de efeito externo, claim/opt-out/versão preservados. Inbox mostra a espera. FAQs oficiais e resumos extrativos locais reduzem consumo.
 - Fonte comum de conteúdo entre páginas/IA cobre Feira Tendência, Destinos/FAMTOUR, Guia, Workshop e quatro edições publicadas. Preços anunciados não prometem reserva; capacidade publicada não é vaga restante. Fixtures e componentes antigos não montados excluídos.
 - Corrida entre pull de cache e callback corrigida: somente o envelope ao vivo autenticado pode promover a mesma mensagem já importada. Histórico isolado nunca responde.
 - Teste real autorizado: pergunta de produtos retomada uma vez, resposta READ; nova pergunta sobre Feira recebeu resposta DELIVERED. Conversa permanece AGENT. Prévia gratuita real aprovada sobre quatro projetos, formatos, combos e datas; dados privados somente em `.local-runtime`.
-- Gate aprovado: 121 unitários, 75 Workers (após correção final), 66 visuais, D1/recuperação, tipos/lint, build, auditoria zero e preflights. Sem pendência crítica deste ajuste local.
+- Gate aprovado: 126 unitários, 76 Workers (após correção final), 66 visuais, D1/recuperação, tipos/lint, build, auditoria zero e preflights. CI da implementação `756061f` aprovado. Ajustes finais: rotação persistida entre ciclos e indisponibilidade de endpoint, com prévia comercial real aprovada.
 
 ## Bloqueios externos
 

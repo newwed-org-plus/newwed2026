@@ -18,12 +18,12 @@ describe('recuperação de disponibilidade gratuita',()=>{
   expect(rateLimitError(429,new Headers({'x-ratelimit-reset':String((now+90000)/1000)}),{},now).retryAt).toBe('2026-10-25T22:01:30.000Z');
   expect(rateLimitError(429,new Headers({'retry-after':'invalid'}),{},now).retryAt).toBe('2026-10-25T22:01:00.000Z');
  });
- it('troca upstream limitado apenas por alternativas verificadas com preço zero',async()=>{
+ it.each([429,404,408,502,503,504])('troca upstream indisponível (%s) apenas por alternativas verificadas com preço zero',async(status)=>{
   const bodies:Record<string,unknown>[]=[];
   const fetcher=vi.fn(async(url:RequestInfo|URL,init?:RequestInit)=>{
    if(String(url).endsWith('/models'))return Response.json({data:[model(selected),model(second),{...model('test/paid:free'),pricing:{prompt:'0',completion:'0',request:'1'}}]});
    const body=JSON.parse(String(init?.body));bodies.push(body);
-   return bodies.length===1?Response.json({error:{message:'upstream rate limited',metadata:{provider_name:'test'}}},{status:429,headers:{'retry-after':'60'}}):Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(reply)}}]});
+   return bodies.length===1?Response.json({error:{message:'upstream unavailable',metadata:{provider_name:'test'}}},{status,headers:{'retry-after':'60'}}):Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(reply)}}]});
   });
   expect(await answerWithOpenRouter({OPENROUTER_API_KEY:'synthetic',ENABLE_FREE_AI_RETRY:'true'},input,fetcher)).toEqual(reply);
   expect(bodies.map(b=>b.model)).toEqual([selected,second]);
