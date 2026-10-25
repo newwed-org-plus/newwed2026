@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 const timestamps = {
@@ -172,6 +173,7 @@ export const conversations = sqliteTable("conversations", {
   requestId: text("request_id"),
   ...timestamps,
 }, (table) => [
+  index("conversations_page_idx").on(sql`coalesce(${table.lastMessageAt},${table.updatedAt}) DESC`,sql`${table.id} DESC`),
   uniqueIndex("conversation_external_uidx").on(table.channel, table.externalId),
   index("conversations_mode_updated_idx").on(table.mode, table.updatedAt),
   index("conversations_claimed_by_idx").on(table.claimedBy),
@@ -196,6 +198,7 @@ export const messages = sqliteTable("messages", {
   createdAt: text("created_at").notNull(),
 }, (table) => [
   uniqueIndex("messages_external_uidx").on(table.externalId),
+  index("messages_conversation_page_idx").on(table.conversationId,sql`${table.createdAt} DESC`,sql`${table.id} DESC`),
   index("messages_checkout_idx").on(table.checkoutId),
 ]);
 

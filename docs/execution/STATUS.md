@@ -28,11 +28,17 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Recuperação de produção confirmada por contagens em 25/10: 358 conversas e 14.908 mensagens; zero históricos/lotes pendentes. Nenhum conteúdo de mensagem foi lido.
 - Tipos, lint, TypeScript, 95 unitários, 34 Workers, invariantes D1 e build aprovados; 53 cenários visuais aprovados (52 na suíte e um na repetição focada). Detalhes no CP-21.
 
-## Onda atual
+## Onda 22 concluída
 
 - Onda 22, `codex/wave-22-capacity-login`. Migration local 0009 e Durable Object AdminIpLimiter.
 - Cursor de histórico, orçamento 100/tick, lock por linha e login sem bucket D1 por IP.
 - Gate completo aprovado: 96 unitários, 37 Workers, 53 visuais, D1, build, lint/tipos e auditoria sem alertas. CP-22.
+
+## Onda atual
+
+- Onda 23, `codex/wave-23-inbox-pagination`, migration local 0010.
+- Paginação estável, erros globais, polling serial e ambiente visível.
+- Gate aprovado: 96 unitários, 39 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-23.
 
 ## Próximas ondas
 
