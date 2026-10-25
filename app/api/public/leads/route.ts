@@ -1,16 +1,19 @@
+import {requireCapability} from "@/server/capabilities";
+import {publishOutbox} from "@/server/outbox";
 import { env } from "cloudflare:workers";
 import { publicLeadSchema } from "@/features/leads/schemas";
 import { errorResponse, HttpError, json, requireIdempotencyKey } from "@/server/http";
 import { normalizeEmail, normalizePhone, sha256 } from "@/server/normalization";
 import { verifyTurnstile } from "@/server/integrations/turnstile";
 import { clientIp,enforceRateLimit } from "@/server/rate-limit";
-import { requestIdFrom,responseWithRequestId } from "@/server/request-context";
+import { requestIdFrom,responseWithRequestId,readJsonWithLimit } from "@/server/request-context";
 
 type StoredResponse = { leadId: string; stage: "NOVO"; duplicated: boolean };
 
 export async function POST(request: Request) {
   const requestId = requestIdFrom(request);
   try {
+    requireCapability(env,"publicLeads");
     const idempotencyKey = requireIdempotencyKey(request);
     const prior = await env.DB.prepare("SELECT response_json FROM idempotency_keys WHERE key = ? AND scope = 'public_lead'")
       .bind(idempotencyKey).first<{ response_json: string }>();
@@ -18,7 +21,7 @@ export async function POST(request: Request) {
 
     await enforceRateLimit(env,{scope:"public.lead",identity:clientIp(request),limit:5,windowSeconds:60});
 
-    const input = publicLeadSchema.parse(await request.json());
+    const input = publicLeadSchema.parse(await readJsonWithLimit(request,65536));
     await verifyTurnstile(input.turnstileToken, request.headers.get("cf-connecting-ip"));
 
     const normalizedEmail = normalizeEmail(input.email);
@@ -66,12 +69,7 @@ export async function POST(request: Request) {
     }
     await env.DB.batch(statements);
 
-    try {
-      await env.EVENTS_QUEUE.send({ id: outboxId, type: "lead.submitted", leadId,requestId });
-      await env.DB.prepare("UPDATE outbox_events SET published_at = ? WHERE id = ?").bind(new Date().toISOString(),outboxId).run();
-    } catch (queueError) {
-      console.warn(JSON.stringify({ level: "warn", event: "outbox.pending", outboxId, error: queueError instanceof Error ? queueError.message : String(queueError) }));
-    }
+    await publishOutbox(env,{id:outboxId,type:"lead.submitted",leadId,requestId});
 
     return responseWithRequestId(json(responseBody, { status: existing ? 200 : 201 }),requestId);
   } catch (error) {

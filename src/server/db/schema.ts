@@ -208,6 +208,7 @@ export const checkouts = sqliteTable("checkouts", {
   leadId: text("lead_id").notNull().references(() => leads.id),
   editionId: text("edition_id").notNull().references(() => editions.id),
   priceBatchId: text("price_batch_id").notNull().references(() => priceBatches.id),
+  conversationId:text("conversation_id").references(()=>conversations.id),whatsappInstanceId:text("whatsapp_instance_id").references(()=>whatsappInstances.id),deliveryChannel:text("delivery_channel").notNull().default("meta"),
   provider: text("provider").notNull().default("asaas"),
   providerCustomerId: text("provider_customer_id"),
   providerPaymentId: text("provider_payment_id"),
@@ -242,6 +243,7 @@ export const checkouts = sqliteTable("checkouts", {
   version: integer("version").notNull().default(1),
   ...timestamps,
 }, (table) => [
+  index("checkouts_conversation_idx").on(table.conversationId),
   index("checkouts_status_idx").on(table.status),
   index("checkouts_financial_status_idx").on(table.financialStatus),
   index("checkouts_send_status_idx").on(table.sendStatus),

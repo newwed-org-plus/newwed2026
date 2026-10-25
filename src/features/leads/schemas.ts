@@ -56,6 +56,7 @@ export const leadPatchSchema = z.object({
 export const assignmentSchema = z.object({ userId: z.string().uuid() });
 
 export const checkoutSchema = z.object({
+  conversationId:z.string().min(1).max(256).optional(),
   editionId: z.string().min(1),
   priceBatchId: z.string().min(1),
   method: z.enum(["PIX", "CREDIT_CARD"]),

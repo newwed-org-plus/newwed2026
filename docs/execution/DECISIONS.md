@@ -181,3 +181,7 @@ Envio manual, agente, checkout, confirmação e e-mail possuem controles indepen
 ## D-044 — Capacidade e validação local
 
 Otimizar e medir antes de propor capacidade paga; contratação exige orçamento aprovado. Homologação usa D1 e filas isolados, sem R2. O usuário escolheu testar localmente; Asaas sandbox e e-mail ainda precisam ser preparados. Validar código com fixtures sintéticas sem substituir testes externos por resultados simulados. Não redirecionar o webhook da linha ativa ao localhost.
+
+## D-045 — Confirmação e estorno sem repetição cega
+
+A confirmação textual do pagamento tem identidade estável por checkout e usa exclusivamente a conversa/linha UAZAPI autorizadas na criação. Resultado incerto é conciliado individualmente; falha conhecida pode ser reenviada por ação auditada. O estado de comunicação não desfaz PAID. Estorno solicitado/em andamento/parcial não libera toda a vaga; somente o evento de estorno concluído faz essa transição, e eventos de pagamento atrasados não revertem REFUNDED.

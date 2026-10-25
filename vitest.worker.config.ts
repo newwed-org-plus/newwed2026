@@ -11,7 +11,7 @@ export default defineConfig({
       d1Databases:["DB","LEGACY_DB"],r2Buckets:["MEDIA"],queueProducers:{EVENTS_QUEUE:{queueName:"new-wed-events-test"}},
       durableObjects:{ADMIN_IP_LIMITER:{className:"AdminIpLimiter",useSQLite:true},ADMIN_PASSWORD_VERIFIER:{className:"AdminPasswordVerifier",useSQLite:true}},
       bindings:{
-        ENABLE_PUBLIC_LEADS:"true",ENABLE_MANUAL_SEND:"true",ENABLE_AGENT:"true",ENABLE_CHECKOUT:"true",ENABLE_CONFIRMATION:"true",ENABLE_EMAIL:"true",
+        CHECKOUT_CHANNEL:"meta",ENABLE_PUBLIC_LEADS:"true",ENABLE_MANUAL_SEND:"true",ENABLE_AGENT:"true",ENABLE_CHECKOUT:"true",ENABLE_CONFIRMATION:"true",ENABLE_EMAIL:"true",
         UAZAPI_INSTANCES:JSON.stringify([{id:"vendas",name:"Vendas",baseUrl:"https://vendas.uazapi.test",token:"synthetic-vendas-token"},{id:"eventos",name:"Eventos",baseUrl:"https://eventos.uazapi.test",token:"synthetic-eventos-token"}]),
         UAZAPI_WEBHOOK_BASE_URL:"https://newwed.test",
         TEST_MIGRATIONS:await readD1Migrations(path.join(import.meta.dirname,"migrations")),

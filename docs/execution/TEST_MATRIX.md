@@ -66,3 +66,13 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Recebimento comum permanece assíncrono. A recuperação histórica força atendimento humano e não chama agente ou endpoint de envio.
 - Testes: regressões focadas 13/13 e Worker completo 34/34; `cf:types`, lint, typecheck, 92 unitários, build e 53 visuais passaram. `db:migrate:local` confirmou nenhuma migration pendente.
 - `npm audit --omit=dev` continua com 9 alertas altos preexistentes; lockfile/dependências não alterados. Detalhes em `checkpoints/CP-20.md`.
+
+## Ondas 21–25 — Conclusão comercial
+
+- Dependências e preflight por função, isolamento de ambientes, arquitetura sem R2 e login próprio.
+- Importação com orçamento 100/tick e lease por linha; IP limitado em Durable Object; indisponibilidade D1 responde 503 sem bypass.
+- Paginação com timestamp/ID: mais de 50 conversas e 100 mensagens, horários iguais, busca concorrente, erro global e expiração de sessão.
+- Outbox: backlog antigo retido, funções desligadas, claim concorrente, crash/timeout e reconciliação sem replay cego. Intake sem chave de IA/envio.
+- Checkout UAZAPI: vínculo obrigatório, linha/conversa preservadas, recibo, confirmação única, falha/timeout e reenvio auditado após resultado conhecido; legado Meta continua coberto.
+- Asaas: Pix/cartão/parcelas, última vaga, conciliação, eventos duplicados/fora de ordem; estorno em andamento preserva capacidade e estorno concluído é terminal.
+- Turnstile: ação/hostname/resposta, falha de rede e ausência de configuração fora do desenvolvimento.

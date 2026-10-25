@@ -16,7 +16,7 @@ export async function GET(request: Request,{ params }:{ params:Promise<{ id:stri
       FROM conversations c LEFT JOIN whatsapp_instances wi ON wi.id=c.whatsapp_instance_id LEFT JOIN leads l ON l.id=c.lead_id LEFT JOIN editions e ON e.id=l.edition_id LEFT JOIN users u ON u.id=c.claimed_by WHERE c.id=?`)
       .bind(id).first<Record<string,unknown>>();
     if (!conversation) throw new HttpError(404,"CONVERSATION_NOT_FOUND","Conversa não encontrada.");
-    const messages = await env.DB.prepare(`SELECT m.id,m.external_id,m.direction,m.type,m.body,m.status,m.actor_id,m.last_error,m.accepted_at,m.failed_at,m.created_at,u.name AS actor_name
+    const messages = await env.DB.prepare(`SELECT m.id,m.checkout_id,m.external_id,m.direction,m.type,m.body,m.status,m.actor_id,m.last_error,m.accepted_at,m.failed_at,m.created_at,u.name AS actor_name
       FROM messages m LEFT JOIN users u ON u.id=m.actor_id WHERE m.conversation_id=? AND (? IS NULL OR m.created_at<? OR (? IS NOT NULL AND m.created_at=? AND m.id<?))
       ORDER BY m.created_at DESC,m.id DESC LIMIT ?`).bind(id,before.time,before.time,before.id,before.time,before.id,limit + 1).all<Record<string,unknown>>();
     const page = messages.results.slice(0,limit);

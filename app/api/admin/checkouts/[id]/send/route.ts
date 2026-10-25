@@ -12,16 +12,17 @@ async function priorResponse(key: string) {
 
 export async function POST(request: Request,{ params }:{ params:Promise<{ id:string }> }) {
   try {
-    const actor = await requireAccessUser(request);
+    const actor = await requireAccessUser(request,["admin","gestor"]);
     requireCapability(env,"checkout");
     const key = requireIdempotencyKey(request);
     const prior = await priorResponse(key);
-    if (prior) return json(JSON.parse(prior.response_json),{ status:202 });
+    if (prior) {const body=JSON.parse(prior.response_json);if(body.checkoutId!==(await params).id)throw new HttpError(409,"IDEMPOTENCY_KEY_REUSED","Esta chave pertence a outro checkout.");return json(body,{status:202});}
 
     const { id } = await params;
     const checkout = await env.DB.prepare("SELECT id,status,send_status,url,expires_at FROM checkouts WHERE id=?")
       .bind(id).first<{ id:string;status:string;send_status:string;url:string|null;expires_at:string|null }>();
     if (!checkout) throw new HttpError(404,"CHECKOUT_NOT_FOUND","Checkout não encontrado.");
+    if(checkout.send_status==="UNKNOWN")throw new HttpError(409,"RECONCILIATION_REQUIRED","Confira o resultado do envio anterior antes de reenviar.");
     if (!checkout.url || !["READY","SENT","PENDING","FAILED"].includes(checkout.status)) {
       throw new HttpError(409,"CHECKOUT_NOT_SENDABLE","Este checkout ainda não está pronto ou já foi encerrado.");
     }
@@ -35,7 +36,7 @@ export async function POST(request: Request,{ params }:{ params:Promise<{ id:str
     try {
       const [updated] = await env.DB.batch([
         env.DB.prepare(`UPDATE checkouts SET status=CASE WHEN status='READY' THEN 'SEND_PENDING' ELSE status END,send_status='PENDING',send_requested_at=?,last_error_code=NULL,last_error=NULL,last_error_at=NULL,updated_at=?,version=version+1
-          WHERE id=? AND url IS NOT NULL AND expires_at>? AND status IN ('READY','SENT','PENDING','FAILED')`).bind(now,now,id,now),
+          WHERE id=? AND send_status!='UNKNOWN' AND NOT EXISTS (SELECT 1 FROM messages WHERE checkout_id=checkouts.id AND status IN ('SEND_UNKNOWN','SENDING')) AND url IS NOT NULL AND expires_at>? AND status IN ('READY','SENT','PENDING','FAILED')`).bind(now,now,id,now),
         env.DB.prepare("INSERT INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,created_at) SELECT ?,'checkout.send',?,?,?,0,? WHERE changes()=1")
           .bind(outboxId,id,dedupeKey,JSON.stringify({ checkoutId:id,resend }),now),
         env.DB.prepare("INSERT INTO idempotency_keys (key,scope,resource_id,response_json,created_at) SELECT ?,'checkout_send',?,?,? WHERE changes()=1")

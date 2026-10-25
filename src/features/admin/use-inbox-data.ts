@@ -2,7 +2,7 @@
 import {useCallback,useEffect,useRef,useState} from "react";
 import {adminApi} from "./api";
 export type InboxItem={id:string;contact_phone?:string|null;contact_name?:string|null;line_name?:string|null;mode:"AGENT"|"HUMAN";external_id:string;claimed_by:string|null;claimed_by_name:string|null;agent_error:string|null;opted_out_at:string|null;lead_name:string|null;lead_stage:string|null;edition_name:string|null;last_message:string|null;last_direction:string|null;last_status:string|null;last_message_at:string|null;updated_at:string};
-export type Message={id:string;external_id:string|null;direction:"IN"|"OUT";type:string;body:string|null;status:string;actor_name:string|null;last_error:string|null;created_at:string};
+export type Message={id:string;checkout_id?:string|null;external_id:string|null;direction:"IN"|"OUT";type:string;body:string|null;status:string;actor_name:string|null;last_error:string|null;created_at:string};
 type Conversation=InboxItem & {lead_id:string|null;lead_email:string|null;lead_phone:string|null;company:string|null;city_state:string|null;summary:string|null;agent_paused_at:string|null;claimed_at:string|null};
 type Detail={conversation:Conversation;messages:Message[];nextCursor:string|null};
 type User={id:string;name:string;roles:string[];environment?:string;inboundHost?:string;capabilities?:{manualSend:boolean;agent:boolean}};
