@@ -1,3 +1,4 @@
+import {requireCapability} from "@/server/capabilities";
 import { env } from "cloudflare:workers";
 import { checkoutExpiresAt,currentDateInRecife,installmentsAreAllowed,resolveCheckoutDueDate } from "@/features/billing/checkout-request";
 import { checkoutSchema } from "@/features/leads/schemas";
@@ -17,6 +18,7 @@ export async function POST(request: Request,{ params }:{ params:Promise<{ id:str
   const requestId = requestIdFrom(request);
   try {
     const actor = await requireAccessUser(request,["admin","gestor"]);
+    requireCapability(env,"checkout");
     const { id:leadId } = await params;
     const idempotencyKey = requireIdempotencyKey(request);
     const prior = await priorResponse(idempotencyKey);

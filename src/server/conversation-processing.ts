@@ -1,3 +1,6 @@
+import {uncertainSend} from "./send-outcome";
+import {publishOutbox} from "./outbox";
+import {capabilityEnabled} from "./capabilities";
 import { requiresImmediateHandoff,type AgentResult } from "@/features/conversations/model";
 import { markLeadInAttendance,pauseConversationForHandoff,queueConversationSummary } from "@/server/conversation-state";
 import { answerWithAgent,loadAgentContext,summarizeConversation,type OpenAIFetcher } from "@/server/integrations/openai-agent";
@@ -49,7 +52,7 @@ async function storeAndSendReply(env: ConversationWorkerEnv,input: {
   try {
     const response = await sendConversationText(env,input.conversation.id,input.phone,input.reply.reply,metaFetcher);
     const externalId = response.messages?.[0]?.id;
-    if (!externalId) throw new Error("Meta did not return a message id");
+    if (!externalId) throw new Error("O provedor não confirmou o identificador do envio");
     const acceptedAt = new Date().toISOString();
     await env.DB.batch([
       env.DB.prepare("UPDATE messages SET external_id=?,status='ACCEPTED',accepted_at=? WHERE id=? AND status='SENDING'").bind(externalId,acceptedAt,messageId),
@@ -61,8 +64,9 @@ async function storeAndSendReply(env: ConversationWorkerEnv,input: {
   } catch (error) {
     const failedAt = new Date().toISOString();
     const failure = errorMessage(error);
+    const uncertain=uncertainSend(error);
     await env.DB.batch([
-      env.DB.prepare("UPDATE messages SET status='FAILED',last_error=?,failed_at=? WHERE id=? AND status='SENDING'").bind(failure,failedAt,messageId),
+      env.DB.prepare("UPDATE messages SET status=?,last_error=?,failed_at=? WHERE id=? AND status='SENDING'").bind(uncertain?"SEND_UNKNOWN":"FAILED",failure,failedAt,messageId),
       env.DB.prepare("UPDATE conversations SET mode='HUMAN',human_active=1,agent_paused_at=coalesce(agent_paused_at,?),agent_error=?,agent_processing_token=NULL,agent_processing_started_at=NULL,updated_at=? WHERE id=? AND agent_processing_token=?")
         .bind(failedAt,failure,failedAt,input.conversation.id,input.token),
     ]);
@@ -70,14 +74,14 @@ async function storeAndSendReply(env: ConversationWorkerEnv,input: {
       await env.DB.prepare("INSERT INTO activities (id,lead_id,type,title,body,created_at,updated_at) VALUES (?,?,'HANDOFF','Falha no envio do agente',?,?,?)")
         .bind(crypto.randomUUID(),input.conversation.lead_id,failure,failedAt,failedAt).run();
     }
-    return { sent:false as const,error:failure };
+    return { sent:false as const,error:failure,uncertain };
   }
 }
 
-export async function processIncomingWhatsApp(env: ConversationWorkerEnv,externalId: string,dependencies: ProcessingDependencies = {},provider:"meta"|"uazapi" = "meta") {
+export async function processIncomingWhatsApp(env: ConversationWorkerEnv,externalId: string,dependencies: ProcessingDependencies = {},provider:"meta"|"uazapi" = "meta",execution:"inline"|"receive-only"|"reply"="inline") {
   const stored = await env.DB.prepare("SELECT id,payload_json,processed_at,request_id FROM webhook_events WHERE provider=? AND external_id=?")
     .bind(provider,externalId).first<{ id:string;payload_json:string;processed_at:string|null;request_id:string|null }>();
-  if (!stored || stored.processed_at) return { processed:false as const,duplicate:Boolean(stored?.processed_at) };
+  if (!stored || (stored.processed_at && execution!=="reply")) return { processed:false as const,duplicate:Boolean(stored?.processed_at) };
   const payload = JSON.parse(stored.payload_json) as { event:{ id:string;from:string;type:string;text?:{ body?:string } };lineId?:string } & Partial<UazapiIncoming>;
   const event = payload.event;
   const phone = event.from.replace(/\D/g,"");
@@ -88,10 +92,11 @@ export async function processIncomingWhatsApp(env: ConversationWorkerEnv,externa
   const isHistory = event.history === true;
   const outgoing = event.fromMe === true;
   const lineAgent = provider === "uazapi" && payload.lineId ? await getLineAgent(env,payload.lineId) : null;
-  const initialMode = provider === "uazapi" && (!lineAgent?.enabled || !env.OPENROUTER_API_KEY || isHistory || outgoing) ? "HUMAN" : "AGENT";
+  const available=capabilityEnabled(env,"agent") && (provider!=="uazapi" || (lineAgent?.enabled && (execution==="receive-only" || env.OPENROUTER_API_KEY)));
+  const initialMode = !available || isHistory || outgoing ? "HUMAN" : "AGENT";
   const text = event.text?.body?.trim() ?? "";
   // Upsert, message and processed marker are atomic; failed persistence remains retryable.
-  const [,inserted] = await env.DB.batch([
+  const results = execution==="reply" ? null : await env.DB.batch([
     env.DB.prepare(`INSERT INTO conversations (id,lead_id,channel,external_id,whatsapp_instance_id,contact_phone,contact_name,mode,human_active,last_message_at,request_id,created_at,updated_at)
       VALUES (?,?,'whatsapp',?,?,?,?,?,?,?, ?,?,?) ON CONFLICT(channel,external_id) DO UPDATE SET
       lead_id=coalesce(conversations.lead_id,excluded.lead_id),contact_name=coalesce(excluded.contact_name,conversations.contact_name),
@@ -102,9 +107,13 @@ export async function processIncomingWhatsApp(env: ConversationWorkerEnv,externa
       .bind(crypto.randomUUID(),event.id,outgoing ? "OUT" : "IN",event.type,text || null,outgoing ? "SENT" : "RECEIVED",JSON.stringify(event),stored.request_id,eventAt,externalContactId),
     ...(outgoing && !isHistory ? [env.DB.prepare("UPDATE conversations SET mode='HUMAN',human_active=1,agent_paused_at=coalesce(agent_paused_at,?),updated_at=? WHERE channel='whatsapp' AND external_id=?")
       .bind(now,now,externalContactId)] : []),
+    ...(execution==="receive-only" && available && !isHistory && !outgoing && text ? [env.DB.prepare(`INSERT OR IGNORE INTO outbox_events
+      (id,type,aggregate_id,dedupe_key,payload_json,attempts,request_id,created_at)
+      SELECT ?,'conversation.reply.requested',id,?,?,0,?,? FROM conversations WHERE channel='whatsapp' AND external_id=? AND mode='AGENT' AND claimed_by IS NULL AND opted_out_at IS NULL`)
+      .bind(`reply:${provider}:${event.id}`,`reply:${provider}:${event.id}`,JSON.stringify({externalId,provider,requestId:stored.request_id}),stored.request_id,now,externalContactId)] : []),
     env.DB.prepare("UPDATE webhook_events SET processed_at=?,error=NULL WHERE id=?").bind(now,stored.id),
   ]);
-  const duplicate = (inserted.meta.changes ?? 0) !== 1;
+  const duplicate = results ? (results[1].meta.changes ?? 0) !== 1 : false;
   const conversation = await env.DB.prepare("SELECT id,lead_id,mode,claimed_by,opted_out_at,request_id FROM conversations WHERE channel='whatsapp' AND external_id=?")
     .bind(externalContactId).first<ConversationRow>();
   if (!conversation) throw new Error("Conversation upsert failed");
@@ -131,6 +140,16 @@ export async function processIncomingWhatsApp(env: ConversationWorkerEnv,externa
     await markLeadInAttendance(env,conversation.lead_id,conversation.claimed_by,"Primeiro atendimento humano");
     await queueConversationSummary(env,conversation.id);
     return { processed:true as const,answered:false };
+  }
+  if(execution==="receive-only") {
+    if(!available)await pauseConversationForHandoff(env,{conversationId:conversation.id,leadId:conversation.lead_id,reason:"Automação pausada"});
+    if(available)await publishOutbox(env,{id:`reply:${provider}:${event.id}`,type:"conversation.reply.requested",externalId,provider,requestId:stored.request_id??undefined});
+    return {processed:true as const,answered:false,deferred:available};
+  }
+  if(!capabilityEnabled(env,"agent"))return {processed:true as const,answered:false};
+  if(execution==="reply" && event.createdAt && Date.now()-Date.parse(event.createdAt)>300_000) {
+    await pauseConversationForHandoff(env,{conversationId:conversation.id,leadId:conversation.lead_id,reason:"Solicitação automática expirada; atendimento humano necessário"});
+    return {processed:true as const,answered:false,handoff:true};
   }
   if (provider === "uazapi" && (!lineAgent?.enabled || !env.OPENROUTER_API_KEY)) {
     await pauseConversationForHandoff(env,{conversationId:conversation.id,leadId:conversation.lead_id,reason:"Atendente OpenRouter pausado ou não configurado"});
@@ -170,17 +189,19 @@ export async function processIncomingWhatsApp(env: ConversationWorkerEnv,externa
   }
   const result = await storeAndSendReply(env,{ conversation,phone,reply,token,lineId:payload.lineId,agentVersion:lineAgent?.version,agentId:lineAgent?.id },provider === "uazapi" ? dependencies.uazapiFetcher : dependencies.metaFetcher);
   await queueConversationSummary(env,conversation.id);
-  return { processed:true as const,answered:result.sent,handoff:reply.handoff };
+  return { processed:true as const,answered:result.sent,handoff:reply.handoff,uncertain:"uncertain" in result && result.uncertain };
 }
 
 export async function processManualConversationMessage(env: ConversationWorkerEnv,messageId: string,metaFetcher?:MetaFetcher) {
-  const claimed = await env.DB.prepare(`UPDATE messages SET status='SENDING' WHERE id=? AND status='SEND_PENDING' AND EXISTS (
+  if(!capabilityEnabled(env,"manualSend"))return {sent:false as const,paused:true};
+  const claimed = await env.DB.prepare(`UPDATE messages SET status='SENDING',send_started_at=? WHERE id=? AND status='SEND_PENDING' AND EXISTS (
     SELECT 1 FROM conversations c WHERE c.id=messages.conversation_id AND c.mode='HUMAN' AND c.claimed_by=messages.actor_id
       AND c.agent_processing_token IS NULL AND c.opted_out_at IS NULL)`)
-    .bind(messageId).run();
+    .bind(new Date().toISOString(),messageId).run();
   if ((claimed.meta.changes ?? 0) !== 1) {
     const existing = await env.DB.prepare("SELECT status FROM messages WHERE id=?").bind(messageId).first<{ status:string }>();
     if (existing && ["ACCEPTED","DELIVERED","READ"].includes(existing.status)) return { sent:true as const,idempotent:true };
+    if(existing?.status==="SEND_UNKNOWN")return {sent:false as const,uncertain:true};
     if (existing?.status === "SEND_PENDING") {
       const now = new Date().toISOString();
       await env.DB.prepare("UPDATE messages SET status='FAILED',last_error='A conversa não está disponível para resposta humana.',failed_at=? WHERE id=? AND status='SEND_PENDING'")
@@ -194,7 +215,7 @@ export async function processManualConversationMessage(env: ConversationWorkerEn
   try {
     const response = await sendConversationText(env,message.conversation_id,message.external_id,message.body,metaFetcher);
     const externalId = response.messages?.[0]?.id;
-    if (!externalId) throw new Error("Meta did not return a message id");
+    if (!externalId) throw new Error("O provedor não confirmou o identificador do envio");
     const acceptedAt = new Date().toISOString();
     await env.DB.batch([
       env.DB.prepare("UPDATE messages SET external_id=?,status='ACCEPTED',accepted_at=? WHERE id=? AND status='SENDING'").bind(externalId,acceptedAt,messageId),
@@ -206,9 +227,10 @@ export async function processManualConversationMessage(env: ConversationWorkerEn
   } catch (error) {
     const failedAt = new Date().toISOString();
     const failure = errorMessage(error);
-    await env.DB.prepare("UPDATE messages SET status='FAILED',last_error=?,failed_at=? WHERE id=? AND status='SENDING'")
-      .bind(failure,failedAt,messageId).run();
-    return { sent:false as const,error:failure };
+    const uncertain=uncertainSend(error);
+    await env.DB.prepare("UPDATE messages SET status=?,last_error=?,failed_at=? WHERE id=? AND status='SENDING'")
+      .bind(uncertain?"SEND_UNKNOWN":"FAILED",failure,failedAt,messageId).run();
+    return { sent:false as const,error:failure,uncertain };
   }
 }
 

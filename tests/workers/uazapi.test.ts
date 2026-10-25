@@ -43,7 +43,7 @@ describe("UAZAPI no runtime Workers",()=>{
   it("isola a fila de recebimento, processa até a Inbox e recupera somente eventos UAZAPI",async()=>{
     const dedicatedSend=vi.fn<(event:unknown)=>Promise<void>>().mockResolvedValue(undefined);
     const commercialSend=vi.fn<(event:unknown)=>Promise<void>>().mockResolvedValue(undefined);
-    const inboundEnv={...runtime,UAZAPI_EVENTS_QUEUE:{send:dedicatedSend} as unknown as Queue,EVENTS_QUEUE:{send:commercialSend} as unknown as Queue};
+    const inboundEnv={...runtime,ENABLE_AGENT:"false" as const,UAZAPI_EVENTS_QUEUE:{send:dedicatedSend} as unknown as Queue,EVENTS_QUEUE:{send:commercialSend} as unknown as Queue};
     await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"messages",message:message("INBOUND-ONLY")},"request-inbound-only");
     expect(dedicatedSend).toHaveBeenCalledTimes(1);expect(commercialSend).not.toHaveBeenCalled();
     const context=createExecutionContext();
@@ -64,7 +64,7 @@ describe("UAZAPI no runtime Workers",()=>{
     await env.DB.prepare("UPDATE outbox_events SET published_at=NULL WHERE type='uazapi.incoming'").run();
     dedicatedSend.mockClear();
     await receiver.scheduled({} as ScheduledController,inboundEnv);
-    expect(dedicatedSend).toHaveBeenCalledTimes(1);expect(commercialSend).not.toHaveBeenCalled();
+    expect(dedicatedSend).not.toHaveBeenCalled();expect(commercialSend).not.toHaveBeenCalled();
     expect(await env.DB.prepare("SELECT published_at FROM outbox_events WHERE id='commercial'").first()).toMatchObject({published_at:null});
     await publishOutbox(inboundEnv,{id:"commercial",type:"checkout.send"});
     expect(commercialSend).toHaveBeenCalledTimes(1);

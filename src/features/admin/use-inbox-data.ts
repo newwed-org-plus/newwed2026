@@ -5,7 +5,7 @@ export type InboxItem={id:string;contact_phone?:string|null;contact_name?:string
 export type Message={id:string;external_id:string|null;direction:"IN"|"OUT";type:string;body:string|null;status:string;actor_name:string|null;last_error:string|null;created_at:string};
 type Conversation=InboxItem & {lead_id:string|null;lead_email:string|null;lead_phone:string|null;company:string|null;city_state:string|null;summary:string|null;agent_paused_at:string|null;claimed_at:string|null};
 type Detail={conversation:Conversation;messages:Message[];nextCursor:string|null};
-type User={id:string;name:string;roles:string[];environment?:string;inboundHost?:string};
+type User={id:string;name:string;roles:string[];environment?:string;inboundHost?:string;capabilities?:{manualSend:boolean;agent:boolean}};
 function merge<T extends {id:string}>(previous:T[],incoming:T[],compare:(a:T,b:T)=>number) {
   const items=new Map(previous.map(item=>[item.id,item]));for(const item of incoming)items.set(item.id,item);return [...items.values()].sort(compare);
 }

@@ -1,3 +1,5 @@
+import {dispatchEvent} from "@/server/dispatch";
+import {capabilityEnabled} from "@/server/capabilities";
 import { expireCheckoutReservations,markCheckoutDelivered,processCheckoutCancellation,processCheckoutCreation,sendCheckout } from "@/server/checkout-processing";
 import { processConversationSummary,processIncomingWhatsApp,processManualConversationMessage } from "@/server/conversation-processing";
 import { getAsaasPayment } from "@/server/integrations/asaas";
@@ -8,7 +10,7 @@ import { processNotificationEmail,type EmailEnv } from "@/server/notifications";
 import { processUazapiBatch,processUazapiStatus } from "@/server/uazapi-webhook";
 import type { RuntimeSecrets } from "@/server/secrets";
 
-type EventBody = { type:string;externalId?:string;checkoutId?:string;providerPaymentId?:string;id?:string;leadId?:string;resend?:boolean;conversationId?:string;messageId?:string;targetCount?:number;notificationId?:string;userId?:string;requestId?:string };
+type EventBody = { provider?:"meta"|"uazapi"; type:string;externalId?:string;checkoutId?:string;providerPaymentId?:string;id?:string;leadId?:string;resend?:boolean;conversationId?:string;messageId?:string;targetCount?:number;notificationId?:string;userId?:string;requestId?:string };
 type WorkerEnv = Env & RuntimeSecrets & EmailEnv;
 
 async function handleStatus(env: WorkerEnv, externalId: string) {
@@ -42,10 +44,11 @@ async function reconcileAsaas(env: WorkerEnv, providerPaymentId: string) {
 }
 
 async function handleEvent(env: WorkerEnv, body: EventBody) {
+  if(body.type==="conversation.reply.requested" && body.externalId)return processIncomingWhatsApp(env,body.externalId,{},body.provider??"uazapi","reply");
   if (body.type === "uazapi.batch" && body.externalId) return processUazapiBatch(env,body.externalId,body.targetCount);
-  if (body.type === "uazapi.incoming" && body.externalId) return processIncomingWhatsApp(env,body.externalId,{},"uazapi");
+  if (body.type === "uazapi.incoming" && body.externalId) return processIncomingWhatsApp(env,body.externalId,{},"uazapi","receive-only");
   if (body.type === "uazapi.status" && body.externalId) return processUazapiStatus(env,body.externalId);
-  if (body.type === "whatsapp.incoming" && body.externalId) return processIncomingWhatsApp(env,body.externalId);
+  if (body.type === "whatsapp.incoming" && body.externalId) return processIncomingWhatsApp(env,body.externalId,{},"meta","receive-only");
   if (body.type === "whatsapp.status" && body.externalId) return handleStatus(env,body.externalId);
   if (body.type === "checkout.create" && body.checkoutId && body.id) return processCheckoutCreation(env,body.checkoutId,body.id);
   if (body.type === "checkout.send" && body.checkoutId && body.id) return sendCheckout(env,body.checkoutId,body.id,body.resend);
@@ -58,34 +61,42 @@ async function handleEvent(env: WorkerEnv, body: EventBody) {
     const now = new Date().toISOString();
     await env.DB.prepare("INSERT INTO activities (id,lead_id,type,title,created_at,updated_at) VALUES (?,?,'LEAD_CREATED','Pré-inscrição recebida',?,?)")
       .bind(crypto.randomUUID(),body.leadId,now,now).run();
+    return;
   }
+  throw new Error("Unsupported durable event");
 }
 
 export default {
   async queue(batch, env) {
     for (const message of batch.messages) {
       const body = message.body as EventBody;
-      try { await handleEvent(env as WorkerEnv,body); message.ack(); }
-      catch (error) { console.error(JSON.stringify({ level: "error", event: "queue.failed", messageId: message.id, requestId:body.requestId, error: error instanceof Error ? error.message : String(error) })); message.retry(); }
+      try {
+        if(body.type==="asaas.reconcile"&&!body.id)await handleEvent(env as WorkerEnv,body);
+        else await dispatchEvent(env,body as import("@/server/outbox").QueueEvent,event=>handleEvent(env as WorkerEnv,event));
+        message.ack();
+      } catch {console.error(JSON.stringify({event:"queue.failed",messageId:message.id,requestId:body.requestId}));message.retry();}
     }
   },
   async scheduled(_controller, env) {
     const workerEnv = env as WorkerEnv;
     const now = new Date().toISOString();
     const stale = new Date(Date.now() - 10 * 60_000).toISOString();
-    await workerEnv.DB.batch([
+    await workerEnv.DB.prepare("UPDATE outbox_events SET dispatch_state=CASE WHEN type='checkout.create' THEN 'PENDING' ELSE 'HELD' END,hold_reason=CASE WHEN type='checkout.create' THEN NULL ELSE 'PROCESSING_RESULT_UNKNOWN' END,published_at=CASE WHEN type='checkout.create' THEN NULL ELSE published_at END,processing_token=NULL,processing_started_at=NULL WHERE dispatch_state='PROCESSING' AND processing_started_at<=?").bind(stale).run();
+    if(capabilityEnabled(workerEnv,"checkout"))await workerEnv.DB.batch([
       workerEnv.DB.prepare("UPDATE checkouts SET status='FAILED',last_error_code='PROCESSING_TIMEOUT',last_error='O processamento excedeu o lease e será retomado.',last_error_at=?,next_retry_at=?,processing_token=NULL,processing_started_at=NULL,updated_at=? WHERE status='CREATING' AND processing_started_at IS NOT NULL AND processing_started_at<=?")
         .bind(now,now,now,stale),
       workerEnv.DB.prepare("UPDATE outbox_events SET published_at=NULL,next_attempt_at=? WHERE type='checkout.create' AND aggregate_id IN (SELECT id FROM checkouts WHERE status='FAILED' AND last_error_code='PROCESSING_TIMEOUT')")
         .bind(now),
       workerEnv.DB.prepare("UPDATE checkouts SET status='FAILED',send_status='FAILED',last_error_code='META_DELIVERY_UNKNOWN',last_error='O aceite do envio não foi confirmado após o lease.',last_error_at=?,processing_token=NULL,processing_started_at=NULL,updated_at=? WHERE status='SEND_PENDING' AND processing_started_at IS NOT NULL AND processing_started_at<=?")
         .bind(now,now,stale),
+    ]);
+    await workerEnv.DB.batch([
       workerEnv.DB.prepare("UPDATE conversations SET mode='HUMAN',human_active=1,agent_paused_at=coalesce(agent_paused_at,?),agent_error='Resposta do agente excedeu o lease e foi encaminhada ao humano.',agent_processing_token=NULL,agent_processing_started_at=NULL,updated_at=? WHERE agent_processing_token IS NOT NULL AND agent_processing_started_at<=?")
         .bind(now,now,new Date(Date.now() - 2 * 60_000).toISOString()),
-      workerEnv.DB.prepare("UPDATE messages SET status='FAILED',last_error='O resultado do envio não foi confirmado dentro do lease.',failed_at=? WHERE status='SENDING' AND created_at<=?")
+      workerEnv.DB.prepare("UPDATE messages SET status='SEND_UNKNOWN',last_error='O resultado do envio não foi confirmado dentro do lease.',failed_at=? WHERE status='SENDING' AND coalesce(send_started_at,created_at)<=?")
         .bind(now,stale),
     ]);
-    const pending = await workerEnv.DB.prepare("SELECT id,type,aggregate_id,payload_json FROM outbox_events WHERE published_at IS NULL AND attempts<10 AND (next_attempt_at IS NULL OR next_attempt_at<=?) ORDER BY created_at LIMIT 50")
+    const pending = await workerEnv.DB.prepare("SELECT id,type,aggregate_id,payload_json FROM outbox_events WHERE type NOT LIKE 'uazapi.%' AND dispatch_state='PENDING' AND published_at IS NULL AND attempts<10 AND (next_attempt_at IS NULL OR next_attempt_at<=?) ORDER BY created_at LIMIT 50")
       .bind(now).all<{ id:string;type:string;aggregate_id:string;payload_json:string }>();
     for (const event of pending.results) {
       await publishOutbox(workerEnv,{ id:event.id,type:event.type,...JSON.parse(event.payload_json) });
@@ -95,7 +106,7 @@ export default {
     for (const webhook of pendingWebhooks.results) {
       await processStoredAsaasWebhook(workerEnv,webhook);
     }
-    await expireCheckoutReservations(workerEnv);
+    if(capabilityEnabled(workerEnv,"checkout"))await expireCheckoutReservations(workerEnv);
     await workerEnv.DB.prepare("DELETE FROM rate_limit_buckets WHERE expires_at<?").bind(now).run();
     if (workerEnv.ASAAS_API_KEY) {
       const pendingPayments = await workerEnv.DB.prepare("SELECT provider_payment_id FROM payments WHERE provider_payment_id IS NOT NULL AND status IN ('PENDING','OVERDUE') ORDER BY updated_at LIMIT 50")

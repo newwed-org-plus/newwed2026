@@ -34,11 +34,18 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Cursor de histórico, orçamento 100/tick, lock por linha e login sem bucket D1 por IP.
 - Gate completo aprovado: 96 unitários, 37 Workers, 53 visuais, D1, build, lint/tipos e auditoria sem alertas. CP-22.
 
-## Onda atual
+## Onda 23 concluída
 
 - Onda 23, `codex/wave-23-inbox-pagination`, migration local 0010.
 - Paginação estável, erros globais, polling serial e ambiente visível.
 - Gate aprovado: 96 unitários, 39 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-23.
+
+## Onda atual
+
+- Onda 24, `codex/wave-24-safe-commercial-processing`, migration local 0011.
+- Outbox com retenção/lease/conclusão, flags independentes e intake separado de respostas.
+- Envios incertos não são repetidos; revisão e reconciliação auditadas.
+- Gate aprovado: 96 unitários, 46 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-24.
 
 ## Próximas ondas
 

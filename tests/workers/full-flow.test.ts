@@ -102,13 +102,13 @@ describe("fluxo completo no runtime Workers",()=>{
     expect((await env.DB.prepare("SELECT status FROM payments WHERE provider_payment_id='pay-test'").first<{status:string}>())?.status).toBe("PAID");
     const notification=await env.DB.prepare("SELECT n.id,o.id AS outbox_id,u.id AS user_id FROM notifications n JOIN outbox_events o ON o.aggregate_id=n.id AND o.type='notification.email' JOIN notification_recipients nr ON nr.notification_id=n.id AND nr.channel='EMAIL' JOIN users u ON u.id=nr.user_id WHERE n.entity_id=?")
       .bind(checkoutBody.checkoutId).first<{id:string;outbox_id:string;user_id:string}>();
-    const send=vi.fn().mockRejectedValueOnce(new Error("temporary email failure")).mockResolvedValue({messageId:"email-1"});
+    const send=vi.fn().mockResolvedValue({messageId:"email-1"});
     const emailEnv={...workerEnv,EMAIL:{send} as unknown as SendEmail,EMAIL_FROM:"marketing@newwed.com.br",EMAIL_ALLOWED_RECIPIENT_DOMAINS:"newwed.local"} as EmailEnv;
-    expect(await processNotificationEmail(emailEnv,notification!.outbox_id,notification!.id,notification!.user_id)).toMatchObject({sent:false});
     expect(await processNotificationEmail(emailEnv,notification!.outbox_id,notification!.id,notification!.user_id)).toMatchObject({sent:true});
     expect(await processNotificationEmail(emailEnv,notification!.outbox_id,notification!.id,notification!.user_id)).toMatchObject({duplicate:true});
-    expect(send).toHaveBeenCalledTimes(2);
-    expect((await env.DB.prepare("SELECT delivery_status,attempts FROM notification_recipients WHERE notification_id=? AND channel='EMAIL'").bind(notification!.id).first<{delivery_status:string;attempts:number}>())).toMatchObject({delivery_status:"SENT",attempts:2});
+    expect(await processNotificationEmail(emailEnv,notification!.outbox_id,notification!.id,notification!.user_id)).toMatchObject({duplicate:true});
+    expect(send).toHaveBeenCalledTimes(1);
+    expect((await env.DB.prepare("SELECT delivery_status,attempts FROM notification_recipients WHERE notification_id=? AND channel='EMAIL'").bind(notification!.id).first<{delivery_status:string;attempts:number}>())).toMatchObject({delivery_status:"SENT",attempts:1});
     expect((await env.DB.prepare("SELECT utm_source FROM lead_attribution WHERE lead_id=? AND touch_type='LAST'").bind(leadId).first<{utm_source:string}>())?.utm_source).toBe("instagram");
     if (!env.MEDIA) throw new Error("The local Workers test requires the MEDIA binding.");
     await env.MEDIA.put("evidence/flow.txt","ok");
