@@ -97,7 +97,7 @@ describe("UAZAPI no runtime Workers",()=>{
     const fetcher = vi.fn(async (url:RequestInfo|URL,init?:RequestInit) => {
       const path = new URL(String(url)).pathname;paths.push(path);
       if (path === "/webhook") {
-        expect(JSON.parse(String(init?.body))).toMatchObject({events:["connection","messages","messages_update","history"],excludeMessages:["wasSentByApi","isGroupYes"]});
+        expect(JSON.parse(String(init?.body))).toMatchObject({events:["connection","messages","messages_update","history"],excludeMessages:["isGroupYes"]});
         return Response.json([]);
       }
       if (path === "/instance/connect") {state="connecting";return Response.json({response:"Connecting"});}

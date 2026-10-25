@@ -5,6 +5,7 @@ import { LoaderCircle,QrCode,RefreshCw,Unplug } from "lucide-react";
 import { adminApi } from "@/features/admin/api";
 
 type Line = { id:string;name:string;state:"disconnected"|"connecting"|"connected"|"hibernated";phone:string|null;profile_name:string|null;last_error:string|null;updated_at:string;serverConfigured?:boolean };
+type History={job:null|{status:string;scanned_count:number;last_error:string|null};totals:{conversations:number;messages:number}};
 type Session = { id:string;state:Line["state"];qrCode:string|null;phone:string|null;profileName:string|null;updatedAt:string };
 const labels = { disconnected:"Desconectado",connecting:"Aguardando conexão",connected:"Conectado",hibernated:"Sessão pausada" };
 
@@ -15,14 +16,19 @@ export function AdminWhatsApp() {
   const [loading,setLoading] = useState(true);
   const [busy,setBusy] = useState(false);
   const [error,setError] = useState("");
+  const [localTestMode,setLocalTestMode]=useState(false);
+  const [historyEnabled,setHistoryEnabled]=useState(false);
+  const [history,setHistory]=useState<History|null>(null);
+  const historyFlight=useRef(false);
+  const [syncing,setSyncing]=useState(false);
   const [confirmDisconnect,setConfirmDisconnect] = useState(false);
   const generation = useRef(0);
   const inFlight = useRef(false);
   const invalidate = useCallback(() => { generation.current++; },[]);
   const load = useCallback(async () => {
     try {
-      const {items} = await adminApi<{items:Line[]}>("/api/admin/whatsapp");
-      setLines(items);
+      const {items,historySyncEnabled,localTestMode} = await adminApi<{items:Line[];historySyncEnabled?:boolean;localTestMode?:boolean}>("/api/admin/whatsapp");
+      setLines(items);setHistoryEnabled(historySyncEnabled===true);setLocalTestMode(localTestMode===true);
       setSelectedId(current => items.some(line => line.id === current) ? current : items[0]?.id ?? "");
       setError("");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Não foi possível carregar as linhas."); }
@@ -70,6 +76,23 @@ export function AdminWhatsApp() {
     timer = setTimeout(poll,5000);
     return () => { stopped = true;clearTimeout(timer); };
   },[selectedId,serverConfigured,operate,state]);
+  const loadHistory=useCallback(async()=>{
+    if(!selectedId||!historyEnabled||historyFlight.current)return null;
+    historyFlight.current=true;const version=generation.current;
+    try{const result=await adminApi<History>(`/api/admin/whatsapp/${selectedId}/history`);if(version!==generation.current)return null;setHistory(result);return result;}catch(reason){if(version===generation.current)setError(reason instanceof Error?reason.message:"Não foi possível consultar o histórico.");return null;}finally{historyFlight.current=false;}
+  },[selectedId,historyEnabled]);
+  useEffect(()=>{setHistory(null);void loadHistory();},[loadHistory]);
+  const historyStatus=history?.job?.status;
+  useEffect(()=>{
+    if(!localTestMode&&(!historyStatus||!["PENDING","RUNNING"].includes(historyStatus)))return;
+    let stopped=false;let timer:ReturnType<typeof setTimeout>;
+    const poll=async()=>{const next=await loadHistory();if(!stopped&&(localTestMode||!next||next.job&&["PENDING","RUNNING"].includes(next.job.status)))timer=setTimeout(poll,5000);};
+    timer=setTimeout(poll,5000);return()=>{stopped=true;clearTimeout(timer);};
+  },[historyStatus,loadHistory,localTestMode]);
+  const importHistory=async()=>{
+    if(syncing)return;setSyncing(true);setError("");
+    try{await adminApi(`/api/admin/whatsapp/${selectedId}/history`,{method:"POST",body:"{}"});await loadHistory();}catch(reason){setError(reason instanceof Error?reason.message:"Não foi possível iniciar a importação.");}finally{setSyncing(false);}
+  };
   const changeLine = (id: string) => { invalidate();setSelectedId(id);setSession(null);setBusy(false);setError("");setConfirmDisconnect(false); };
 
   return <section className="mx-auto max-w-5xl px-5 py-8 md:px-8">
@@ -92,6 +115,7 @@ export function AdminWhatsApp() {
           <button onClick={() => operate("refresh")} disabled={busy||!serverConfigured} className="flex items-center gap-2 border border-black/20 px-4 py-3 text-sm disabled:opacity-50">{busy ? <LoaderCircle size={16} className="animate-spin"/> : <RefreshCw size={16}/>} Atualizar estado</button>
           {(state === "connected" || state === "connecting" || state === "hibernated") && <button onClick={() => setConfirmDisconnect(true)} disabled={busy||!serverConfigured} className="flex items-center gap-2 px-3 py-3 text-sm text-[#70112b]"><Unplug size={16}/> Desconectar</button>}
         </div>
+        {historyEnabled&&<section aria-label="Importação do histórico" className="mt-6 border-t border-black/10 pt-5 text-sm"><h3 className="font-medium">Histórico na Inbox deste ambiente</h3>{history&&<p className="mt-2 text-black/60">{history.totals.conversations} conversas · {history.totals.messages} mensagens</p>}{history?.job&&<p role="status" className="mt-2">{history.job.status==="DONE"?"Consulta ao histórico disponível concluída.":history.job.status==="FAILED"?"Importação interrompida; confira o erro e tente novamente.":"Importando mensagens anteriores; você já pode abrir a Inbox."}</p>}{history?.job?.last_error&&<p className="mt-2 text-[#70112b]">{history.job.last_error}</p>}<button onClick={importHistory} disabled={syncing||state!=="connected"||Boolean(history?.job&&["PENDING","RUNNING"].includes(history.job.status))} className="mt-4 border border-black/20 px-4 py-3 disabled:opacity-50">{syncing?"Solicitando…":"Importar histórico disponível"}</button><p className="mt-2 text-xs text-black/50">Consulta o histórico da UAZAPI sem reconectar a linha. Mensagens importadas não disparam respostas.</p></section>}
         {confirmDisconnect && <div role="alert" className="mt-5 border border-[#70112b]/20 p-4 text-sm"><p>Desconectar {line.name}? Novas respostas ficarão indisponíveis até conectar novamente. O histórico será preservado.</p><div className="mt-4 flex flex-wrap gap-3"><button onClick={() => operate("disconnect")} disabled={busy||!serverConfigured} className="bg-[#70112b] px-4 py-2 text-white disabled:opacity-50">Confirmar desconexão</button><button onClick={() => setConfirmDisconnect(false)} className="border border-black/20 px-4 py-2">Cancelar</button></div></div>}
       </div>}
     </div>}

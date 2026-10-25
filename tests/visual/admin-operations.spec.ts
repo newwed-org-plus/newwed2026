@@ -30,14 +30,18 @@ for(const [name,width,height] of [["mobile",390,844],["tablet",768,1024],["deskt
 });
 for(const [name,width,height] of [["mobile",390,844],["desktop",1440,900]] as const)test(`${name} · checkout exige a escolha da conversa UAZAPI`,async({page})=>{
  await page.setViewportSize({width,height});const lead={id:'synthetic-lead',name:'VALIDACAO checkout',email:'demo@example.invalid',phone:'81000000001',stage:'QUALIFICADO',edition_id:'e',edition_name:'VALIDACAO edição'};let sent:Record<string,unknown>|undefined;
- await page.route('**/api/catalog/editions',route=>route.fulfill({json:{editions:[{id:'e',name:'VALIDACAO edição',price_batch_id:'b',installment_count:3,amount_cents:120000}]}}));
+ let releaseCatalog:()=>void=()=>{};const catalogReady=new Promise<void>(resolve=>{releaseCatalog=resolve;});
+ await page.route('**/api/admin/users',route=>route.fulfill({status:503,json:{message:'VALIDACAO lista de responsáveis indisponível.'}}));
+ await page.route('**/api/catalog/editions',async route=>{await catalogReady;return route.fulfill({json:{editions:[{id:'e',name:'VALIDACAO edição',price_batch_id:'b',installment_count:3,amount_cents:120000}]}});});
  await page.route('**/api/admin/leads**',route=>{
   const url=new URL(route.request().url());if(route.request().method()==='POST'){sent=route.request().postDataJSON();return route.fulfill({status:202,json:{checkoutId:'synthetic-checkout',status:'CREATING'}});}
   if(url.pathname.endsWith('/synthetic-lead'))return route.fulfill({json:{lead,answers:[],history:[],activities:[],checkouts:[],conversations:[{id:'c1',whatsapp_instance_id:'linha-a',contact_name:'VALIDACAO linha A'},{id:'c2',whatsapp_instance_id:'linha-b',contact_name:'VALIDACAO linha B'}]}});
   return route.fulfill({json:{items:[lead]}});
  });
  await page.goto(`${origin}/admin`);await page.getByRole('button').filter({has:page.getByText('VALIDACAO checkout',{exact:true})}).click();
- await expect(page.getByRole('button',{name:'Criar checkout',exact:true})).toBeDisabled();await page.getByLabel('Conversa para o checkout',{exact:true}).selectOption('c2');await page.getByRole('button',{name:'Criar checkout',exact:true}).click();
+ const create=page.getByRole('button',{name:'Criar checkout',exact:true});await expect(create).toBeDisabled();
+ await page.getByLabel('Conversa para o checkout',{exact:true}).selectOption('c2');await expect(create).toBeDisabled();await expect(page.getByText('Carregando oferta da edição…')).toBeVisible();
+ releaseCatalog();await expect(create).toBeEnabled();await create.click();
  await expect.poll(()=>sent?.conversationId).toBe('c2');await expect(page.getByText(/reservado e em processamento/)).toBeVisible();
  await page.screenshot({path:`test-results/checkout-${name}.png`,fullPage:true});
 });

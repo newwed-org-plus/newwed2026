@@ -44,7 +44,7 @@ export async function operateWhatsAppLine(env: LineEnv,id: string,action:"refres
         if (session.state !== "disconnected") throw new HttpError(409,"WHATSAPP_QR_RESTART_FAILED","A tentativa anterior ainda não foi encerrada. Atualize o estado e tente novamente.");
       }
       if (action === "connect" || action === "restart") {
-        await uazapiRequest(instance,"/webhook",{ enabled:true,url:callbackUrl,events:["connection","messages","messages_update","history"],excludeMessages:["wasSentByApi","isGroupYes"],addUrlEvents:false,addUrlTypesMessages:false },fetcher);
+        await uazapiRequest(instance,"/webhook",{ enabled:true,url:callbackUrl,events:["connection","messages","messages_update","history"],excludeMessages:["isGroupYes"],addUrlEvents:false,addUrlTypesMessages:false },fetcher);
         if (action === "restart" || (session.state !== "connected" && session.state !== "connecting")) {
           await uazapiRequest(instance,"/instance/connect",{},fetcher);
           session = parseUazapiSession(await uazapiRequest(instance,"/instance/status",undefined,fetcher));

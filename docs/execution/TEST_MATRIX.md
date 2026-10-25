@@ -85,3 +85,22 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Backup/restauração: `npm run test:recovery` em dois D1 temporários, schema/dados exportados, FKs e índices conferidos e limpeza automática.
 - Visual: cinco cenários adicionais, três viewports para operação/revisão individual e dois para vínculo de checkout; regressão total esperada de 62 cenários.
 - Validação externa, pico remoto, treinamento e piloto de 24 h continuam sujeitos aos pré-requisitos do checklist; fixtures não são evidência de produção.
+
+
+## Onda 27 — Stack e importação locais
+
+- Unitários: geração de configs com D1/filas compartilhados, ausência de chaves no receptor, restauração condicionada ao callback ainda próprio, timestamps em segundos e allowlist vazia. Total: 100.
+- Workers: paginação/orçamento/deduplicação do cache, histórico enviado por API, lock/backoff/retomada, envio manual humano uma única vez para contato escolhido, bloqueio das automações, reconciliação recente sem resposta e guards de localhost/segredo. Total: 61.
+- Visual: contagens e progresso de importação com botão bloqueado durante execução, além dos cenários anteriores. Total esperado: 63.
+- Smokes reais somente de leitura: callback autorizado do provider, webhook público pronto, painel não exposto e cron local funcional. Mensagem do operador não é reenviada pelo agente.
+- Checkout mobile/desktop segura o catálogo até após a escolha da conversa e simula responsáveis indisponíveis; botão deve permanecer bloqueado até haver oferta, sem depender da lista de responsáveis.
+- Histórico do celular pendente por indisponibilidade do aparelho; testes simulados não são evidência de recuperação completa nem entrega real.
+
+
+## Onda 28 — Indisponibilidade local e entrega verificável
+
+- Middleware exercitado em servidor Vite real: falha de transporte vira 503 estável sem overlay; SyntaxError continua no overlay. Cliente repete leitura limitada e não repete POST.
+- Workers: snapshot por ID/linha/contato, nono dígito brasileiro, Sent → Delivered → Read, recibo antecipado, duplicatas, falha/estado antigo sem regressão, cooldown e proteção de outra conversa na atualização de páginas antigas.
+- Entrada autorizada sem nono dígito recebe elegibilidade de IA; a allowlist não libera contatos diferentes.
+- Visuais: estados em português, entrega sem reenvio, recuperação de 503 e atualização de mensagem carregada de página antiga.
+- Teste externo aprovado pelo usuário: uma mensagem manual chegou (Delivered no provider e DELIVERED na API local). IA local usa somente modelo gratuito; teste real aguarda pergunta enviada pelo usuário, sem injeção de mensagem.

@@ -189,3 +189,19 @@ A confirmação textual do pagamento tem identidade estável por checkout e usa 
 ## D-046 — Operação observável sem inventar disponibilidade
 
 Contagens operacionais vêm de agregações completas, e publicação de Queue não significa conclusão. Ausência de métrica/cron aparece como desconhecida ou desatualizada. Coleta de cota usa a conta inteira e orçamentos explicitamente definidos pelo titular; 80% pausa importação. Alertas internos são deduplicados por critério/dia e não liberam backlog. Rollback posterior à 0011 deve usar consumidor compatível com HELD/flags; consumidores anteriores não são seguros para o schema novo.
+
+
+## D-047 — Atendimento real pela stack local
+
+Em 2026-10-25, o usuário pediu testar UAZAPI integralmente no localhost antes de qualquer deploy e autorizou explicitamente usar a linha `atendimento` no local. Para esta linha, substitui a restrição de callback de D-044 e autoriza importar os dados disponíveis da própria UAZAPI para o D1 local, sem copiar o D1 de produção. Aplicação, filas, consumidores, cron, sessões e banco executam localmente; a UAZAPI continua externa, com callback HTTPS transportado por túnel restrito ao webhook. O callback anterior é preservado em arquivo privado ignorado e restaurado no encerramento normal, somente se ainda pertencer ao túnel atual. Encerramento forçado ou falta de rede exigem recuperação operacional explícita.
+
+A importação distingue lista de conversas, cache de mensagens do provider e recuperação antiga do celular. Não anuncia histórico completo quando o provider não devolve mensagens. O usuário está sem acesso ao aparelho; os pedidos de recuperação do celular ficam pausados com progresso salvo, sem reconexão ou renovação de QR.
+
+Após o usuário tentar enviar uma mensagem na Inbox e relatar o bloqueio, o perfil local passa a permitir respostas manuais para a conversa escolhida pelo operador autenticado, preservando claim, opt-out, pausa e idempotência. A exceção exige intenção manual e flags locais explícitas; IA e outros envios automáticos continuam restritos ao contato de teste autorizado. Nenhuma mensagem de validação é disparada pelo agente nem tentativa falhada é reenviada automaticamente. Checkout, confirmação e e-mail continuam desligados. Credenciais e conteúdo real permanecem fora do Git e das evidências.
+
+
+## D-048 — Estados verificáveis e teste de IA local
+
+Em 2026-10-25, o usuário autorizou corrigir as falhas transitórias do runtime local, atualizar os estados da Inbox e enviar uma mensagem a um destinatário de teste informado nesta conversa. Aceite não equivale a entrega: recibo ou snapshot da UAZAPI deve identificar a mesma linha e o mesmo ID; entrega e leitura nunca regridem por eventos antigos. A variação brasileira do nono dígito só é aceita junto dessa correlação, sem trocar destinatário ou reenviar. A consulta de estado é uma leitura e não dispara envio. Retentativas automáticas do cliente ficam restritas a GET/HEAD; mutações preservam a chave de idempotência e exigem conferir o resultado após falha de conexão. Erros reais de compilação permanecem visíveis.
+
+O usuário autorizou também liberar a IA no localhost exclusivamente para o contato de teste já configurado e escolheu enviar uma pergunta pelo próprio WhatsApp. Preservar o contexto existente do atendente, usar somente modelo gratuito verificado, sem fallback pago, liberar somente a conversa autorizada e manter as demais humanas. Não simular mensagem recebida em nome do usuário. Falha ou limite do provedor deve encaminhar ao humano de forma explícita.

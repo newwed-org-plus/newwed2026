@@ -4,7 +4,7 @@ import {capabilityEnabled} from "./capabilities";
 import { requiresImmediateHandoff,type AgentResult } from "@/features/conversations/model";
 import { markLeadInAttendance,pauseConversationForHandoff,queueConversationSummary } from "@/server/conversation-state";
 import { answerWithAgent,loadAgentContext,summarizeConversation,type OpenAIFetcher } from "@/server/integrations/openai-agent";
-import { sendUazapiText } from "@/server/integrations/uazapi";
+import { localRecipientAllowed,sendUazapiText } from "@/server/integrations/uazapi";
 import { reconcileUazapiReceipt,type UazapiIncoming } from "@/server/uazapi-webhook";
 import { sendWhatsAppText,type MetaFetcher } from "@/server/integrations/meta";
 import type { RuntimeSecrets } from "@/server/secrets";
@@ -21,10 +21,10 @@ function errorMessage(error: unknown) {
   return (error instanceof Error ? error.message : String(error)).slice(0,1000);
 }
 
-async function sendConversationText(env: ConversationWorkerEnv,conversationId: string,phone: string,body: string,fetcher?:typeof fetch) {
+async function sendConversationText(env: ConversationWorkerEnv,conversationId: string,phone: string,body: string,fetcher?:typeof fetch,manual=false) {
   const conversation = await env.DB.prepare("SELECT whatsapp_instance_id,contact_phone FROM conversations WHERE id=?")
     .bind(conversationId).first<{whatsapp_instance_id:string|null;contact_phone:string|null}>();
-  if (conversation?.whatsapp_instance_id) return sendUazapiText(env,conversation.whatsapp_instance_id,conversation.contact_phone ?? phone,body,fetcher);
+  if (conversation?.whatsapp_instance_id) return sendUazapiText(env,conversation.whatsapp_instance_id,conversation.contact_phone ?? phone,body,fetcher,manual?"manual":"automated");
   return sendWhatsAppText(env,phone,body,fetcher);
 }
 
@@ -92,7 +92,7 @@ export async function processIncomingWhatsApp(env: ConversationWorkerEnv,externa
   const isHistory = event.history === true;
   const outgoing = event.fromMe === true;
   const lineAgent = provider === "uazapi" && payload.lineId ? await getLineAgent(env,payload.lineId) : null;
-  const available=capabilityEnabled(env,"agent") && (provider!=="uazapi" || (lineAgent?.enabled && (execution==="receive-only" || env.OPENROUTER_API_KEY)));
+  const available=localRecipientAllowed(env,phone) && capabilityEnabled(env,"agent") && (provider!=="uazapi" || (lineAgent?.enabled && (execution==="receive-only" || env.OPENROUTER_API_KEY)));
   const initialMode = !available || isHistory || outgoing ? "HUMAN" : "AGENT";
   const text = event.text?.body?.trim() ?? "";
   // Upsert, message and processed marker are atomic; failed persistence remains retryable.
@@ -200,7 +200,7 @@ export async function processManualConversationMessage(env: ConversationWorkerEn
     .bind(new Date().toISOString(),messageId).run();
   if ((claimed.meta.changes ?? 0) !== 1) {
     const existing = await env.DB.prepare("SELECT status FROM messages WHERE id=?").bind(messageId).first<{ status:string }>();
-    if (existing && ["ACCEPTED","DELIVERED","READ"].includes(existing.status)) return { sent:true as const,idempotent:true };
+    if (existing && ["ACCEPTED","SENT","DELIVERED","READ"].includes(existing.status)) return { sent:true as const,idempotent:true };
     if(existing?.status==="SEND_UNKNOWN")return {sent:false as const,uncertain:true};
     if (existing?.status === "SEND_PENDING") {
       const now = new Date().toISOString();
@@ -213,7 +213,7 @@ export async function processManualConversationMessage(env: ConversationWorkerEn
     .bind(messageId).first<{ body:string;conversation_id:string;external_id:string }>();
   if (!message) return { sent:false as const };
   try {
-    const response = await sendConversationText(env,message.conversation_id,message.external_id,message.body,metaFetcher);
+    const response = await sendConversationText(env,message.conversation_id,message.external_id,message.body,metaFetcher,true);
     const externalId = response.messages?.[0]?.id;
     if (!externalId) throw new Error("O provedor não confirmou o identificador do envio");
     const acceptedAt = new Date().toISOString();

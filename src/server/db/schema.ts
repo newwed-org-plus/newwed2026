@@ -194,6 +194,7 @@ export const messages = sqliteTable("messages", {
   lastError: text("last_error"),
   sendStartedAt:text("send_started_at"),
   acceptedAt: text("accepted_at"),
+  sentAt:text("sent_at"),deliveredAt:text("delivered_at"),readAt:text("read_at"),statusUpdatedAt:text("status_updated_at"),statusCheckedAt:text("status_checked_at"),statusCheckError:text("status_check_error"),
   failedAt: text("failed_at"),
   requestId: text("request_id"),
   createdAt: text("created_at").notNull(),
@@ -201,6 +202,7 @@ export const messages = sqliteTable("messages", {
   uniqueIndex("messages_external_uidx").on(table.externalId),
   index("messages_conversation_page_idx").on(table.conversationId,sql`${table.createdAt} DESC`,sql`${table.id} DESC`),
   index("messages_checkout_idx").on(table.checkoutId),
+  index("messages_delivery_poll_idx").on(table.statusCheckedAt,table.createdAt).where(sql`${table.direction}='OUT' AND ${table.status} IN ('ACCEPTED','SENT','DELIVERED','SEND_UNKNOWN')`),
 ]);
 
 export const checkouts = sqliteTable("checkouts", {
@@ -409,3 +411,7 @@ export const operationalHealth=sqliteTable("operational_health",{
 export const resourceUsage=sqliteTable("resource_usage",{
  resource:text("resource").primaryKey(),windowStart:text("window_start").notNull(),windowEnd:text("window_end").notNull(),used:integer("used").notNull(),budget:integer("budget"),observedAt:text("observed_at").notNull(),source:text("source").notNull(),oldestItemAt:text("oldest_item_at"),
 });
+
+export const uazapiHistorySyncs=sqliteTable("uazapi_history_syncs",{
+ id:text("id").primaryKey(),lineId:text("line_id").notNull().references(()=>whatsappInstances.id),status:text("status").notNull().default("PENDING"),providerOffset:integer("provider_offset").notNull().default(0),scannedCount:integer("scanned_count").notNull().default(0),skippedCount:integer("skipped_count").notNull().default(0),attempts:integer("attempts").notNull().default(0),nextAttemptAt:text("next_attempt_at"),lastError:text("last_error"),requestedBy:text("requested_by").references(()=>users.id),createdAt:text("created_at").notNull(),updatedAt:text("updated_at").notNull(),completedAt:text("completed_at"),
+},table=>[uniqueIndex("uazapi_history_active_idx").on(table.lineId).where(sql`${table.status} IN ('PENDING','RUNNING')`),index("uazapi_history_pending_idx").on(table.status,table.nextAttemptAt,table.updatedAt)]);
