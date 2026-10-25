@@ -93,4 +93,5 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Workers: paginação/orçamento/deduplicação do cache, histórico enviado por API, lock/backoff/retomada, envio manual humano uma única vez para contato escolhido, bloqueio das automações, reconciliação recente sem resposta e guards de localhost/segredo. Total: 61.
 - Visual: contagens e progresso de importação com botão bloqueado durante execução, além dos cenários anteriores. Total esperado: 63.
 - Smokes reais somente de leitura: callback autorizado do provider, webhook público pronto, painel não exposto e cron local funcional. Mensagem do operador não é reenviada pelo agente.
+- Checkout mobile/desktop segura o catálogo até após a escolha da conversa e simula responsáveis indisponíveis; botão deve permanecer bloqueado até haver oferta, sem depender da lista de responsáveis.
 - Histórico do celular pendente por indisponibilidade do aparelho; testes simulados não são evidência de recuperação completa nem entrega real.
