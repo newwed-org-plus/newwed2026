@@ -13,49 +13,20 @@ O usuário autorizou publicar o repositório `newwed2026/newwed2026` na conta Ne
 
 O ambiente é selecionado no build com `CLOUDFLARE_ENV=production`; o deploy usa a configuração gerada e não recompila no ambiente de desenvolvimento. A migração remota ocorre antes da publicação.
 
-O site usa seus assets empacotados e não depende de uploads R2. O consumidor de eventos, Access, Turnstile e as integrações externas ainda exigem provisionamento próprio. O painel mantém `ALLOW_LOCAL_ACCESS=false`, e o formulário falha de forma segura enquanto Turnstile não estiver configurado. O preflight completo de lançamento comercial continua bloqueado sem R2 e os demais requisitos; esta publicação não representa aceite do piloto comercial.
+O site usa seus assets empacotados e não depende de uploads R2. O consumidor de eventos, Access, Turnstile e as integrações externas ainda exigem provisionamento próprio. O painel mantém `ALLOW_LOCAL_ACCESS=false`, e o formulário falha de forma segura enquanto Turnstile não estiver configurado. Esta publicação não representa aceite do piloto comercial. Os requisitos atuais estão no preflight por função e no checklist operacional; R2 é opcional.
 
-## Recursos
+## Arquitetura vigente nas ondas 21–26
 
-Crie recursos distintos para `staging` e `production`:
+R2/Access são opcionais. Login próprio usa D1 e Durable Objects. UAZAPI tem receptor/fila/DLQ próprios; consumidor comercial separado usa OpenRouter gratuito, UAZAPI, Asaas e e-mail. Configuração atual: [EXTERNAL_CONFIGURATION.md](operations/EXTERNAL_CONFIGURATION.md).
 
-1. D1: `new-wed-platform-<ambiente>`.
-2. R2: `new-wed-platform-<ambiente>`.
-3. Queue principal `new-wed-events-<ambiente>` e dead-letter queue correspondente.
-4. Aplicação Cloudflare Access cobrindo `/admin/*` e `/api/admin/*`.
-5. Widget Turnstile para os domínios públicos.
+Staging D1 `d67175d9-52b6-47f7-b7a0-4a75a05af32d` e quatro filas staging já criados; somente 0000–0008 foram aplicadas remotamente. Ondas 22–26 não foram implantadas. Migrations 0009–0013 são aditivas, sequenciais e requerem binários compatíveis com retenção após 0011. Consulte [RECOVERY_RUNBOOK.md](operations/RECOVERY_RUNBOOK.md).
 
-Substitua os UUIDs marcadores em `wrangler.jsonc` e `wrangler.events.jsonc` pelos IDs reais. Gere novamente os tipos com `npm run cf:types`.
-
-## Segredos
-
-Cadastre, sem colocar valores no Git:
-
-```text
-OPENAI_API_KEY
-META_APP_SECRET
-META_ACCESS_TOKEN
-META_VERIFY_TOKEN
-META_PHONE_NUMBER_ID
-ASAAS_API_KEY
-ASAAS_WEBHOOK_TOKEN
-TURNSTILE_SECRET_KEY
-```
-
-Defina `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`, `TURNSTILE_SITE_KEY`, `OPENAI_MODEL` e o template Meta aprovado nas variáveis do ambiente. O bypass `ALLOW_LOCAL_ACCESS` jamais deve ser habilitado fora do desenvolvimento local. O modelo padrão é `gpt-5-mini` e pode ser trocado sem alterar o código.
-
-## Ordem de publicação
-
-1. Execute o gate completo definido no CI, incluindo os testes D1 e `npm run test:workers`.
-2. Aprove `npm run preflight:launch -- staging` e o checklist em `docs/operations/LAUNCH_CHECKLIST.md`.
-3. Aplique migrations D1 no staging.
-4. Publique o consumidor com `npm run deploy:events -- --env staging`.
-5. Publique o app com `npm run deploy -- --env staging`.
-6. Cadastre URLs de webhook e execute smoke tests sem tráfego externo até existir autorização específica.
-7. Execute a conciliação sandbox e o piloto de uma edição conforme `docs/operations/PILOT_RUNBOOK.md`.
-8. Somente após o aceite do piloto, repita o preflight e a publicação em produção.
-
-O repositório não cria recursos nem envia mensagens/pagamentos automaticamente. Essas ações dependem das credenciais e da janela de lançamento aprovadas.
+1. Concluir gate/CI e revisão local; merge em main aciona Workers Builds e exige janela específica.
+2. Registrar bookmark/export, commit, CI e flags; aplicar migrations em staging, conferir DOs e preflight por função.
+3. Publicar receiver e comercial compatíveis inicialmente desligados, depois web; registrar versões dos três. Não usar o canal antigo para liberar backlog retido.
+4. Configurar secrets mínimos por serviço, sem credenciais de envio/IA no receiver. Conferir linha exclusiva e callbacks sem tocar a linha ativa.
+5. Ativar progressivamente e executar smokes conforme LAUNCH_CHECKLIST.md e PILOT_RUNBOOK.md.
+6. Após aceite e piloto de 24 h, repetir o processo de produção, registrando versões/migrations/smokes. Rollback mantém schema aditivo e consumidor capaz de respeitar HELD/flags; nunca voltar ao consumidor antigo.
 
 ### Domínio institucional
 

@@ -100,8 +100,8 @@ export async function processCheckoutCreation(env: CheckoutWorkerEnv,checkoutId:
   const nowIso = now.toISOString();
   const staleBefore = new Date(now.getTime() - 10 * 60_000).toISOString();
   const claimed = await env.DB.prepare(`UPDATE checkouts SET status='CREATING',processing_token=?,processing_started_at=?,retry_count=retry_count+1,next_retry_at=NULL,updated_at=?,version=version+1
-    WHERE id=? AND send_status='NOT_REQUESTED' AND status IN ('CREATING','FAILED') AND (next_retry_at IS NULL OR next_retry_at<=?) AND (processing_started_at IS NULL OR processing_started_at<=?)`)
-    .bind(token,nowIso,nowIso,checkoutId,nowIso,staleBefore).run();
+    WHERE id=? AND expires_at>? AND send_status='NOT_REQUESTED' AND status IN ('CREATING','FAILED') AND (next_retry_at IS NULL OR next_retry_at<=?) AND (processing_started_at IS NULL OR processing_started_at<=?)`)
+    .bind(token,nowIso,nowIso,checkoutId,nowIso,nowIso,staleBefore).run();
   if ((claimed.meta.changes ?? 0) !== 1) return { processed:false as const };
 
   const checkout = await env.DB.prepare(`SELECT c.id,c.lead_id,c.edition_id,c.price_batch_id,c.provider_customer_id,c.method,c.installment_count,c.amount_cents,c.expires_at,c.retry_count,

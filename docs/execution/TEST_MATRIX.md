@@ -76,3 +76,12 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Checkout UAZAPI: vínculo obrigatório, linha/conversa preservadas, recibo, confirmação única, falha/timeout e reenvio auditado após resultado conhecido; legado Meta continua coberto.
 - Asaas: Pix/cartão/parcelas, última vaga, conciliação, eventos duplicados/fora de ordem; estorno em andamento preserva capacidade e estorno concluído é terminal.
 - Turnstile: ação/hostname/resposta, falha de rede e ausência de configuração fora do desenvolvimento.
+
+## Onda 26 — Operação e ensaio do piloto
+
+- Workers: 75 pendências versus lista limitada; alertas de falta de progresso/uso, reconciliação e-mail e limpeza segura do limitador IP.
+- Capacidade: 28 recebimentos, dois logins e 100 históricos por tick concorrentes; retomada até 148 mensagens únicas, zero OUT.
+- Inscrição concorrente: lead único, consentimentos preservados e única entrada NOVO.
+- Backup/restauração: `npm run test:recovery` em dois D1 temporários, schema/dados exportados, FKs e índices conferidos e limpeza automática.
+- Visual: cinco cenários adicionais, três viewports para operação/revisão individual e dois para vínculo de checkout; regressão total esperada de 62 cenários.
+- Validação externa, pico remoto, treinamento e piloto de 24 h continuam sujeitos aos pré-requisitos do checklist; fixtures não são evidência de produção.

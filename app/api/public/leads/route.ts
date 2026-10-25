@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     if (!edition) throw new HttpError(422, "EDITION_UNAVAILABLE", "Esta edição não está disponível.");
 
     const now = new Date().toISOString();
-    const leadId = existing?.id ?? crypto.randomUUID();
+    const leadId = existing?.id ?? `${dedupeKey.slice(0,8)}-${dedupeKey.slice(8,12)}-5${dedupeKey.slice(13,16)}-8${dedupeKey.slice(17,20)}-${dedupeKey.slice(20,32)}`;
     const answerId = crypto.randomUUID();
     const firstAttributionId = crypto.randomUUID();
     const lastAttributionId = crypto.randomUUID();
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         .bind(idempotencyKey,leadId,JSON.stringify(responseBody),now),
     ];
     if (!existing) {
-      statements.splice(2, 0, env.DB.prepare("INSERT INTO pipeline_history (id,lead_id,from_stage,to_stage,actor_id,reason,created_at) VALUES (?,?,NULL,'NOVO',NULL,'Pré-inscrição pública',?)").bind(pipelineId,leadId,now));
+      statements.splice(2, 0, env.DB.prepare("INSERT INTO pipeline_history (id,lead_id,from_stage,to_stage,actor_id,reason,created_at) SELECT ?,?,NULL,'NOVO',NULL,'Pré-inscrição pública',? WHERE NOT EXISTS (SELECT 1 FROM pipeline_history WHERE lead_id=? AND from_stage IS NULL AND to_stage='NOVO')").bind(pipelineId,leadId,now,leadId));
     }
     await env.DB.batch(statements);
 

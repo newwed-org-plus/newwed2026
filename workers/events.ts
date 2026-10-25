@@ -1,3 +1,5 @@
+import {collectUsage,monitorCron} from "@/server/operations";
+import {sendPaidConfirmation} from "@/server/checkout-confirmation";
 import {dispatchEvent} from "@/server/dispatch";
 import {capabilityEnabled} from "@/server/capabilities";
 import { expireCheckoutReservations,markCheckoutDelivered,processCheckoutCancellation,processCheckoutCreation,sendCheckout } from "@/server/checkout-processing";
@@ -44,6 +46,7 @@ async function reconcileAsaas(env: WorkerEnv, providerPaymentId: string) {
 }
 
 async function handleEvent(env: WorkerEnv, body: EventBody) {
+  if(body.type==="checkout.confirmation.send"&&body.checkoutId&&body.id)return sendPaidConfirmation(env,body.checkoutId,body.id);
   if(body.type==="conversation.reply.requested" && body.externalId)return processIncomingWhatsApp(env,body.externalId,{},body.provider??"uazapi","reply");
   if (body.type === "uazapi.batch" && body.externalId) return processUazapiBatch(env,body.externalId,body.targetCount);
   if (body.type === "uazapi.incoming" && body.externalId) return processIncomingWhatsApp(env,body.externalId,{},"uazapi","receive-only");
@@ -59,8 +62,8 @@ async function handleEvent(env: WorkerEnv, body: EventBody) {
   if (body.type === "notification.email" && body.id && body.notificationId && body.userId) return processNotificationEmail(env,body.id,body.notificationId,body.userId);
   if (body.type === "lead.submitted" && body.leadId) {
     const now = new Date().toISOString();
-    await env.DB.prepare("INSERT INTO activities (id,lead_id,type,title,created_at,updated_at) VALUES (?,?,'LEAD_CREATED','Pré-inscrição recebida',?,?)")
-      .bind(crypto.randomUUID(),body.leadId,now,now).run();
+    await env.DB.prepare("INSERT OR IGNORE INTO activities (id,lead_id,type,title,created_at,updated_at) VALUES (?,?,'LEAD_CREATED','Pré-inscrição recebida',?,?)")
+      .bind(body.id??`lead:${body.leadId}`,body.leadId,now,now).run();
     return;
   }
   throw new Error("Unsupported durable event");
@@ -78,6 +81,7 @@ export default {
     }
   },
   async scheduled(_controller, env) {
+    return monitorCron(env,"commercial",async()=>{
     const workerEnv = env as WorkerEnv;
     const now = new Date().toISOString();
     const stale = new Date(Date.now() - 10 * 60_000).toISOString();
@@ -87,7 +91,7 @@ export default {
         .bind(now,now,now,stale),
       workerEnv.DB.prepare("UPDATE outbox_events SET published_at=NULL,next_attempt_at=? WHERE type='checkout.create' AND aggregate_id IN (SELECT id FROM checkouts WHERE status='FAILED' AND last_error_code='PROCESSING_TIMEOUT')")
         .bind(now),
-      workerEnv.DB.prepare("UPDATE checkouts SET status='FAILED',send_status='FAILED',last_error_code='META_DELIVERY_UNKNOWN',last_error='O aceite do envio não foi confirmado após o lease.',last_error_at=?,processing_token=NULL,processing_started_at=NULL,updated_at=? WHERE status='SEND_PENDING' AND processing_started_at IS NOT NULL AND processing_started_at<=?")
+      workerEnv.DB.prepare("UPDATE checkouts SET status='FAILED',send_status='UNKNOWN',last_error_code='DELIVERY_UNKNOWN',last_error='O aceite do envio não foi confirmado após o lease.',last_error_at=?,processing_token=NULL,processing_started_at=NULL,updated_at=? WHERE status='SEND_PENDING' AND processing_started_at IS NOT NULL AND processing_started_at<=?")
         .bind(now,now,stale),
     ]);
     await workerEnv.DB.batch([
@@ -108,6 +112,7 @@ export default {
     }
     if(capabilityEnabled(workerEnv,"checkout"))await expireCheckoutReservations(workerEnv);
     await workerEnv.DB.prepare("DELETE FROM rate_limit_buckets WHERE expires_at<?").bind(now).run();
+    await collectUsage(workerEnv).catch(()=>console.error(JSON.stringify({event:"operations.usage.unavailable"})));
     if (workerEnv.ASAAS_API_KEY) {
       const pendingPayments = await workerEnv.DB.prepare("SELECT provider_payment_id FROM payments WHERE provider_payment_id IS NOT NULL AND status IN ('PENDING','OVERDUE') ORDER BY updated_at LIMIT 50")
         .all<{ provider_payment_id: string }>();
@@ -116,5 +121,6 @@ export default {
         providerPaymentId: payment.provider_payment_id,
       })));
     }
+    });
   },
 } satisfies ExportedHandler<Env>;

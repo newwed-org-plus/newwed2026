@@ -289,6 +289,7 @@ export const webhookEvents = sqliteTable("webhook_events", {
 }, (table) => [
   uniqueIndex("webhook_provider_external_uidx").on(table.provider, table.externalId),
   index("webhook_pending_retry_idx").on(table.provider, table.processedAt, table.nextRetryAt),
+  index("webhook_operations_idx").on(table.provider,table.processedAt,table.attempts,table.createdAt),
 ]);
 
 export const users = sqliteTable("users", {
@@ -388,7 +389,7 @@ export const outboxEvents = sqliteTable("outbox_events", {
   lastError: text("last_error"),
   requestId: text("request_id"),
   createdAt: text("created_at").notNull(),
-}, (table) => [index("outbox_pending_idx").on(table.publishedAt, table.nextAttemptAt, table.createdAt)]);
+}, (table) => [index("outbox_pending_idx").on(table.publishedAt, table.nextAttemptAt, table.createdAt),index("outbox_operations_idx").on(table.dispatchState,table.type,table.createdAt),index("outbox_completed_idx").on(table.processedAt).where(sql`${table.processedAt} IS NOT NULL`)]);
 
 export const rateLimitBuckets = sqliteTable("rate_limit_buckets", {
   key: text("key").primaryKey(),
@@ -401,3 +402,10 @@ export const rateLimitBuckets = sqliteTable("rate_limit_buckets", {
 
 export const operationLeases = sqliteTable("operation_leases", { id:text("id").primaryKey(),token:text("token").notNull(),expiresAt:text("expires_at").notNull() });
 export const historyImports = sqliteTable("history_imports", { externalId:text("external_id").primaryKey(),lineId:text("line_id").notNull(),cursor:integer("cursor").default(0).notNull(),attempts:integer("attempts").default(0).notNull(),nextAttemptAt:text("next_attempt_at"),completedAt:text("completed_at"),updatedAt:text("updated_at").notNull() },table=>[index("history_imports_pending_idx").on(table.completedAt,table.nextAttemptAt,table.updatedAt)]);
+
+export const operationalHealth=sqliteTable("operational_health",{
+ service:text("service").primaryKey(),lastStartedAt:text("last_started_at"),lastCompletedAt:text("last_completed_at"),lastSuccessAt:text("last_success_at"),lastErrorCode:text("last_error_code"),pending:integer("pending").notNull().default(0),oldestPendingAt:text("oldest_pending_at"),watermark:text("watermark"),failures:integer("failures").notNull().default(0),stalledRuns:integer("stalled_runs").notNull().default(0),failureStreak:integer("failure_streak").notNull().default(0),peakPending:integer("peak_pending").notNull().default(0),
+});
+export const resourceUsage=sqliteTable("resource_usage",{
+ resource:text("resource").primaryKey(),windowStart:text("window_start").notNull(),windowEnd:text("window_end").notNull(),used:integer("used").notNull(),budget:integer("budget"),observedAt:text("observed_at").notNull(),source:text("source").notNull(),oldestItemAt:text("oldest_item_at"),
+});

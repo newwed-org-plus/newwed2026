@@ -96,3 +96,11 @@ describe('Turnstile valida o domínio e a ação no servidor',()=>{
   }finally{Object.assign(runtime,previous);}
  });
 });
+
+it('deduplica inscrições concorrentes preservando consentimentos e uma única entrada no pipeline',async()=>{
+ const edition=await env.DB.prepare("SELECT slug FROM editions WHERE status='OPEN' LIMIT 1").first<{slug:string}>();
+ const input={nome:'VALIDACAO concorrente',email:'repeated@example.test',telefone:'81999990009',empresa:'VALIDACAO',cidade_estado:'Recife/PE',editionSlug:edition!.slug,lgpd:true,consent:{version:'2026-10',accepted:true},landingUrl:'https://newwed.test/famtour',respostas_brutas:{}};
+ const [first,second]=await Promise.all([createLead(req(input)),createLead(req(input))]);expect(first.status).toBe(201);expect([200,201]).toContain(second.status);
+ const a=await first.json() as {leadId:string};const b=await second.json() as {leadId:string};expect(a.leadId).toBe(b.leadId);
+ expect(await env.DB.prepare('SELECT count(*) AS total FROM leads').first()).toEqual({total:1});expect(await env.DB.prepare("SELECT count(*) AS total FROM pipeline_history WHERE to_stage='NOVO'").first()).toEqual({total:1});
+});

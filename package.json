@@ -74,6 +74,9 @@
     "baseline:capture:target": "UPDATE_BASELINES=1 BASELINE_CAPTURE_TARGET=1 playwright test tests/visual/parity.spec.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply new-wed-platform-development --local",
-    "cf:types": "wrangler types src/types/cloudflare-env.d.ts --env-file config/wrangler-types.env"
+    "cf:types": "wrangler types src/types/cloudflare-env.d.ts --env-file config/wrangler-types.env",
+    "local:prepare": "node scripts/seed-local.mjs",
+    "dev:local": "vinext dev --hostname 127.0.0.1 --port 4173",
+    "test:recovery": "bash scripts/test-recovery-d1.sh"
   }
 }
