@@ -14,7 +14,7 @@ test.afterAll(()=>{
  const identity="SELECT id FROM users WHERE email='inbox-ui@example.test'";
  execFileSync('npx',['wrangler','d1','execute','new-wed-platform-development','--local','--command',`DELETE FROM admin_sessions WHERE user_id IN (${identity}); DELETE FROM admin_credentials WHERE user_id IN (${identity}); DELETE FROM roles WHERE user_id IN (${identity}); DELETE FROM users WHERE email='inbox-ui@example.test';`],{stdio:'pipe'});
 });
-const item=(i:number)=>({id:`c${i}`,external_id:`contact-${i}`,contact_name:`VALIDACAO Contato ${i}`,mode:'HUMAN',claimed_by:null,updated_at:'2026-10-25T12:00:00.000Z'});
+const item=(i:number)=>({whatsapp_instance_id:'validacao',id:`c${i}`,external_id:`contact-${i}`,contact_name:`VALIDACAO Contato ${i}`,mode:'HUMAN',claimed_by:null,updated_at:'2026-10-25T12:00:00.000Z'});
 const message=(i:number)=>({id:`m${String(i).padStart(3,'0')}`,direction:'IN',type:'text',body:`VALIDACAO mensagem ${i}`,status:'RECEIVED',created_at:'2026-10-25T12:00:00.000Z'});
 for(const [name,width,height] of [['mobile',390,844],['desktop',1440,900]] as const)test(`${name} · pagina conversas e preserva mensagens antigas ao atualizar`,async({page})=>{
  await page.setViewportSize({width,height});
@@ -47,4 +47,37 @@ test('descarta a resposta da busca anterior quando o filtro muda',async({page})=
  await page.getByPlaceholder('Buscar conversa',{exact:true}).fill('antigo');await expect.poll(()=>oldStarted).toBe(true);
  await page.getByPlaceholder('Buscar conversa',{exact:true}).fill('novo');await expect(page.getByText('RESULTADO NOVO',{exact:true})).toBeVisible();release();
  await expect(page.getByText('RESULTADO ANTIGO',{exact:true})).toHaveCount(0);
+});
+
+
+test('estado atualiza em páginas antigas sem apagar mensagens e diferencia envio de entrega',async({page})=>{
+ await page.route('**/api/admin/conversations**',route=>{
+  const url=new URL(route.request().url());
+  if(url.pathname.endsWith('/c0')){
+   const old={...message(0),direction:'OUT',status:'ACCEPTED'};
+   return route.fulfill({json:{conversation:item(0),messages:url.searchParams.has('before')?[old]:Array.from({length:100},(_,i)=>message(i+1)),messageStates:url.searchParams.has('statusIds')?[{id:old.id,status:'DELIVERED'}]:[],nextCursor:url.searchParams.has('before')?null:'older'}});
+  }
+  return route.fulfill({json:{items:[item(0)],nextCursor:null}});
+ });
+ await page.goto(`${origin}/admin`);await page.getByRole('button',{name:'Inbox',exact:true}).click();await page.getByText('VALIDACAO Contato 0',{exact:true}).click();
+ await page.getByRole('button',{name:'Carregar mensagens anteriores'}).click();await expect(page.getByText('Aceita para envio',{exact:true})).toBeVisible();await expect(page.getByText('O provedor aceitou a mensagem. A entrega ainda não foi confirmada.',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Atualizar inbox',exact:true}).click();await expect(page.getByText('Entregue',{exact:true})).toBeVisible();await expect(page.getByText('VALIDACAO mensagem 0',{exact:true})).toBeVisible();
+});
+
+test('consulta de entrega atualiza a mensagem sem reenviar e recupera falha local',async({page})=>{
+ let state='SENT';let checks=0;let sends=0;let transient=true;
+ await page.route('**/api/admin/conversations**',route=>{
+  const url=new URL(route.request().url());
+  if(url.pathname.endsWith('/sync-status')){checks++;state='READ';return route.fulfill({json:{checked:1,updated:1,unavailable:0}});}
+  if(route.request().method()!=='GET'){sends++;return route.fulfill({status:400,json:{message:'Envio inesperado'}});}
+  if(url.pathname.endsWith('/c0')){
+   if(transient){transient=false;return route.fulfill({status:503,json:{code:'LOCAL_RUNTIME_UNAVAILABLE',message:'Ambiente local reiniciando.'}});}
+   return route.fulfill({json:{conversation:item(0),messages:[{...message(0),direction:'OUT',status:state}],nextCursor:null}});
+  }
+  return route.fulfill({json:{items:[item(0)],nextCursor:null}});
+ });
+ await page.goto(`${origin}/admin`);await page.getByRole('button',{name:'Inbox',exact:true}).click();await page.getByText('VALIDACAO Contato 0',{exact:true}).click();
+ await expect(page.getByText('Enviada',{exact:true})).toBeVisible();await expect(page.getByText('Enviada pelo WhatsApp. A entrega ao destinatário ainda não foi confirmada.',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Conferir entrega',exact:true}).click();await expect(page.getByText('Lida',{exact:true})).toBeVisible();expect(checks).toBe(1);expect(sends).toBe(0);await expect(page.locator('vite-error-overlay')).toHaveCount(0);
+ await page.screenshot({path:'test-results/inbox-delivery-synthetic.png',fullPage:true});
 });

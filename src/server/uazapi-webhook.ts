@@ -1,4 +1,4 @@
-import {markCheckoutDelivered} from "./checkout-delivery";
+import {applyUazapiDelivery,normalizeDeliveryStatus,receiptTime,type DeliveryStatus} from "./uazapi-delivery";
 import { z } from "zod";
 import { configuredInstance,uazapiMessageId,type UazapiEnv } from "@/server/integrations/uazapi";
 import { ensureWhatsAppLines } from "@/server/whatsapp-lines";
@@ -10,7 +10,7 @@ import { publishOutbox } from "@/server/outbox";
 export const uazapiHistoryMessageSchema = z.object({
   id:z.string().max(256).optional(),messageid:z.string().max(256).optional(),chatid:z.string().max(100),
   senderName:z.string().max(200).optional(),fromMe:z.boolean().optional(),wasSentByApi:z.boolean().optional(),isGroup:z.boolean().optional(),
-  messageType:z.string().max(100).optional(),text:z.string().max(32_000).nullish(),messageTimestamp:z.number().optional(),
+  status:z.string().max(80).optional(),messageType:z.string().max(100).optional(),text:z.string().max(32_000).nullish(),messageTimestamp:z.number().optional(),
 });
 const messageSchema=uazapiHistoryMessageSchema;
 type MessageInput = z.infer<typeof messageSchema>;
@@ -49,13 +49,13 @@ export async function acceptUazapiWebhook(env: WebhookEnv,lineId: string,input: 
       if (payload) candidates.push({externalId:`${history ? "history" : "message"}:${payload.event.id}`,type:"uazapi.incoming",payload});
     }
   } else if (type === "messages_update") {
-    const body = z.object({ state:z.string().optional(),event:z.object({ MessageIDs:z.array(z.string().max(256)).max(200),Type:z.string().optional(),IsGroup:z.boolean().optional(),IsFromMe:z.boolean().optional() }) }).parse(input);
+    const body = z.object({ state:z.string().optional(),event:z.object({ MessageIDs:z.array(z.string().max(256)).max(200),Type:z.string().optional(),Timestamp:z.number().optional(),IsGroup:z.boolean().optional(),IsFromMe:z.boolean().optional() }) }).parse(input);
     const state = (body.state ?? body.event.Type ?? "").toLowerCase();
-    const status = state === "read" || state === "played" ? "READ" : state === "delivered" ? "DELIVERED" : null;
+    const status=normalizeDeliveryStatus(state);
     if (!status || body.event.IsGroup || body.event.IsFromMe === false) return { received:true,queued:0,ignored:true };
     for (const id of body.event.MessageIDs) {
       const messageId = uazapiMessageId(lineId,id);
-      candidates.push({externalId:`status:${messageId}:${status}`,type:"uazapi.status",payload:{lineId,messageId,status}});
+      candidates.push({externalId:`status:${messageId}:${status}`,type:"uazapi.status",payload:{lineId,messageId,status,observedAt:receiptTime(body.event.Timestamp)}});
     }
   } else {
     // Connection webhooks can arrive out of order. /instance/status is authoritative.
@@ -126,22 +126,17 @@ export async function processUazapiStatus(env: Pick<Env,"DB">,externalId: string
   const stored = await env.DB.prepare("SELECT id,payload_json FROM webhook_events WHERE provider='uazapi' AND external_id=? AND processed_at IS NULL")
     .bind(externalId).first<{id:string;payload_json:string}>();
   if (!stored) return;
-  const {messageId,status} = JSON.parse(stored.payload_json) as {messageId:string;status:"READ"|"DELIVERED"};
-  // Persist first; replay receipts when an API send/phone echo is saved later.
-  await env.DB.batch([
-    env.DB.prepare("UPDATE messages SET status=CASE WHEN status='READ' THEN 'READ' ELSE ? END WHERE external_id=? AND direction='OUT'").bind(status,messageId),
-    env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=?").bind(new Date().toISOString(),stored.id),
-  ]);
+  const {messageId,status,observedAt} = JSON.parse(stored.payload_json) as {messageId:string;status:DeliveryStatus;observedAt?:string};
+  await applyUazapiDelivery(env,messageId,status,observedAt);
+  await env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=?").bind(new Date().toISOString(),stored.id).run();
   await reconcileUazapiReceipt(env,messageId);
 }
 
 export async function reconcileUazapiReceipt(env: Pick<Env,"DB">,messageId: string) {
   if (!messageId.startsWith("uazapi:")) return;
-  await env.DB.prepare(`UPDATE messages SET status=CASE
-    WHEN EXISTS(SELECT 1 FROM webhook_events WHERE provider='uazapi' AND external_id=?) THEN 'READ'
-    WHEN status!='READ' AND EXISTS(SELECT 1 FROM webhook_events WHERE provider='uazapi' AND external_id=?) THEN 'DELIVERED'
-    ELSE status END WHERE external_id=? AND direction='OUT'`)
-    .bind(`status:${messageId}:READ`,`status:${messageId}:DELIVERED`,messageId).run();
-  const delivered=await env.DB.prepare("SELECT checkout_id,type FROM messages WHERE external_id=? AND status IN ('DELIVERED','READ')").bind(messageId).first<{checkout_id:string|null;type:string}>();
-  if(delivered?.checkout_id && delivered.type!=="payment_confirmation")await markCheckoutDelivered(env,delivered.checkout_id,null,"Entrega confirmada pela UAZAPI");
+  const evidence=await env.DB.prepare(`SELECT external_id,payload_json,created_at FROM webhook_events WHERE provider='uazapi' AND external_id IN (?,?,?,?)
+   ORDER BY CASE external_id WHEN ? THEN 4 WHEN ? THEN 3 WHEN ? THEN 2 ELSE 1 END DESC LIMIT 1`)
+   .bind(`status:${messageId}:READ`,`status:${messageId}:DELIVERED`,`status:${messageId}:FAILED`,`status:${messageId}:SENT`,
+    `status:${messageId}:READ`,`status:${messageId}:DELIVERED`,`status:${messageId}:FAILED`).first<{external_id:string;payload_json:string;created_at:string}>();
+  if(evidence){const data=JSON.parse(evidence.payload_json) as {status?:DeliveryStatus;observedAt?:string};const status=normalizeDeliveryStatus(data.status)??normalizeDeliveryStatus(evidence.external_id.split(':').at(-1));if(status)await applyUazapiDelivery(env,messageId,status,data.observedAt??evidence.created_at);}
 }

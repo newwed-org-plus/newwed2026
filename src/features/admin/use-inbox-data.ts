@@ -1,10 +1,11 @@
 "use client";
 import {useCallback,useEffect,useRef,useState} from "react";
 import {adminApi} from "./api";
-export type InboxItem={id:string;contact_phone?:string|null;contact_name?:string|null;line_name?:string|null;mode:"AGENT"|"HUMAN";external_id:string;claimed_by:string|null;claimed_by_name:string|null;agent_error:string|null;opted_out_at:string|null;lead_name:string|null;lead_stage:string|null;edition_name:string|null;last_message:string|null;last_direction:string|null;last_status:string|null;last_message_at:string|null;updated_at:string};
-export type Message={id:string;checkout_id?:string|null;external_id:string|null;direction:"IN"|"OUT";type:string;body:string|null;status:string;actor_name:string|null;last_error:string|null;created_at:string};
+export type InboxItem={id:string;whatsapp_instance_id?:string|null;contact_phone?:string|null;contact_name?:string|null;line_name?:string|null;mode:"AGENT"|"HUMAN";external_id:string;claimed_by:string|null;claimed_by_name:string|null;agent_error:string|null;opted_out_at:string|null;lead_name:string|null;lead_stage:string|null;edition_name:string|null;last_message:string|null;last_direction:string|null;last_status:string|null;last_message_at:string|null;updated_at:string};
+export type Message={id:string;checkout_id?:string|null;external_id:string|null;direction:"IN"|"OUT";type:string;body:string|null;status:string;sent_at?:string|null;delivered_at?:string|null;read_at?:string|null;status_updated_at?:string|null;status_checked_at?:string|null;status_check_error?:string|null;actor_name:string|null;last_error:string|null;created_at:string};
 type Conversation=InboxItem & {lead_id:string|null;lead_email:string|null;lead_phone:string|null;company:string|null;city_state:string|null;summary:string|null;agent_paused_at:string|null;claimed_at:string|null};
-type Detail={conversation:Conversation;messages:Message[];nextCursor:string|null};
+type MessageState=Pick<Message,"id"|"status"|"sent_at"|"delivered_at"|"read_at"|"status_updated_at"|"status_checked_at"|"status_check_error"|"last_error">;
+type Detail={conversation:Conversation;messages:Message[];messageStates?:MessageState[];nextCursor:string|null};
 type User={id:string;name:string;roles:string[];environment?:string;inboundHost?:string;capabilities?:{manualSend:boolean;agent:boolean}};
 function merge<T extends {id:string}>(previous:T[],incoming:T[],compare:(a:T,b:T)=>number) {
   const items=new Map(previous.map(item=>[item.id,item]));for(const item of incoming)items.set(item.id,item);return [...items.values()].sort(compare);
@@ -31,11 +32,13 @@ export function useInboxData(query:string,mode:string,failuresOnly:boolean,selec
   const [paging,setPaging]=useState(false);const [listFetching,setListFetching]=useState(false);const [detailFetching,setDetailFetching]=useState(false);const [lastUpdated,setLastUpdated]=useState<number|null>(null);
   const key=JSON.stringify([query,mode,failuresOnly]);
   const listState=useRef({key,sequence:0,busy:false,extended:false});
-  const detailState=useRef({id:selectedId,sequence:0,busy:false,extended:false});
+  const detailState=useRef({id:selectedId,sequence:0,busy:false,extended:false,newestIds:new Set<string>(),statusOffset:0});
+  const detailRef=useRef<Detail|null>(null);
+  useEffect(()=>{detailRef.current=detail;},[detail]);
   const lifetime=useRef<AbortController|null>(null);
   useEffect(()=>{lifetime.current=new AbortController();return()=>lifetime.current?.abort();},[]);
   useEffect(()=>{listState.current={key,sequence:listState.current.sequence+1,busy:false,extended:false};setItems([]);setNextList(null);setLoading(true);},[key]);
-  useEffect(()=>{detailState.current={id:selectedId,sequence:detailState.current.sequence+1,busy:false,extended:false};setDetail(null);setDetailError('');setNextMessage(null);setDetailLoading(Boolean(selectedId));},[selectedId]);
+  useEffect(()=>{detailState.current={id:selectedId,sequence:detailState.current.sequence+1,busy:false,extended:false,newestIds:new Set<string>(),statusOffset:0};setDetail(null);setDetailError('');setNextMessage(null);setDetailLoading(Boolean(selectedId));},[selectedId]);
   useEffect(()=>{const signal=lifetime.current!.signal;adminApi<User>('/api/admin/me',{signal}).then(user=>{if(!signal.aborted)setMe(user);}).catch(reason=>{if(!signal.aborted)setUserError(String(reason.message??reason));});},[]);
   const loadList=useCallback(async(signal:AbortSignal,cursor?:string)=>{
     const state=listState.current;if(state.key!==key||state.busy)return;state.busy=true;setListFetching(true);
@@ -54,9 +57,15 @@ export function useInboxData(query:string,mode:string,failuresOnly:boolean,selec
     const state=detailState.current;if(!selectedId||state.id!==selectedId||state.busy)return;state.busy=true;setDetailFetching(true);
     const active=()=>!signal.aborted&&detailState.current===state;
     try {
-      const result=await adminApi<Detail>(`/api/admin/conversations/${selectedId}${before?`?before=${encodeURIComponent(before)}`:''}`,{signal});
+      const params=new URLSearchParams();if(before)params.set('before',before);
+      const waiting=detailRef.current?.conversation.id===selectedId?detailRef.current.messages.filter(message=>message.direction==='OUT'&&message.status!=='READ'&&!state.newestIds.has(message.id)):[];
+      const start=state.statusOffset%Math.max(1,waiting.length);const statusIds=waiting.slice(start,start+99).map(message=>message.id);state.statusOffset=start+99;
+      if(statusIds.length)params.set('statusIds',statusIds.join(','));
+      const result=await adminApi<Detail>(`/api/admin/conversations/${selectedId}${params.size?`?${params}`:''}`,{signal});
       if(!active())return;
-      setDetailError('');setDetail(current=>({...result,messages:merge(current?.conversation.id===selectedId?current.messages:[],result.messages,messageOrder)}));
+      if(!before)state.newestIds=new Set(result.messages.map(message=>message.id));
+      const states=new Map((result.messageStates??[]).map(message=>[message.id,message]));
+      setDetailError('');setDetail(current=>({...result,messages:merge(current?.conversation.id===selectedId?current.messages:[],result.messages,messageOrder).map(message=>({...message,...states.get(message.id)}))}));
       if(before||!state.extended)setNextMessage(result.nextCursor);if(before)state.extended=true;
     } catch(reason) {if(active())setDetailError(reason instanceof Error?reason.message:'Não foi possível carregar o histórico.');}
     finally {state.busy=false;if(active()){setDetailLoading(false);setDetailFetching(false);}}

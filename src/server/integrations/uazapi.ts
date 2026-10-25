@@ -1,3 +1,4 @@
+import {sameWhatsAppRecipient} from '../whatsapp-phone';
 import { z } from "zod";
 import { HttpError } from "@/server/http";
 import type { RuntimeSecrets } from "@/server/secrets";
@@ -109,5 +110,5 @@ export async function sendUazapiText(env: UazapiEnv,lineId: string,phone: string
 export function localRecipientAllowed(env:RuntimeSecrets & {ENVIRONMENT?:string},phone:string) {
  if(env.ENVIRONMENT!=="development"||env.LOCAL_TEST_MODE!=="true")return true;
  const allowed=String(env.LOCAL_WHATSAPP_ALLOWED_RECIPIENTS??"").split(",").map(value=>value.replace(/\D/g,""));
- const normalized=phone.replace(/\D/g,"");return /^\d{10,15}$/.test(normalized)&&allowed.includes(normalized);
+ const normalized=phone.replace(/\D/g,"");return /^\d{10,15}$/.test(normalized)&&allowed.some(phone=>sameWhatsAppRecipient(phone,`${normalized}@s.whatsapp.net`));
 }

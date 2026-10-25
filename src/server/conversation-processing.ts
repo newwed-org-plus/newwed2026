@@ -200,7 +200,7 @@ export async function processManualConversationMessage(env: ConversationWorkerEn
     .bind(new Date().toISOString(),messageId).run();
   if ((claimed.meta.changes ?? 0) !== 1) {
     const existing = await env.DB.prepare("SELECT status FROM messages WHERE id=?").bind(messageId).first<{ status:string }>();
-    if (existing && ["ACCEPTED","DELIVERED","READ"].includes(existing.status)) return { sent:true as const,idempotent:true };
+    if (existing && ["ACCEPTED","SENT","DELIVERED","READ"].includes(existing.status)) return { sent:true as const,idempotent:true };
     if(existing?.status==="SEND_UNKNOWN")return {sent:false as const,uncertain:true};
     if (existing?.status === "SEND_PENDING") {
       const now = new Date().toISOString();

@@ -54,3 +54,12 @@ A tela WhatsApp permite **Importar histórico disponível** e mostra contagens r
 A lista de conversas e o conteúdo antigo do celular são fontes diferentes. `npm run local:history -- atendimento` importa metadados individuais e solicita mensagens antigas ao WhatsApp, com estado privado persistido. Se retornar pending/sem dados, é necessário que o aparelho disponibilize o histórico; não significa importação completa. Quando houver acesso ao celular, `npm run local:history -- atendimento --retry-limited` retoma pendências sem reconexão nem reenvio. Não repetir esse helper enquanto o aparelho estiver indisponível.
 
 O backup do callback e o progresso contêm dados privados e ficam exclusivamente em `.local-runtime/`. Encerramento forçado (SIGKILL), perda de energia/rede ou fechamento abrupto podem impedir a restauração. Nessa situação, manter o túnel disponível se possível e restaurar a configuração anterior pelo painel UAZAPI usando o backup privado; conferir o destino antes de encerrar o transporte. Nunca substituir uma configuração que outro operador já tenha alterado. A UAZAPI informa que falhas HTTP de webhook não são reenviadas automaticamente.
+
+
+## Entrega e IA no perfil local
+
+`ENABLE_MESSAGE_STATUS_SYNC=true` habilita a conciliação de estados na aplicação e no consumidor locais. Os configs remotos mantêm a função desligada até a migration 0015 e a liberação próprias. O cron consulta no máximo dez mensagens por execução, com cooldown de um minuto; falha do provider mantém o último estado conhecido. **Conferir entrega** consulta a UAZAPI sem repetir o envio. Somente **Entregue** e **Lida** confirmam recebimento; **Aceita para envio** e **Enviada** ainda aguardam essa confirmação.
+
+Reinícios do runtime local retornam 503 estável, com repetição limitada apenas de leituras. Se a conexão cair durante uma ação, conferir o histórico antes de repetir; a chave de idempotência da mensagem é preservada. Erros reais de compilação continuam sendo exibidos.
+
+Para IA, vincular/ativar o atendente, preservar o contexto e escolher um modelo gratuito validado. A conversa de teste deve ser devolvida ao agente; as demais permanecem humanas, e a allowlist local aceita somente a mesma identidade brasileira com/sem o nono dígito. A pergunta deve vir do WhatsApp do contato para a linha conectada. Responder manualmente pela Inbox ou importar histórico não inicia IA. Ao assumir a conversa, a IA pausa. Limite/falha do modelo encaminha ao humano, sem fallback pago.
