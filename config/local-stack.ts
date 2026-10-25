@@ -9,7 +9,7 @@ export function prepareLocalWorkers(root=process.cwd()) {
  const source=readFileSync(resolve(root,'.dev.vars'),'utf8');
  const localPolicy=parseEnv(source);
  const receiverPolicy=['LOCAL_TEST_MODE','LOCAL_WHATSAPP_ALLOWED_RECIPIENTS'].filter(key=>localPolicy[key]!==undefined).map(key=>`${key}=${JSON.stringify(localPolicy[key])}\n`).join('');
- const base={ENVIRONMENT:'development',ENABLE_MANUAL_SEND:'true',ENABLE_AGENT:'true',ENABLE_HISTORY_SYNC:'true',ENABLE_MESSAGE_STATUS_SYNC:'true',ENABLE_CHECKOUT:'false',ENABLE_CONFIRMATION:'false',ENABLE_EMAIL:'false'};
+ const base={ENVIRONMENT:'development',ENABLE_MANUAL_SEND:'true',ENABLE_AGENT:'true',ENABLE_FREE_AI_RETRY:'true',ENABLE_HISTORY_SYNC:'true',ENABLE_MESSAGE_STATUS_SYNC:'true',ENABLE_CHECKOUT:'false',ENABLE_CONFIRMATION:'false',ENABLE_EMAIL:'false'};
  for(const kind of ['commercial','receiver'] as const) {
   const folder=resolve(root,'.local-runtime',kind);mkdirSync(folder,{recursive:true,mode:0o700});
   const write=(path:string,value:string)=>{if(!existsSync(path)||readFileSync(path,"utf8")!==value)writeFileSync(path,value,{mode:0o600});};

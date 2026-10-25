@@ -1,3 +1,4 @@
+import {siteKnowledge} from '../site-knowledge';
 import { agentResultSchema,type AgentResult } from "@/features/conversations/model";
 import type { RuntimeSecrets } from "@/server/secrets";
 
@@ -37,7 +38,8 @@ export async function loadAgentContext(env: Pick<Env,"DB">,input: { leadId?:stri
       .bind(input.conversationId).all<{ direction:string;body:string;created_at:string }>(),
   ]);
   return {
-    catalog:catalog.results,
+    siteKnowledge,
+    catalog:catalog.results.filter(row=>!/(?:validacao|validação|demonstração|demonstracao)/i.test(String(row.name??''))),
     lead,
     summary:conversation?.summary ?? null,
     recentMessages:messages.results.reverse(),

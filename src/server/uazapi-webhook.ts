@@ -95,7 +95,11 @@ export async function processUazapiBatch(env: WebhookEnv,externalId: string,offs
   }
   const now = new Date().toISOString();
   const statements = chunk.flatMap(item => [
-    env.DB.prepare("INSERT OR IGNORE INTO webhook_events (id,provider,external_id,event_type,payload_json,request_id,created_at) VALUES (?,'uazapi',?,?,?,?,?)")
+    // A cache pull may win the race before this authenticated live callback.
+    // Promote only that same message to its live evidence; history alone never replies.
+    env.DB.prepare(`INSERT INTO webhook_events (id,provider,external_id,event_type,payload_json,request_id,created_at) VALUES (?,'uazapi',?,?,?,?,?)
+      ON CONFLICT(provider,external_id) DO UPDATE SET payload_json=excluded.payload_json,request_id=excluded.request_id,processed_at=NULL,error=NULL
+      WHERE json_extract(webhook_events.payload_json,'$.event.history')=1 AND json_extract(excluded.payload_json,'$.event.history')=0`)
       .bind(crypto.randomUUID(),item.externalId,item.type,JSON.stringify(item.payload),stored.request_id,now),
     ...(options.processHistory && isHistoryPayload(item.payload) ? [] : [env.DB.prepare("INSERT OR IGNORE INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,request_id,created_at) SELECT ?,?,?,?,?,0,?,? WHERE changes()=1")
       .bind(`uazapi:${item.externalId}`,item.type,item.externalId,`uazapi:${item.externalId}`,JSON.stringify({externalId:item.externalId,requestId:stored.request_id}),stored.request_id,now)]),

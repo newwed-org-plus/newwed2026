@@ -35,7 +35,8 @@
     "D1_BUDGET_WINDOW": "day",
     "QUEUE_BUDGET": "",
     "ENABLE_HISTORY_SYNC": "false",
-    "ENABLE_MESSAGE_STATUS_SYNC": "false"
+    "ENABLE_MESSAGE_STATUS_SYNC": "false",
+    "ENABLE_FREE_AI_RETRY": "false"
   },
   "send_email": [
     {
@@ -104,7 +105,8 @@
         "D1_BUDGET_WINDOW": "day",
         "QUEUE_BUDGET": "",
         "ENABLE_HISTORY_SYNC": "false",
-    "ENABLE_MESSAGE_STATUS_SYNC": "false"
+        "ENABLE_MESSAGE_STATUS_SYNC": "false",
+        "ENABLE_FREE_AI_RETRY": "false"
       },
       "send_email": [
         {
@@ -171,7 +173,8 @@
         "D1_BUDGET_WINDOW": "day",
         "QUEUE_BUDGET": "",
         "ENABLE_HISTORY_SYNC": "false",
-    "ENABLE_MESSAGE_STATUS_SYNC": "false"
+        "ENABLE_MESSAGE_STATUS_SYNC": "false",
+        "ENABLE_FREE_AI_RETRY": "false"
       },
       "send_email": [
         {

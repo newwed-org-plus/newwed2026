@@ -185,6 +185,7 @@ export const messages = sqliteTable("messages", {
   checkoutId: text("checkout_id").references(() => checkouts.id),
   actorId: text("actor_id").references(() => users.id),
   externalId: text("external_id"),
+  inReplyTo:text("in_reply_to"),
   direction: text("direction").notNull(),
   type: text("type").notNull(),
   body: text("body"),
@@ -200,6 +201,7 @@ export const messages = sqliteTable("messages", {
   createdAt: text("created_at").notNull(),
 }, (table) => [
   uniqueIndex("messages_external_uidx").on(table.externalId),
+  uniqueIndex("messages_agent_reply_uidx").on(table.conversationId,table.inReplyTo).where(sql`${table.inReplyTo} IS NOT NULL`),
   index("messages_conversation_page_idx").on(table.conversationId,sql`${table.createdAt} DESC`,sql`${table.id} DESC`),
   index("messages_checkout_idx").on(table.checkoutId),
   index("messages_delivery_poll_idx").on(table.statusCheckedAt,table.createdAt).where(sql`${table.direction}='OUT' AND ${table.status} IN ('ACCEPTED','SENT','DELIVERED','SEND_UNKNOWN')`),
@@ -386,7 +388,7 @@ export const outboxEvents = sqliteTable("outbox_events", {
   payloadJson: text("payload_json").notNull(),
   attempts: integer("attempts").notNull().default(0),
   publishedAt: text("published_at"),
-  dispatchState:text("dispatch_state").notNull().default("PENDING"),holdReason:text("hold_reason"),processingToken:text("processing_token"),processingStartedAt:text("processing_started_at"),processedAt:text("processed_at"),processingAttempts:integer("processing_attempts").notNull().default(0),
+  dispatchState:text("dispatch_state").notNull().default("PENDING"),holdReason:text("hold_reason"),processingToken:text("processing_token"),processingStartedAt:text("processing_started_at"),processedAt:text("processed_at"),processingAttempts:integer("processing_attempts").notNull().default(0),deferredAttempts:integer("deferred_attempts").notNull().default(0),
   nextAttemptAt: text("next_attempt_at"),
   lastError: text("last_error"),
   requestId: text("request_id"),
@@ -415,3 +417,7 @@ export const resourceUsage=sqliteTable("resource_usage",{
 export const uazapiHistorySyncs=sqliteTable("uazapi_history_syncs",{
  id:text("id").primaryKey(),lineId:text("line_id").notNull().references(()=>whatsappInstances.id),status:text("status").notNull().default("PENDING"),providerOffset:integer("provider_offset").notNull().default(0),scannedCount:integer("scanned_count").notNull().default(0),skippedCount:integer("skipped_count").notNull().default(0),attempts:integer("attempts").notNull().default(0),nextAttemptAt:text("next_attempt_at"),lastError:text("last_error"),requestedBy:text("requested_by").references(()=>users.id),createdAt:text("created_at").notNull(),updatedAt:text("updated_at").notNull(),completedAt:text("completed_at"),
 },table=>[uniqueIndex("uazapi_history_active_idx").on(table.lineId).where(sql`${table.status} IN ('PENDING','RUNNING')`),index("uazapi_history_pending_idx").on(table.status,table.nextAttemptAt,table.updatedAt)]);
+
+export const aiProviderCooldowns=sqliteTable('ai_provider_cooldowns',{
+ scope:text('scope').primaryKey(),availableAt:text('available_at').notNull(),errorCode:text('error_code').notNull(),updatedAt:text('updated_at').notNull(),
+});

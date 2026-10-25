@@ -1,3 +1,4 @@
+import {recoveryEnabled} from "@/server/ai-availability";
 import {syncUazapiDelivery} from "@/server/uazapi-delivery";
 import {processPendingHistorySyncs,reconcileRecentLocalMessages} from "@/server/uazapi-history-sync";
 import {collectUsage,monitorCron} from "@/server/operations";
@@ -87,6 +88,10 @@ export default {
     const workerEnv = env as WorkerEnv;
     const now = new Date().toISOString();
     const stale = new Date(Date.now() - 10 * 60_000).toISOString();
+    if(recoveryEnabled(workerEnv))await workerEnv.DB.prepare(`UPDATE outbox_events SET dispatch_state='PENDING',published_at=NULL,processing_token=NULL,processing_started_at=NULL,next_attempt_at=?
+      WHERE type='conversation.reply.requested' AND dispatch_state='PROCESSING' AND processing_started_at<=?
+      AND NOT EXISTS(SELECT 1 FROM messages WHERE conversation_id=outbox_events.aggregate_id AND in_reply_to=json_extract(outbox_events.payload_json,'$.externalId'))`)
+      .bind(now,new Date(Date.now()-120000).toISOString()).run();
     await workerEnv.DB.prepare("UPDATE outbox_events SET dispatch_state=CASE WHEN type='checkout.create' THEN 'PENDING' ELSE 'HELD' END,hold_reason=CASE WHEN type='checkout.create' THEN NULL ELSE 'PROCESSING_RESULT_UNKNOWN' END,published_at=CASE WHEN type='checkout.create' THEN NULL ELSE published_at END,processing_token=NULL,processing_started_at=NULL WHERE dispatch_state='PROCESSING' AND processing_started_at<=?").bind(stale).run();
     if(capabilityEnabled(workerEnv,"checkout"))await workerEnv.DB.batch([
       workerEnv.DB.prepare("UPDATE checkouts SET status='FAILED',last_error_code='PROCESSING_TIMEOUT',last_error='O processamento excedeu o lease e será retomado.',last_error_at=?,next_retry_at=?,processing_token=NULL,processing_started_at=NULL,updated_at=? WHERE status='CREATING' AND processing_started_at IS NOT NULL AND processing_started_at<=?")
@@ -97,8 +102,13 @@ export default {
         .bind(now,now,stale),
     ]);
     await workerEnv.DB.batch([
-      workerEnv.DB.prepare("UPDATE conversations SET mode='HUMAN',human_active=1,agent_paused_at=coalesce(agent_paused_at,?),agent_error='Resposta do agente excedeu o lease e foi encaminhada ao humano.',agent_processing_token=NULL,agent_processing_started_at=NULL,updated_at=? WHERE agent_processing_token IS NOT NULL AND agent_processing_started_at<=?")
-        .bind(now,now,new Date(Date.now() - 2 * 60_000).toISOString()),
+      workerEnv.DB.prepare(`UPDATE conversations SET
+        mode=CASE WHEN ?=1 AND NOT EXISTS(SELECT 1 FROM messages m WHERE m.conversation_id=conversations.id AND m.status IN ('SENDING','SEND_UNKNOWN')) THEN mode ELSE 'HUMAN' END,
+        human_active=CASE WHEN ?=1 AND mode='AGENT' AND NOT EXISTS(SELECT 1 FROM messages m WHERE m.conversation_id=conversations.id AND m.status IN ('SENDING','SEND_UNKNOWN')) THEN 0 ELSE 1 END,
+        agent_paused_at=CASE WHEN ?=1 AND mode='AGENT' AND NOT EXISTS(SELECT 1 FROM messages m WHERE m.conversation_id=conversations.id AND m.status IN ('SENDING','SEND_UNKNOWN')) THEN agent_paused_at ELSE coalesce(agent_paused_at,?) END,
+        agent_error=CASE WHEN ?=1 AND NOT EXISTS(SELECT 1 FROM messages m WHERE m.conversation_id=conversations.id AND m.status IN ('SENDING','SEND_UNKNOWN')) THEN agent_error ELSE 'Resposta do agente excedeu o lease e foi encaminhada ao humano.' END,
+        agent_processing_token=NULL,agent_processing_started_at=NULL,updated_at=? WHERE agent_processing_token IS NOT NULL AND agent_processing_started_at<=?`)
+        .bind(recoveryEnabled(workerEnv)?1:0,recoveryEnabled(workerEnv)?1:0,recoveryEnabled(workerEnv)?1:0,now,recoveryEnabled(workerEnv)?1:0,now,new Date(Date.now() - 2 * 60_000).toISOString()),
       workerEnv.DB.prepare("UPDATE messages SET status='SEND_UNKNOWN',last_error='O resultado do envio não foi confirmado dentro do lease.',failed_at=? WHERE status='SENDING' AND coalesce(send_started_at,created_at)<=?")
         .bind(now,stale),
     ]);

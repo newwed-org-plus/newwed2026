@@ -104,3 +104,11 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Entrada autorizada sem nono dígito recebe elegibilidade de IA; a allowlist não libera contatos diferentes.
 - Visuais: estados em português, entrega sem reenvio, recuperação de 503 e atualização de mensagem carregada de página antiga.
 - Teste externo aprovado pelo usuário: uma mensagem manual chegou (Delivered no provider e DELIVERED na API local). IA local usa somente modelo gratuito; teste real aguarda pergunta enviada pelo usuário, sem injeção de mensagem.
+
+## Onda 29 — Continuidade gratuita e conhecimento oficial
+
+- Unitários: classificação de 429 por conta/upstream, Retry-After/data/reset, teto zero, alternativas somente gratuitas verificadas, no máximo três tentativas e nenhuma rotação em cota global. Contexto inclui quatro projetos e quatro edições da LP com datas/preços/parcelas, sem preços inventados de Feira/Guia/Workshop.
+- Workers: AGENT durante espera, cooldown persistido, next_attempt_at respeitado, mais de dez esperas sem falha final, retomada uma vez, replay sem geração/envio, FAQ/resumo sem geração, claim durante espera, nova pergunta durante geração, recuperação de lease somente sem efeito externo e bloqueio de envio incerto. Retomada explícita local auditada, mesma origem, histórico recusado e idempotência.
+- Visual: aviso de disponibilidade gratuita, controle humano visível e remoção do aviso após retomada. Paridade dos projetos mantida após extração da fonte comum.
+- Externo autorizado: retomar somente a pergunta real pendente do contato local; verificar estado de envio/entrega sem repetir a mensagem. Prévia OpenRouter real verifica formatos do Guia, combos do Workshop e datas anunciadas das quatro edições sem envio WhatsApp adicional. Dados/IDs privados ficam em `.local-runtime`.
+- Regressão adicional: cache histórico antes de callback ao vivo, promoção da mesma mensagem somente com envelope autenticado, uma única entrada na Inbox e uma única resposta. Totais finais locais: 121 unitários, 75 Workers e 66 visuais.

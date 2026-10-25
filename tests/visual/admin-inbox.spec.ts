@@ -16,6 +16,17 @@ test.afterAll(()=>{
 });
 const item=(i:number)=>({whatsapp_instance_id:'validacao',id:`c${i}`,external_id:`contact-${i}`,contact_name:`VALIDACAO Contato ${i}`,mode:'HUMAN',claimed_by:null,updated_at:'2026-10-25T12:00:00.000Z'});
 const message=(i:number)=>({id:`m${String(i).padStart(3,'0')}`,direction:'IN',type:'text',body:`VALIDACAO mensagem ${i}`,status:'RECEIVED',created_at:'2026-10-25T12:00:00.000Z'});
+test('mostra espera de modelo gratuito sem transferir a conversa e remove aviso ao retomar',async({page})=>{
+ let waiting=true;
+ await page.route('**/api/admin/conversations**',route=>{
+  const url=new URL(route.request().url());const c={...item(0),mode:'AGENT',agent_error:null,agent_wait_until:waiting?'2026-10-26T00:01:00.000Z':null};
+  return route.fulfill({json:url.pathname.endsWith('/c0')?{conversation:c,messages:[message(0)],nextCursor:null}:{items:[c],nextCursor:null}});
+ });
+ await page.goto(`${origin}/admin`);await page.getByRole('button',{name:'Inbox',exact:true}).click();await page.getByText('VALIDACAO Contato 0',{exact:true}).click();
+ await expect(page.getByText(/IA aguardando disponibilidade gratuita/)).toBeVisible();await expect(page.getByRole('button',{name:'Assumir',exact:true})).toBeVisible();
+ await page.screenshot({path:'test-results/inbox-free-ai-wait.png',fullPage:true});
+ waiting=false;await page.getByRole('button',{name:'Atualizar inbox',exact:true}).click();await expect(page.getByText(/IA aguardando disponibilidade gratuita/)).toHaveCount(0);
+});
 for(const [name,width,height] of [['mobile',390,844],['desktop',1440,900]] as const)test(`${name} · pagina conversas e preserva mensagens antigas ao atualizar`,async({page})=>{
  await page.setViewportSize({width,height});
  await page.route('**/api/admin/conversations**',route=>{
