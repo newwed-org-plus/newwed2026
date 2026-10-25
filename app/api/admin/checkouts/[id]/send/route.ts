@@ -1,3 +1,4 @@
+import {requireCapability} from "@/server/capabilities";
 import { env } from "cloudflare:workers";
 import { requireAccessUser } from "@/server/auth/access";
 import { errorResponse,HttpError,json,requireIdempotencyKey } from "@/server/http";
@@ -12,6 +13,7 @@ async function priorResponse(key: string) {
 export async function POST(request: Request,{ params }:{ params:Promise<{ id:string }> }) {
   try {
     const actor = await requireAccessUser(request);
+    requireCapability(env,"checkout");
     const key = requireIdempotencyKey(request);
     const prior = await priorResponse(key);
     if (prior) return json(JSON.parse(prior.response_json),{ status:202 });

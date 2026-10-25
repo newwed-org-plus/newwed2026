@@ -3,7 +3,7 @@ import { z } from "zod";
 export const conversationModeSchema = z.enum(["AGENT", "HUMAN"]);
 export type ConversationMode = z.infer<typeof conversationModeSchema>;
 
-export const notificationDeliveryStatusSchema = z.enum(["PENDING", "SENT", "FAILED"]);
+export const notificationDeliveryStatusSchema = z.enum(["PENDING", "SENT", "FAILED", "SEND_UNKNOWN"]);
 
 export const manualMessageSchema = z.object({
   body:z.string().trim().min(1).max(1000),

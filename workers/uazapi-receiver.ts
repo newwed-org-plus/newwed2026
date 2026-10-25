@@ -8,7 +8,7 @@ import { isDailyQuotaError } from "@/server/database-availability";
 type ReceiverEnv=Env & {HISTORY_CRON_MESSAGE_BUDGET?:string};
 function history(payload:unknown) {return Boolean(payload && typeof payload==='object' && (payload as {event?:{history?:boolean}}).event?.history);}
 async function handled(env:Pick<Env,'DB'>,id:string) {
-  await env.DB.prepare("UPDATE outbox_events SET published_at=coalesce(published_at,?),next_attempt_at=NULL,last_error=NULL WHERE id=?").bind(new Date().toISOString(),id).run();
+  await env.DB.prepare("UPDATE outbox_events SET published_at=coalesce(published_at,?),dispatch_state='DONE',processed_at=coalesce(processed_at,strftime('%Y-%m-%dT%H:%M:%fZ','now')),next_attempt_at=NULL,last_error=NULL WHERE id=?").bind(new Date().toISOString(),id).run();
 }
 async function storedPayload(env:Pick<Env,'DB'>,externalId:string) {
   return env.DB.prepare("SELECT payload_json,processed_at FROM webhook_events WHERE provider='uazapi' AND external_id=?").bind(externalId).first<{payload_json:string;processed_at:string|null}>();
@@ -64,7 +64,7 @@ async function recover(env:ReceiverEnv) {
           env.DB.prepare("UPDATE operation_leases SET expires_at=? WHERE id=? AND token=?").bind(new Date(Date.now()+120_000).toISOString(),key,token),
         ]);
         if(complete) {
-          await env.DB.prepare("UPDATE outbox_events SET published_at=coalesce(published_at,?),next_attempt_at=NULL,last_error=NULL WHERE type='uazapi.batch' AND aggregate_id=?").bind(timestamp,job.external_id).run();
+          await env.DB.prepare("UPDATE outbox_events SET published_at=coalesce(published_at,?),dispatch_state='DONE',processed_at=coalesce(processed_at,strftime('%Y-%m-%dT%H:%M:%fZ','now')),next_attempt_at=NULL,last_error=NULL WHERE type='uazapi.batch' AND aggregate_id=?").bind(timestamp,job.external_id).run();
           break;
         }
       }
@@ -97,9 +97,10 @@ export default {
         // Parent/legacy history remains durable in D1; cron owns its budget and line lease.
         if(!historical) {
           if(event.type==='uazapi.batch')await processUazapiBatch(env,event.externalId,event.targetCount);
-          else if(event.type==='uazapi.incoming')await processIncomingWhatsApp({...env,OPENROUTER_API_KEY:undefined},event.externalId,{},'uazapi');
+          else if(event.type==='uazapi.incoming')await processIncomingWhatsApp({...env,OPENROUTER_API_KEY:undefined},event.externalId,{},'uazapi','receive-only');
           else if(event.type==='uazapi.status')await processUazapiStatus(env,event.externalId);
           else throw new Error('Unsupported inbound event');
+          if(event.id)await handled(env,event.id);
         }
         message.ack();
       } catch(error) {

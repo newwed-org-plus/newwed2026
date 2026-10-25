@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       (SELECT direction FROM messages WHERE conversation_id=c.id ORDER BY created_at DESC,id DESC LIMIT 1) AS last_direction,
       (SELECT status FROM messages WHERE conversation_id=c.id ORDER BY created_at DESC,id DESC LIMIT 1) AS last_status
       FROM conversations c LEFT JOIN whatsapp_instances wi ON wi.id=c.whatsapp_instance_id LEFT JOIN leads l ON l.id=c.lead_id LEFT JOIN editions e ON e.id=l.edition_id LEFT JOIN users u ON u.id=c.claimed_by
-      WHERE (? IS NULL OR c.mode=?) AND (?=0 OR c.agent_error IS NOT NULL OR EXISTS (SELECT 1 FROM messages fm WHERE fm.conversation_id=c.id AND fm.status='FAILED'))
+      WHERE (? IS NULL OR c.mode=?) AND (?=0 OR c.agent_error IS NOT NULL OR EXISTS (SELECT 1 FROM messages fm WHERE fm.conversation_id=c.id AND fm.status IN ('FAILED','SEND_UNKNOWN')))
       AND (?='' OR l.name LIKE ? OR l.email LIKE ? OR l.phone LIKE ? OR c.external_id LIKE ? OR c.contact_name LIKE ?)
       AND (? IS NULL OR coalesce(c.last_message_at,c.updated_at)<? OR (? IS NOT NULL AND coalesce(c.last_message_at,c.updated_at)=? AND c.id<?))
       ORDER BY coalesce(c.last_message_at,c.updated_at) DESC,c.id DESC LIMIT ?`)

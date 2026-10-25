@@ -34,6 +34,7 @@ if (!app?.durable_objects?.bindings?.some(binding => binding.name === "ADMIN_PAS
 for (const name of ["ENABLE_MANUAL_SEND","ENABLE_AGENT","ENABLE_CHECKOUT","ENABLE_CONFIRMATION","ENABLE_EMAIL"]) {
   if (commercial && app?.vars?.[name] !== events?.vars?.[name]) errors.push(`${name}: controles web/consumer divergentes`);
 }
+if (enabled("ENABLE_AGENT") && receiver?.vars?.ENABLE_AGENT !== app.vars.ENABLE_AGENT) errors.push("ENABLE_AGENT: receptor divergente");
 if (enabled("ENABLE_PUBLIC_LEADS") && (!app.vars.TURNSTILE_SITE_KEY || !app.vars.TURNSTILE_HOSTNAMES)) errors.push("Turnstile: site key ou hostnames ausentes");
 if (enabled("ENABLE_CHECKOUT")) {
   const origin = target === "production" ? "https://api.asaas.com/v3" : "https://api-sandbox.asaas.com/v3";

@@ -16,7 +16,8 @@
   },
   "vars": {
     "ENVIRONMENT": "production",
-    "HISTORY_CRON_MESSAGE_BUDGET": "100"
+    "HISTORY_CRON_MESSAGE_BUDGET": "100",
+    "ENABLE_AGENT": "false"
   },
   "d1_databases": [
     {
@@ -65,7 +66,8 @@
       },
       "vars": {
         "ENVIRONMENT": "staging",
-        "HISTORY_CRON_MESSAGE_BUDGET": "100"
+        "HISTORY_CRON_MESSAGE_BUDGET": "100",
+        "ENABLE_AGENT": "false"
       },
       "d1_databases": [
         {
