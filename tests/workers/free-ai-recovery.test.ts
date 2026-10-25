@@ -9,6 +9,7 @@ import {acceptUazapiWebhook,processUazapiBatch} from '@/server/uazapi-webhook';
 import {dispatchEvent} from '@/server/dispatch';
 import {getCooldown,paceFreeRequest} from '@/server/ai-availability';
 import {loadAgentContext} from '@/server/integrations/openai-agent';
+import {answerWithOpenRouter} from '@/server/integrations/openrouter';
 import commercial from '../../workers/events';
 
 const runtime={...env,ENABLE_FREE_AI_RETRY:'true',OPENROUTER_API_KEY:'synthetic'};
@@ -135,5 +136,16 @@ describe('retomada durável da IA gratuita',()=>{
   expect(await getCooldown(runtime,'openrouter:pace')).not.toBeNull();
   const context=await loadAgentContext(runtime,{conversationId:id});expect(context.siteKnowledge.projects).toHaveLength(4);
   expect(context.catalog.every(row=>!String(row.name).includes('VALIDACAO'))).toBe(true);
+ });
+ it('após expirar cooldown não insiste para sempre nos mesmos três modelos indisponíveis',async()=>{
+  const failed=[model.id,'google/gemma-4-26b-a4b-it:free','google/gemma-4-31b-it:free'];
+  const next='nvidia/nemotron-3-super-120b-a12b:free';const past=new Date(Date.now()-60000).toISOString();
+  await env.DB.batch(failed.map(id=>env.DB.prepare("INSERT INTO ai_provider_cooldowns(scope,available_at,error_code,updated_at) VALUES(?,?,'OPENROUTER_HTTP_429',?)").bind(`openrouter:model:${id}`,past,past)));
+  const completions:string[]=[];
+  await answerWithOpenRouter(runtime,{name:'VALIDACAO',instructions:'Ajude com fatos verificados.',model:model.id,message:'Informações gerais',context:{}},async(url,init)=>{
+   if(String(url).endsWith('/models'))return Response.json({data:[...failed,next].map(id=>({...model,id}))});
+   completions.push(JSON.parse(String(init?.body)).model);return good(url);
+  });
+  expect(completions).toEqual([next]);
  });
 });

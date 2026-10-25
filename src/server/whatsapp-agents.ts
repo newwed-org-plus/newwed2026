@@ -4,6 +4,8 @@ import { answerWithOpenRouter,listFreeModels } from "@/server/integrations/openr
 import { configuredInstance } from "@/server/integrations/uazapi";
 import type { RuntimeSecrets } from "@/server/secrets";
 import { ensureWhatsAppLines,listWhatsAppLines } from "@/server/whatsapp-lines";
+import {recoveryEnabled} from './ai-availability';
+import {verifiedSiteAnswer} from './site-knowledge';
 
 type AgentEnv = Env & RuntimeSecrets;
 const fields="id,instance_id,name,instructions,model,enabled,version,updated_at";
@@ -54,5 +56,5 @@ export async function saveLineAgent(env:AgentEnv,id:string,input:AgentConfigInpu
 export async function previewLineAgent(env:AgentEnv,id:string,message:string,fetcher:typeof fetch = fetch) {
   const agent = await getAgent(env,id);
   if (!agent) throw new HttpError(409,"AGENT_NOT_CONFIGURED","Salve a configuração antes de testar.");
-  return answerWithOpenRouter(env,{...agent,message,context:{test:true,catalog:[],lead:null,summary:null,recentMessages:[]}},fetcher);
+  return recoveryEnabled(env)&&verifiedSiteAnswer(message)||answerWithOpenRouter(env,{...agent,message,context:{test:true,catalog:[],lead:null,summary:null,recentMessages:[]}},fetcher);
 }

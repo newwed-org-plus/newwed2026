@@ -48,3 +48,14 @@ test("atendentes mostra chave pendente e indisponibilidade do catálogo",async({
   await page.route("**/api/admin/agents**",route=>route.fulfill(route.request().url().endsWith("/models")?{status:502,json:{message:"Catálogo temporariamente indisponível."}}:{json:{configured:false,lines:[],items:[]}}));
   await page.goto(`${origin}/admin`);await page.getByRole("button",{name:"Atendentes",exact:true}).click();await expect(page.getByText(/OpenRouter ainda não conectado/)).toBeVisible();await page.getByRole("button",{name:"Novo atendente",exact:true}).click();await expect(page.getByRole("alert")).toHaveText("Catálogo temporariamente indisponível.");await expect(page.getByRole("button",{name:"Testar resposta",exact:true})).toBeDisabled();
 });
+
+for(const [name,width,height] of [['mobile',390,844],['tablet',768,1024],['desktop',1440,900]] as const)test(`${name} · conhecimento exibe preços publicados e informações sob consulta`,async({page})=>{
+ test.skip(Boolean(process.env.VISUAL_BASE_URL),'Somente ambiente local.');await page.setViewportSize({width,height});let failed=true;
+ await page.route('**/api/admin/agents**',route=>route.fulfill({json:route.request().url().endsWith('/models')?{items:[]}:{configured:true,lines:[],items:[]}}));
+ await page.route('**/api/admin/knowledge',route=>failed?route.fulfill({status:503,json:{message:'Base temporariamente indisponível.'}}):route.continue());
+ await page.goto(`${origin}/admin`);await page.getByRole('button',{name:'Atendentes',exact:true}).click();await page.getByRole('button',{name:'Ver conhecimento dos produtos',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('Base temporariamente indisponível.');failed=false;await page.getByRole('button',{name:'Tentar novamente',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Preços publicados do FAMTOUR',exact:true})).toBeVisible();await expect(page.getByText('R$ 7.697,00',{exact:true})).toBeVisible();await expect(page.getByText('12x de R$ 666,42',{exact:true})).toBeVisible();
+ await expect(page.getByText('Sob consulta; preço não publicado',{exact:true})).toHaveCount(3);await expect(page.getByText(/Capacidade anunciada não é quantidade de vagas restantes/)).toBeVisible();await expect(page.getByText(/não confirma vaga nem pagamento/)).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`test-results/knowledge-${name}.png`,fullPage:true});
+});

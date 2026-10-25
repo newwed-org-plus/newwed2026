@@ -421,3 +421,8 @@ export const uazapiHistorySyncs=sqliteTable("uazapi_history_syncs",{
 export const aiProviderCooldowns=sqliteTable('ai_provider_cooldowns',{
  scope:text('scope').primaryKey(),availableAt:text('available_at').notNull(),errorCode:text('error_code').notNull(),updatedAt:text('updated_at').notNull(),
 });
+export const conversationProductMemory=sqliteTable('conversation_product_memory',{
+ conversationId:text('conversation_id').primaryKey().references(()=>conversations.id,{onDelete:'cascade'}),
+ focusJson:text('focus_json').notNull(),lastMessageAt:text('last_message_at').notNull(),lastMessageId:text('last_message_id').notNull(),
+ revision:integer('revision').notNull().default(1),updatedAt:text('updated_at').notNull(),
+});

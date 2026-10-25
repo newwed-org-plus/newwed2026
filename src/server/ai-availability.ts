@@ -1,7 +1,7 @@
 import {HttpError} from './http';
 export class OpenRouterDeferred extends HttpError {
  constructor(public retryAt:string,public scope:'account'|'model'|'local',code='OPENROUTER_HTTP_429') {
-  super(503,code,'Aguardando disponibilidade de um modelo gratuito. A resposta será retomada automaticamente.');
+  super(503,code,'Os modelos gratuitos estão temporariamente indisponíveis. Aguarde a disponibilidade antes de tentar novamente.');
  }
 }
 export function rateLimitError(status:number,headers:Headers,payload:unknown,now=Date.now()) {
