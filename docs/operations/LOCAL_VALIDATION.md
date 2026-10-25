@@ -1,6 +1,6 @@
 # Validação local
 
-Execute no checkout da onda 26. Nenhum passo abaixo aponta o callback da linha ativa ao computador.
+Execute no checkout da onda 27. O banco e os consumidores são locais. A UAZAPI é externa; para receber eventos em localhost é necessário um túnel HTTPS. Redirecionar uma linha exige autorização do titular. A linha atendimento foi explicitamente autorizada nesta sessão (D-047).
 
 ```bash
 npm ci
@@ -8,9 +8,9 @@ npm run local:prepare
 npm run dev:local
 ```
 
-Abrir `http://127.0.0.1:4173/admin`. O script aplica migrations somente ao D1 local e inclui a edição **VALIDACAO local — demonstração**, um lead e uma conversa sintética. A linha da fixture não tem provider e permanece desconectada. Repetir a preparação preserva registros já existentes. A fixture é exclusivamente de desenvolvimento e nunca deve ser aplicada remotamente.
+Abrir `http://127.0.0.1:4173/admin`. `local:prepare` aplica migrations somente ao D1 local e inclui a edição **VALIDACAO local — demonstração**, um lead e uma conversa sintética. A linha da fixture não tem provider e permanece desconectada. Repetir a preparação preserva registros já existentes. A fixture é exclusivamente de desenvolvimento e nunca deve ser aplicada remotamente.
 
-Se login for necessário, provisionar a própria conta local com `npx tsx scripts/provision-admin.ts <seu-email> --local`; a senha será pedida de forma oculta. Não enviar a senha pelo chat. O bypass de desenvolvimento existente é restrito à configuração local; produção sempre exige autenticação.
+O login local provisionado nesta sessão é `admin@newwed.local`; a senha não é versionada. Para outra conta, provisionar a própria conta local com `npx tsx scripts/provision-admin.ts <seu-email> --local`; a senha será pedida de forma oculta. Não enviar a senha pelo chat. O bypass de desenvolvimento existente é restrito à configuração local; produção sempre exige autenticação.
 
 ## O que revisar na interface
 
@@ -20,7 +20,7 @@ Se login for necessário, provisionar a própria conta local com `npx tsx script
 4. Relatórios: conferir contagens, operação retida, execução de cron ainda não registrada e cota indisponível sem configuração. Dado indisponível não é lista vazia nem consumo zero.
 5. Formulário: revisar campos, consentimento e edição. `ENABLE_PUBLIC_LEADS` está desligado por padrão; habilitar somente em configuração local para persistir inscrições. Turnstile sem secret é permitido exclusivamente em desenvolvimento.
 
-O banco local é independente de produção; mensagens reais da linha ativa continuam chegando ao banco publicado. Não importar conversas reais para testar telas.
+O banco local é independente de produção. Com callback local ativo, os novos eventos da linha autorizada chegam ao computador. Fixtures e testes automatizados continuam sintéticos; não capturar telas ou logs contendo conversas reais.
 
 ## Fluxo completo reproduzível com providers simulados
 
@@ -35,4 +35,22 @@ Workers executa D1/Queue/Durable Objects locais e intercepta providers: inscriç
 
 O teste de capacidade concorrente usa 28 mensagens ao vivo, dois logins e orçamento histórico de 100 por cron; a retomada chega a 148 mensagens únicas sem saída automática. Testes de interface usam fixtures autenticadas e três viewports. Backup/restauração são exercitados em bancos temporários separados e limpos ao terminar.
 
-Para validação externa ainda são necessários Asaas sandbox, e-mail verificado, Turnstile e linha de teste própria, além da janela/destinatários aprovados. Os testes simulados não aprovam produção nem substituem o piloto de 24 horas.
+Para validação comercial externa ainda são necessários Asaas sandbox, e-mail verificado, Turnstile e linha de teste própria em homologação, além da janela/destinatários aprovados. Os testes simulados não aprovam produção nem substituem o piloto de 24 horas.
+
+## Receber e responder pela UAZAPI no localhost
+
+1. Guardar `UAZAPI_INSTANCES`, `UAZAPI_WEBHOOK_BASE_URL` e, se utilizado, `OPENROUTER_API_KEY` somente em `.dev.vars` ignorado. Configurar `LOCAL_TEST_MODE=true`; `dev:local` gera `LOCAL_CRON_TOKEN` privado.
+2. Para iniciar o túnel autorizado automaticamente: definir `LOCAL_UAZAPI_CALLBACK=true` e `LOCAL_UAZAPI_LINE=atendimento` nesse arquivo e executar `npm run local:tunnel:install` uma vez. O instalador suporta macOS e verifica o digest do release oficial do cloudflared.
+3. Executar `npm run dev:local`. Este comando inicia aplicação em 127.0.0.1:4173, receptor, consumidor comercial e cron a cada 15 segundos com o mesmo D1 e filas locais. O receptor não recebe chaves de envio ou IA. Não iniciar outra instância do túnel simultaneamente.
+4. Aguardar a confirmação de callback local no terminal. A ponte publica exclusivamente `/api/webhooks/uazapi/<linha>`; `/admin`, arquivos e depuração não ficam públicos. Não é necessário deploy, reconectar a linha ou gerar QR.
+5. Manter o processo e o computador disponíveis durante o teste. Ao encerrar normalmente, o launcher restaura o callback anterior antes de parar os serviços, somente se a URL ainda pertencer ao túnel atual. Sem rede, a restauração fica pendente e o processo mantém os serviços ativos para outra tentativa.
+
+O controle manual exige `ENABLE_MANUAL_SEND=true`. A exceção `LOCAL_ALLOW_MANUAL_SEND_ANY=true` permite exclusivamente a resposta escolhida pelo operador autenticado e responsável pela conversa. IA e outros envios automáticos continuam limitados por `LOCAL_WHATSAPP_ALLOWED_RECIPIENTS`; lista vazia bloqueia automação real. Não reenviar operações com resultado incerto. Checkout, confirmação e e-mail ficam desligados neste perfil até a preparação própria.
+
+## Histórico e recuperação local
+
+A tela WhatsApp permite **Importar histórico disponível** e mostra contagens reais. O pull usa `/message/find`, cursor persistido, lock e orçamento configurável de 100 mensagens por cron. Não depende de Queue por mensagem nem inicia respostas automáticas. O cache recente é reconciliado em desenvolvimento; isso reduz lacunas curtas de callback, mas não garante recuperar indisponibilidade prolongada.
+
+A lista de conversas e o conteúdo antigo do celular são fontes diferentes. `npm run local:history -- atendimento` importa metadados individuais e solicita mensagens antigas ao WhatsApp, com estado privado persistido. Se retornar pending/sem dados, é necessário que o aparelho disponibilize o histórico; não significa importação completa. Quando houver acesso ao celular, `npm run local:history -- atendimento --retry-limited` retoma pendências sem reconexão nem reenvio. Não repetir esse helper enquanto o aparelho estiver indisponível.
+
+O backup do callback e o progresso contêm dados privados e ficam exclusivamente em `.local-runtime/`. Encerramento forçado (SIGKILL), perda de energia/rede ou fechamento abrupto podem impedir a restauração. Nessa situação, manter o túnel disponível se possível e restaurar a configuração anterior pelo painel UAZAPI usando o backup privado; conferir o destino antes de encerrar o transporte. Nunca substituir uma configuração que outro operador já tenha alterado. A UAZAPI informa que falhas HTTP de webhook não são reenviadas automaticamente.

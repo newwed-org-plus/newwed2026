@@ -7,19 +7,21 @@ import { sha256 } from "@/server/normalization";
 import { timingSafeEqual } from "@/server/crypto";
 import { publishOutbox } from "@/server/outbox";
 
-const messageSchema = z.object({
+export const uazapiHistoryMessageSchema = z.object({
   id:z.string().max(256).optional(),messageid:z.string().max(256).optional(),chatid:z.string().max(100),
   senderName:z.string().max(200).optional(),fromMe:z.boolean().optional(),wasSentByApi:z.boolean().optional(),isGroup:z.boolean().optional(),
   messageType:z.string().max(100).optional(),text:z.string().max(32_000).nullish(),messageTimestamp:z.number().optional(),
 });
+const messageSchema=uazapiHistoryMessageSchema;
 type MessageInput = z.infer<typeof messageSchema>;
 export type UazapiIncoming = { event:{ id:string;from:string;type:string;text:{body:string};fromMe:boolean;history:boolean;createdAt:string;contactName:string|null };lineId:string };
 
 export function normalizeUazapiMessage(lineId: string,message: MessageInput,history = false): UazapiIncoming|null {
   const match = /^(\d{10,15})@s\.whatsapp\.net$/.exec(message.chatid);
   const id = message.messageid || message.id;
-  if (!match || !id || message.isGroup || message.wasSentByApi) return null;
-  const timestamp = message.messageTimestamp;
+  if (!match || !id || message.isGroup || (message.wasSentByApi&&!history)) return null;
+  const rawTimestamp = message.messageTimestamp;
+  const timestamp = rawTimestamp&&rawTimestamp<100_000_000_000?rawTimestamp*1000:rawTimestamp;
   const createdAt = timestamp && timestamp > 0 && timestamp < Date.now()+86_400_000 ? new Date(timestamp).toISOString() : new Date().toISOString();
   return { lineId,event:{ id:uazapiMessageId(lineId,id),from:match[1],type:message.text ? "text" : (message.messageType ?? "unknown").slice(0,100),
     text:{body:message.text ?? ""},fromMe:message.fromMe ?? false,history,createdAt,contactName:message.fromMe ? null : message.senderName ?? null } };

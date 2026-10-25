@@ -131,3 +131,23 @@ test("linha conectada faz uma consulta inicial e para o polling automático",asy
   await page.waitForTimeout(5500);
   expect(refreshes).toBe(1);
 });
+
+test("importação mostra contagens e progresso sem prometer histórico completo do celular",async({page})=>{
+  test.skip(Boolean(process.env.VISUAL_BASE_URL),"Provider simulado somente em ambiente local.");
+  let requested=false;
+  await page.route("**/api/admin/whatsapp**",route=>{
+    const path=new URL(route.request().url()).pathname;
+    if(path.endsWith('/history')){
+      if(route.request().method()==='POST'){requested=true;return route.fulfill({status:202,json:{id:'synthetic-history'}});}
+      return route.fulfill({json:{job:requested?{status:'PENDING',scanned_count:0,last_error:null}:null,totals:{conversations:161,messages:2}}});
+    }
+    if(route.request().method()==='GET')return route.fulfill({json:{historySyncEnabled:true,localTestMode:true,items:[{id:'validacao',name:'VALIDACAO Atendimento',state:'connected',serverConfigured:true}]}});
+    return route.fulfill({json:{id:'validacao',state:'connected',name:'VALIDACAO Atendimento',qrCode:null,phone:null,profileName:null,updatedAt:new Date().toISOString()}});
+  });
+  await page.goto(`${origin}/admin`);await page.getByRole('button',{name:'WhatsApp',exact:true}).click();
+  const section=page.getByRole('region',{name:'Importação do histórico'});
+  await expect(section.getByText('161 conversas · 2 mensagens')).toBeVisible();
+  await section.getByRole('button',{name:'Importar histórico disponível',exact:true}).click();
+  await expect(section.getByText('Importando mensagens anteriores; você já pode abrir a Inbox.')).toBeVisible();
+  await expect(section.getByRole('button',{name:'Importar histórico disponível',exact:true})).toBeDisabled();
+});

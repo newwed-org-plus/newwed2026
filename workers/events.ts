@@ -1,3 +1,4 @@
+import {processPendingHistorySyncs,reconcileRecentLocalMessages} from "@/server/uazapi-history-sync";
 import {collectUsage,monitorCron} from "@/server/operations";
 import {sendPaidConfirmation} from "@/server/checkout-confirmation";
 import {dispatchEvent} from "@/server/dispatch";
@@ -112,6 +113,8 @@ export default {
     }
     if(capabilityEnabled(workerEnv,"checkout"))await expireCheckoutReservations(workerEnv);
     await workerEnv.DB.prepare("DELETE FROM rate_limit_buckets WHERE expires_at<?").bind(now).run();
+    const imported=await processPendingHistorySyncs(workerEnv);
+    if(!imported)await reconcileRecentLocalMessages(workerEnv).catch(()=>console.error(JSON.stringify({event:"local.history.reconcile.unavailable"})));
     await collectUsage(workerEnv).catch(()=>console.error(JSON.stringify({event:"operations.usage.unavailable"})));
     if (workerEnv.ASAAS_API_KEY) {
       const pendingPayments = await workerEnv.DB.prepare("SELECT provider_payment_id FROM payments WHERE provider_payment_id IS NOT NULL AND status IN ('PENDING','OVERDUE') ORDER BY updated_at LIMIT 50")

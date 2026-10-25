@@ -9,14 +9,14 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário vai testar localmente; Asaas sandbox e e-mail ainda não preparados.
 - Não contratar capacidade paga sem orçamento aprovado; não liberar mensagens, cobranças ou e-mails antigos ao ativar consumidor.
-- Preservar webhook e linha ativa; sem copiar conteúdo real ao banco local.
+- O usuário autorizou usar `atendimento` no localhost e importar o histórico UAZAPI desta linha. D-047 substitui a restrição local anterior; sem deploy.
 
 ## Base preservada
 
 - Ondas 0–16: funcionalidades e publicações em CP-00 a CP-16.
 - Ondas 17–20: parser de conexão, renovação explícita de QR, fim do polling conectado e recuperação de histórico; CP-17 a CP-20.
 - Último receptor publicado: versão `b06cb9e7-72ac-4c71-b15a-cc612327dba6`.
-- Migrations remotas até 0008; locais até 0013; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
+- Migrations remotas até 0008; locais até 0014; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
 - Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`, perfil Wrangler `newwed-production`.
 
 ## Onda 21 concluída
@@ -62,8 +62,18 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Focados: 55 Workers e cinco visuais novos aprovados; ensaio de backup/restauração aprovado.
 - Gate completo aprovado: 97 unitários, 55 Workers, 62 visuais, D1, backup/restauração, build, lint/tipos, auditoria zero e preflights. Assets do cliente sem secrets.
 - Banco local preparado com fixture sem provider. Não houve merge, deploy, envio real ou contratação.
-- Correção de corrida no CTA da PR 11: `fe2180b` (incorporada nesta branch como `fb62826`); novo CI em execução.
+- Correção de corrida no CTA da PR 11: `fe2180b` (incorporada nesta branch como `fb62826`); CI aprovado. PRs 7–12 aprovadas no CI, sem merge/deploy.
 
+
+## Onda 27 — UAZAPI inteiramente operada pelo ambiente local
+
+- Branch `codex/wave-27-local-uazapi-stack`, base `453ba29`; CP-27. App, receptor, consumidor comercial, D1, filas, DO e cron locais. UAZAPI continua sendo serviço externo.
+- Migration 0014 somente local: progresso e exclusão de importação nativa. Importação limitada, retomável e sem resposta automática.
+- Callback autorizado da linha atendimento aponta ao túnel que expõe somente seu webhook. O launcher restaura o callback anterior ao encerrar normalmente.
+- Importadas 161 conversas individuais e duas mensagens disponíveis no cache do provider na primeira consulta. Histórico completo do celular pendente; usuário sem acesso ao aparelho, helper pausado e progresso privado preservado.
+- Envios manuais escolhidos pelo operador permitidos localmente; automações continuam limitadas ao destinatário previamente autorizado. Não reenviar automaticamente a tentativa bloqueada.
+- Asaas, confirmação e e-mail permanecem desligados. Nenhum deploy, migration remota, cobrança ou envio de validação iniciado pelo agente.
+- Validação: 100 unitários, 61 Workers, D1/recuperação, build, tipos/lint e auditoria zero aprovados. Visuais: 62 na suíte + CTA tablet aprovado na repetição; 11 Inbox/WhatsApp aprovados novamente. CI pendente.
 
 ## Bloqueios externos
 

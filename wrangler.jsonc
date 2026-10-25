@@ -68,7 +68,8 @@
     "D1_READ_BUDGET": "",
     "D1_WRITE_BUDGET": "",
     "D1_BUDGET_WINDOW": "day",
-    "QUEUE_BUDGET": ""
+    "QUEUE_BUDGET": "",
+    "ENABLE_HISTORY_SYNC": "false"
   },
   "d1_databases": [
     {
@@ -131,7 +132,8 @@
         "D1_READ_BUDGET": "",
         "D1_WRITE_BUDGET": "",
         "D1_BUDGET_WINDOW": "day",
-        "QUEUE_BUDGET": ""
+        "QUEUE_BUDGET": "",
+        "ENABLE_HISTORY_SYNC": "false"
       },
       "d1_databases": [
         {
@@ -203,7 +205,8 @@
         "D1_READ_BUDGET": "",
         "D1_WRITE_BUDGET": "",
         "D1_BUDGET_WINDOW": "day",
-        "QUEUE_BUDGET": ""
+        "QUEUE_BUDGET": "",
+        "ENABLE_HISTORY_SYNC": "false"
       },
       "d1_databases": [
         {

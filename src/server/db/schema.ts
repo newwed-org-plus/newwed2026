@@ -409,3 +409,7 @@ export const operationalHealth=sqliteTable("operational_health",{
 export const resourceUsage=sqliteTable("resource_usage",{
  resource:text("resource").primaryKey(),windowStart:text("window_start").notNull(),windowEnd:text("window_end").notNull(),used:integer("used").notNull(),budget:integer("budget"),observedAt:text("observed_at").notNull(),source:text("source").notNull(),oldestItemAt:text("oldest_item_at"),
 });
+
+export const uazapiHistorySyncs=sqliteTable("uazapi_history_syncs",{
+ id:text("id").primaryKey(),lineId:text("line_id").notNull().references(()=>whatsappInstances.id),status:text("status").notNull().default("PENDING"),providerOffset:integer("provider_offset").notNull().default(0),scannedCount:integer("scanned_count").notNull().default(0),skippedCount:integer("skipped_count").notNull().default(0),attempts:integer("attempts").notNull().default(0),nextAttemptAt:text("next_attempt_at"),lastError:text("last_error"),requestedBy:text("requested_by").references(()=>users.id),createdAt:text("created_at").notNull(),updatedAt:text("updated_at").notNull(),completedAt:text("completed_at"),
+},table=>[uniqueIndex("uazapi_history_active_idx").on(table.lineId).where(sql`${table.status} IN ('PENDING','RUNNING')`),index("uazapi_history_pending_idx").on(table.status,table.nextAttemptAt,table.updatedAt)]);

@@ -85,3 +85,12 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Backup/restauração: `npm run test:recovery` em dois D1 temporários, schema/dados exportados, FKs e índices conferidos e limpeza automática.
 - Visual: cinco cenários adicionais, três viewports para operação/revisão individual e dois para vínculo de checkout; regressão total esperada de 62 cenários.
 - Validação externa, pico remoto, treinamento e piloto de 24 h continuam sujeitos aos pré-requisitos do checklist; fixtures não são evidência de produção.
+
+
+## Onda 27 — Stack e importação locais
+
+- Unitários: geração de configs com D1/filas compartilhados, ausência de chaves no receptor, restauração condicionada ao callback ainda próprio, timestamps em segundos e allowlist vazia. Total: 100.
+- Workers: paginação/orçamento/deduplicação do cache, histórico enviado por API, lock/backoff/retomada, envio manual humano uma única vez para contato escolhido, bloqueio das automações, reconciliação recente sem resposta e guards de localhost/segredo. Total: 61.
+- Visual: contagens e progresso de importação com botão bloqueado durante execução, além dos cenários anteriores. Total esperado: 63.
+- Smokes reais somente de leitura: callback autorizado do provider, webhook público pronto, painel não exposto e cron local funcional. Mensagem do operador não é reenviada pelo agente.
+- Histórico do celular pendente por indisponibilidade do aparelho; testes simulados não são evidência de recuperação completa nem entrega real.

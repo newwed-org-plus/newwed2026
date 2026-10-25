@@ -1,6 +1,10 @@
 import { env } from "cloudflare:workers";
 
 export type RuntimeSecrets = {
+  LOCAL_TEST_MODE?: string;
+  LOCAL_ALLOW_MANUAL_SEND_ANY?: string;
+  LOCAL_CRON_TOKEN?: string;
+  LOCAL_WHATSAPP_ALLOWED_RECIPIENTS?: string;
   CLOUDFLARE_ANALYTICS_TOKEN?: string;
   OPENROUTER_API_KEY?: string;
   UAZAPI_INSTANCES?: string;

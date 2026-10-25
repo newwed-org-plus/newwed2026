@@ -12,7 +12,7 @@ const instanceSchema = z.object({
   token:z.string().min(8).max(512),
 });
 export type UazapiInstance = z.infer<typeof instanceSchema>;
-export type UazapiEnv = Pick<Env,"DB"> & RuntimeSecrets;
+export type UazapiEnv = Pick<Env,"DB"> & RuntimeSecrets & {ENVIRONMENT?:string};
 export type UazapiState = "disconnected"|"connecting"|"connected"|"hibernated";
 export type UazapiSession = { state:UazapiState;qrCode:string|null;phone:string|null;profileName:string|null };
 
@@ -35,7 +35,7 @@ export function uazapiMessageId(lineId: string,id: string) {
   return `uazapi:${lineId}:${id.replace(/^\d+:/,"")}`;
 }
 
-export async function uazapiRequest(instance: UazapiInstance,path: string,body?: unknown,fetcher: typeof fetch = fetch): Promise<unknown> {
+export async function uazapiRequest(instance: UazapiInstance,path: string,body?: unknown,fetcher: typeof fetch = fetch,maxBytes=512*1024): Promise<unknown> {
   if (!instance.baseUrl) throw new HttpError(503,"UAZAPI_SERVER_NOT_CONFIGURED","O recebimento está configurado. Informe a URL do servidor UAZAPI para gerar QR Code ou enviar mensagens.");
   let response:Response;
   try {
@@ -62,7 +62,7 @@ export async function uazapiRequest(instance: UazapiInstance,path: string,body?:
       const { done,value } = await reader.read();
       if (done) break;
       length += value.byteLength;
-      if (length > 512 * 1024) { await reader.cancel();throw new Error(); }
+      if (length > maxBytes) { await reader.cancel();throw new Error(); }
       chunks.push(value);
     }
     const bytes = new Uint8Array(length);
@@ -93,7 +93,9 @@ export function webhookUrl(env: RuntimeSecrets,id: string) {
   return new URL(`/api/webhooks/uazapi/${id}`,url).href;
 }
 
-export async function sendUazapiText(env: UazapiEnv,lineId: string,phone: string,body: string,fetcher: typeof fetch = fetch) {
+export async function sendUazapiText(env: UazapiEnv,lineId: string,phone: string,body: string,fetcher: typeof fetch = fetch,intent:"automated"|"manual"="automated") {
+  const manualAuthorized=intent==="manual"&&env.ENVIRONMENT==="development"&&env.LOCAL_TEST_MODE==="true"&&env.LOCAL_ALLOW_MANUAL_SEND_ANY==="true";
+  if(!manualAuthorized&&!localRecipientAllowed(env,phone))throw new HttpError(403,"WHATSAPP_LOCAL_RECIPIENT_BLOCKED","Este ambiente local envia somente ao contato de teste autorizado.");
   const instance = configuredInstance(env,lineId);
   const line = await env.DB.prepare("SELECT state FROM whatsapp_instances WHERE id=?").bind(lineId).first<{ state:string }>();
   if (line?.state !== "connected") throw new HttpError(409,"WHATSAPP_DISCONNECTED","Conecte a linha de WhatsApp antes de responder.");
@@ -102,4 +104,10 @@ export async function sendUazapiText(env: UazapiEnv,lineId: string,phone: string
   const id = parsed.success ? parsed.data.messageid ?? parsed.data.id : undefined;
   if (!id) throw new HttpError(502,"UAZAPI_MESSAGE_UNCONFIRMED","A UAZAPI não confirmou o identificador do envio. Confira o histórico antes de reenviar.");
   return { messages:[{ id:uazapiMessageId(lineId,id) }] };
+}
+
+export function localRecipientAllowed(env:RuntimeSecrets & {ENVIRONMENT?:string},phone:string) {
+ if(env.ENVIRONMENT!=="development"||env.LOCAL_TEST_MODE!=="true")return true;
+ const allowed=String(env.LOCAL_WHATSAPP_ALLOWED_RECIPIENTS??"").split(",").map(value=>value.replace(/\D/g,""));
+ const normalized=phone.replace(/\D/g,"");return /^\d{10,15}$/.test(normalized)&&allowed.includes(normalized);
 }
