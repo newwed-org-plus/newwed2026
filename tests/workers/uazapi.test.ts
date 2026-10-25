@@ -261,4 +261,28 @@ describe("UAZAPI no runtime Workers",()=>{
     expect((await env.DB.prepare("SELECT count(*) AS total FROM webhook_events WHERE event_type='uazapi.incoming' AND processed_at IS NULL").first<{total:number}>())?.total).toBe(0);
     expect((await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE type='uazapi.batch' AND published_at IS NULL").first<{total:number}>())?.total).toBe(0);
   });
+  it("respeita orçamento compartilhado de histórico e retoma do cursor persistido",async()=>{
+    const queueSend=vi.fn(async()=>{});
+    const inboundEnv={...runtime,HISTORY_CRON_MESSAGE_BUDGET:"12",UAZAPI_EVENTS_QUEUE:{send:queueSend} as unknown as Queue};
+    await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"history",event:"messages",messages:Array.from({length:25},(_,i)=>message(`BUDGET-${i}`))},"req-history-budget");
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM messages").first()).toEqual({total:12});
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM messages").first()).toEqual({total:24});
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM messages").first()).toEqual({total:25});
+    expect(queueSend).toHaveBeenCalledTimes(1);
+  });
+  it("não importa histórico quando outra execução possui o lease da linha",async()=>{
+    const queueSend=vi.fn(async()=>{});
+    const inboundEnv={...runtime,UAZAPI_EVENTS_QUEUE:{send:queueSend} as unknown as Queue};
+    await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"history",event:"messages",messages:[message("LOCKED-HISTORY")]},"req-history-lease");
+    await env.DB.prepare("INSERT INTO operation_leases VALUES ('history:vendas','other',?)").bind(new Date(Date.now()+60000).toISOString()).run();
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM messages").first()).toEqual({total:0});
+    await env.DB.prepare("DELETE FROM operation_leases").run();
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM messages").first()).toEqual({total:1});
+  });
+
 });

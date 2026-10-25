@@ -9,7 +9,7 @@ export default defineConfig({
     miniflare:{
       compatibilityDate:"2026-09-11",compatibilityFlags:["nodejs_compat"],
       d1Databases:["DB"],r2Buckets:["MEDIA"],queueProducers:{EVENTS_QUEUE:{queueName:"new-wed-events-test"}},
-      durableObjects:{ADMIN_PASSWORD_VERIFIER:{className:"AdminPasswordVerifier",useSQLite:true}},
+      durableObjects:{ADMIN_IP_LIMITER:{className:"AdminIpLimiter",useSQLite:true},ADMIN_PASSWORD_VERIFIER:{className:"AdminPasswordVerifier",useSQLite:true}},
       bindings:{
         UAZAPI_INSTANCES:JSON.stringify([{id:"vendas",name:"Vendas",baseUrl:"https://vendas.uazapi.test",token:"synthetic-vendas-token"},{id:"eventos",name:"Eventos",baseUrl:"https://eventos.uazapi.test",token:"synthetic-eventos-token"}]),
         UAZAPI_WEBHOOK_BASE_URL:"https://newwed.test",

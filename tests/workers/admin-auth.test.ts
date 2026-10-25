@@ -42,6 +42,13 @@ describe("login administrativo com senha no runtime Workers e D1", () => {
     const other = env.ADMIN_PASSWORD_VERIFIER.getByName("synthetic-independent-account");
     expect(await other.verify(password, passwordHash)).toEqual({ limited: false, valid: true });
   });
+  it("limita IP no Durable Object sem gravar buckets no D1",async()=>{
+    const first=env.ADMIN_IP_LIMITER.getByName("synthetic-ip-one");
+    for(let i=0;i<10;i++)expect((await first.consume()).limited).toBe(false);
+    expect((await first.consume()).limited).toBe(true);
+    expect((await env.ADMIN_IP_LIMITER.getByName("synthetic-ip-two").consume()).limited).toBe(false);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM rate_limit_buckets").first()).toEqual({total:0});
+  });
   it("usa scrypt compatível com workerd e rejeita senha errada e hash malformado", async () => {
     expect(await verifyPassword(password, passwordHash)).toBe(true);
     expect(await verifyPassword("wrong", passwordHash)).toBe(false);
