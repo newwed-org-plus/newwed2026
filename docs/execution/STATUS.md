@@ -83,7 +83,7 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Inbox mostra Na fila/Enviando/Aceita/Enviada/Entregue/Lida e permite conferir entrega sem reenviar. Páginas antigas recebem atualizações de estado sem perder texto/posição.
 - Teste externo explicitamente autorizado: uma mensagem pelo fluxo manual local, confirmação DELIVERED no provider e na Inbox. Sem segunda tentativa do mesmo envio.
 - Usuário também autorizou IA local somente para o destinatário de teste e escolheu enviar a pergunta pelo próprio WhatsApp. Prévia com openrouter/free aprovada após 429 no modelo inicial; conversa original liberada em modo Agente para o contato autorizado. Não fabricar mensagem recebida.
-- Gate completo aprovado: 104 unitários, 67 Workers, 65 visuais, D1/recuperação, tipos/lint, build, auditoria zero e preflights. CI remoto pendente.
+- Gate completo aprovado: 104 unitários, 67 Workers, 65 visuais, D1/recuperação, tipos/lint, build, auditoria zero e preflights. Código `c598df4`; CI consultável nas [execuções da branch](https://github.com/newwed-org-plus/newwed2026/actions?query=branch%3Acodex%2Fwave-28-inbox-delivery-local).
 
 ## Bloqueios externos
 
