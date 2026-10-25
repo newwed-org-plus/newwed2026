@@ -67,3 +67,9 @@ Para IA, vincular/ativar o atendente, preservar o contexto e escolher um modelo 
 ### Recuperação de 429 sem custo
 
 Depois da migration 0016, habilitar `ENABLE_FREE_AI_RETRY=true` no perfil privado local. Com essa função, a frase anterior sobre handoff por limite é substituída por espera durável: Inbox mostra o horário mínimo, cron tenta novamente, preservando o modo Agente e o controle humano. Somente modelos gratuitos verificados são candidatos; cota diária/global exige aguardar. Não comprar créditos nem tentar contornar o limite. Resumos extrativos e FAQs oficiais reduzem consumo. Ver `docs/OPENROUTER.md` para limites, retomada explícita de uma pergunta antiga e salvaguardas. Produção/homologação permanecem com a função desligada.
+
+### Conferir o conhecimento dos produtos
+
+Aplicar migrations até 0017. Em **Atendentes**, abrir **Ver conhecimento dos produtos**: conferir quatro produtos, valores publicados e campos sob consulta. O fingerprint identifica o conteúdo compartilhado com o site. Não duplicar tabela de preços no contexto editável.
+
+Para testar continuidade, enviar pelo próprio WhatsApp do contato autorizado um produto/destino e depois uma pergunta curta, como “e o valor?”. Não fabricar mensagens em nome do contato. A memória de assunto é isolada por conversa e persiste no D1, enquanto valores vêm da fonte publicada. Pode-se corrigir a escolha, mudar de projeto ou pedir para esquecer o destino. Se o snapshot precisar de reconstrução longa, a resposta aguarda progresso persistido. Nada disso autoriza reserva, cobrança, envio a outro contato ou deploy. Rollback preserva a tabela aditiva; desabilitar agente até haver consumidor compatível com a revisão selecionada.

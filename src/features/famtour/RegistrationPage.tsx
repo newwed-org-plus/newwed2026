@@ -1,4 +1,5 @@
 import { Plane } from "lucide-react";
+import {famtourInformation} from '@/content/famtour-information';
 import { RegistrationFormPreview } from "@/features/famtour/components/inscricao/RegistrationFormPreview";
 import { RegistrationSummary } from "@/features/famtour/components/inscricao/RegistrationSummary";
 import {
@@ -158,7 +159,7 @@ export function InscricaoPage({ edition }: PageProps) {
                   O aéreo está incluso?
                 </dt>
                 <dd className="mt-3 font-sans text-sm leading-relaxed text-black/65">
-                  Sim. Esta edição está cadastrada com aéreo incluso.
+                  {famtourInformation.airfareAnswer}
                 </dd>
               </div>
               <div className="py-6">
@@ -166,8 +167,7 @@ export function InscricaoPage({ edition }: PageProps) {
                   A inscrição já pode ser enviada?
                 </dt>
                 <dd className="mt-3 font-sans text-sm leading-relaxed text-black/65">
-                  Ainda não. Esta página apresenta a estrutura da inscrição, mas
-                  não envia dados e não realiza cobrança nesta etapa.
+                  {famtourInformation.registration.detailPageAnswer}
                 </dd>
               </div>
             </dl>

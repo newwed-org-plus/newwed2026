@@ -112,3 +112,12 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Visual: aviso de disponibilidade gratuita, controle humano visível e remoção do aviso após retomada. Paridade dos projetos mantida após extração da fonte comum.
 - Externo autorizado: retomar somente a pergunta real pendente do contato local; verificar estado de envio/entrega sem repetir a mensagem. Prévia OpenRouter real verifica formatos do Guia, combos do Workshop e datas anunciadas das quatro edições sem envio WhatsApp adicional. Dados/IDs privados ficam em `.local-runtime`.
 - Regressão adicional: cache histórico antes de callback ao vivo, promoção da mesma mensagem somente com envelope autenticado, uma única entrada na Inbox e uma única resposta. Totais finais locais: 126 unitários, 76 Workers e 66 visuais.
+
+## Onda 30 — Conhecimento dos produtos e memória persistente
+
+- Preços exatos de quatro destinos, três produtos sob consulta, formatos, inclusões, datas, galerias e diferença entre capacidade e estoque. Prefixo “publicado” não autoriza juros/desconto, prazo, voo/hotel ou reserva não confirmados.
+- Conversação: pergunta curta após seleção, mil mensagens intermediárias, OUT sugerindo outro destino, mudança de projeto, correção negativa, comparação, ausência de seleção e esquecimento.
+- Guard: preços inexistentes/legados, valor atribuído ao destino errado, parcelas sem símbolo monetário, 24 parcelas, juros/desconto inventados, reserva/vagas e datas sem fonte. Soma de parcelas não vira novo preço à vista.
+- D1: snapshots incrementais de IDs por conversa, concorrência otimista, corrupção reconstruída, isolamento, reabertura com outro runtime e continuidade após 150 registros pertinentes. Memória incompleta adia geração e mantém AGENT; só responde após alcançar o cursor final.
+- Prévia e consumidor: FAQ comercial funciona sem provider, valor escolhido vem da fonte, catálogo privado é retirado do prompt, contexto antigo não sobrescreve preço e resposta registra fingerprint da base.
+- Gestão: API de conhecimento só admin/gestor, quatro produtos/edições e campos não publicados, sem dados de clientes ou secrets. Três visuais mobile/tablet/desktop com falha recuperável e tabela publicada.

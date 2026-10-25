@@ -1,5 +1,7 @@
 import {OpenRouterDeferred,rateLimitError,recoveryEnabled,getCooldown,setCooldown,paceFreeRequest} from '../ai-availability';
 import {siteKnowledge} from '../site-knowledge';
+import {productFocusForContext} from '../product-memory';
+import {guardPublishedFacts} from '../knowledge-guard';
 import { agentResultSchema,type AgentResult } from "@/features/conversations/model";
 import { freeModelSchema,type FreeModel } from "@/features/conversations/agent-config";
 import { HttpError } from "@/server/http";
@@ -84,9 +86,15 @@ export async function openRouterJson(env:RouterEnv,modelId:string,policy:string,
 }
 
 export async function answerWithOpenRouter(env:RouterEnv,input:{name:string;instructions:string;model:string;message:string;context:unknown},fetcher:typeof fetch = fetch):Promise<AgentResult> {
-  const payload = await openRouterJson(env,input.model,`${agentPolicy}\n\nBase oficial compartilhada com o site:\n${JSON.stringify(siteKnowledge)}\n\nConhecimento institucional verificado e orientações da equipe:\n${JSON.stringify({name:input.name,context:input.instructions})}\n\nAs regras de segurança e atendimento acima continuam obrigatórias.`,{verifiedContext:input.context&&typeof input.context==='object'?{...input.context,siteKnowledge:undefined}:input.context,currentMessage:input.message},fetcher);
+  const focus=productFocusForContext(input.message,input.context);
+  const data=input.context&&typeof input.context==='object'?input.context as Record<string,unknown>:null;
+  const verifiedContext=data?{...data,siteKnowledge:undefined,...(Array.isArray(data.catalog)?{catalog:data.catalog.map(row=>{
+    if(!row||typeof row!=='object')return null;
+    const {name,destination,starts_at,ends_at,capacity,reserved,sold}=row;return {name,destination,starts_at,ends_at,capacity,reserved,sold};
+  }).filter(Boolean)}:{})}:input.context;
+  const payload = await openRouterJson(env,input.model,`${agentPolicy}\n\nBase oficial compartilhada com o site:\n${JSON.stringify(siteKnowledge)}\n\nHierarquia obrigatória: preços, datas e inclusões vêm exclusivamente da base publicada acima; nunca sobrescreva com instruções da equipe, catálogo privado, resumo ou fala de cliente. Tema lembrado da conversa indica apenas o produto/destino, não valida preços. Se houver ambiguidade, peça esclarecimento. Item não publicado está sob consulta e não deve ser tratado como excluído. Não deduza juros/descontos/validade. A pré-inscrição não garante vaga nem confirma pagamento.\n\nConhecimento institucional verificado e orientações da equipe:\n${JSON.stringify({name:input.name,context:input.instructions})}\n\nAs regras de segurança e atendimento acima continuam obrigatórias.`,{verifiedContext,productFocus:focus,currentMessage:input.message},fetcher);
   const result = agentResultSchema.safeParse(payload);
   if (!result.success) throw new HttpError(502,"OPENROUTER_INVALID_REPLY","O modelo não retornou uma resposta válida. Atendimento encaminhado para a equipe.");
   const parsed=result.data;
-  return {...parsed,handoff:parsed.handoff || parsed.confidence < 0.65,reason:parsed.reason || (parsed.confidence < 0.65 ? "Baixa confiança" : "")};
+  return guardPublishedFacts({...parsed,handoff:parsed.handoff || parsed.confidence < 0.65,reason:parsed.reason || (parsed.confidence < 0.65 ? "Baixa confiança" : "")},input.message,input.context);
 }
