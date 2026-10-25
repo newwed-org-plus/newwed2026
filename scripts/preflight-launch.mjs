@@ -31,10 +31,13 @@ for (const [name, config] of configs) {
   if (name !== "app" && !config.queues?.consumers?.[0]?.dead_letter_queue) errors.push(`${name}: DLQ ausente`);
 }
 if (!app?.durable_objects?.bindings?.some(binding => binding.name === "ADMIN_PASSWORD_VERIFIER")) errors.push("app: login próprio sem Durable Object");
+if (!app?.durable_objects?.bindings?.some(binding=>binding.name==="ADMIN_IP_LIMITER")) errors.push("app: proteção de login por IP ausente");
+if(commercial&&(!Number(events?.vars?.D1_READ_BUDGET)||!Number(events?.vars?.D1_WRITE_BUDGET)||!Number(events?.vars?.QUEUE_BUDGET))) errors.push("Monitoramento: definir orçamentos D1 conforme plano aprovado");
 for (const name of ["ENABLE_MANUAL_SEND","ENABLE_AGENT","ENABLE_CHECKOUT","ENABLE_CONFIRMATION","ENABLE_EMAIL"]) {
   if (commercial && app?.vars?.[name] !== events?.vars?.[name]) errors.push(`${name}: controles web/consumer divergentes`);
 }
 if (enabled("ENABLE_AGENT") && receiver?.vars?.ENABLE_AGENT !== app.vars.ENABLE_AGENT) errors.push("ENABLE_AGENT: receptor divergente");
+if(enabled("ENABLE_EMAIL")&&receiver?.vars?.ENABLE_EMAIL!==app.vars.ENABLE_EMAIL) errors.push("ENABLE_EMAIL: receptor divergente");
 if (enabled("ENABLE_PUBLIC_LEADS") && (!app.vars.TURNSTILE_SITE_KEY || !app.vars.TURNSTILE_HOSTNAMES)) errors.push("Turnstile: site key ou hostnames ausentes");
 if (enabled("ENABLE_CHECKOUT")) {
   if(app.vars.CHECKOUT_CHANNEL!=="uazapi" || events?.vars?.CHECKOUT_CHANNEL!=="uazapi") errors.push("Checkout novo deve usar UAZAPI");

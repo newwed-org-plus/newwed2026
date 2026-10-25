@@ -1,50 +1,18 @@
-# Checklist de lançamento
+# Checklist de liberação
 
-## 1. Antes do staging
+- [ ] PRs empilhadas revisadas e CI aprovado no commit candidato; resolver a PR antiga/supersedida ao integrar a onda 21.
+- [ ] Validação local aceita pelo usuário. Nenhum merge/publicação automática durante essa revisão.
+- [ ] Recursos/credenciais de staging separados e linha exclusiva disponível; Asaas sandbox, Turnstile e e-mail preparados.
+- [ ] Orçamentos/alertas configurados conforme plano aprovado; nenhuma compra sem aprovação.
+- [ ] Backup/bookmark registrado e ensaio de restauração aprovado.
+- [ ] Preflight estático staging aprovado; secrets e recursos reais conferidos sem expor valores.
+- [ ] Migrations 0000–0013 aplicadas sequencialmente em staging; DOs de login disponíveis. Não aplicar down migration.
+- [ ] Publicar receiver, comercial e web compatíveis com retenção, inicialmente com funções desligadas; registrar versões, CI, migrations e smokes.
+- [ ] Revisar backlog anterior. Nenhuma ativação publica efeitos retidos automaticamente.
+- [ ] Recebimento → manual → IA → checkout → confirmação → e-mail aprovados, por linha/destinatários autorizados.
+- [ ] Fluxo completo, última vaga, duplicidade/ordem de webhook, timeout, opt-out, RBAC/CSRF e indisponibilidade D1 aprovados.
+- [ ] Piloto de uma edição conciliado por pelo menos 24 horas; capacidade medida para pelo menos o dobro do pico observado.
+- [ ] Responsáveis treinados, contingência validada e nenhuma pendência crítica.
+- [ ] Vídeo final recebido e revisão visual concluída, ou aceite explícito da imagem atual.
 
-- [ ] CI de `main` aprovado no commit candidato.
-- [ ] Recursos e secrets de staging conferidos conforme `EXTERNAL_CONFIGURATION.md`.
-- [ ] `npm run preflight:launch -- staging` aprovado.
-- [ ] Backup/export lógico do D1 e procedimento de rollback definidos.
-- [ ] Dados sintéticos identificados como `VALIDACAO-<timestamp>`.
-- [ ] Janela e responsável pela validação definidos.
-- [ ] Autorização específica registrada antes de qualquer mensagem, e-mail ou cobrança sandbox.
-
-## 2. Publicação de staging
-
-1. Aplicar migrations `0000`–`0005` no D1 de staging e confirmar ausência de pendências.
-2. Publicar primeiro o consumer de eventos e depois a aplicação.
-3. Confirmar HTTP, Access, formulário, D1, R2, Queue, DLQ, cron, logs e traces.
-4. Executar o fluxo sintético completo em sandbox: UTM → lead → atendimento → qualificação humana → checkout → entrega → pagamento → `PAGO` → confirmação.
-5. Repetir webhook e enviá-lo fora de ordem; confirmar uma única transição, notificação e mensagem de e-mail.
-6. Conferir liberação de vaga em cancelamento/expiração, handoff, opt-out, rate limit e permissões.
-
-## 3. Evidências de staging
-
-Registrar no checkpoint, sem dados pessoais ou secretos:
-
-- commit implantado e execução do CI;
-- horário e ambiente;
-- IDs sintéticos de lead, conversa, checkout, cobrança e webhook;
-- migrations aplicadas;
-- resultados dos smokes e do fluxo sandbox;
-- contagens de Queue/DLQ, falhas operacionais e screenshots úteis;
-- limpeza dos dados e gatilhos temporários.
-
-## 4. Piloto de uma edição
-
-- [ ] Edição, lote, preço, capacidade e parcelamento aprovados.
-- [ ] Equipe treinada em inbox, claim/release, qualificação, checkout e exceções.
-- [ ] Templates Meta e destinatários de e-mail aprovados.
-- [ ] Orçamento OpenAI e alertas dos provedores ativos.
-- [ ] Critérios de interrupção definidos: duplicidade financeira, perda de mensagens, ausência de confirmação, inconsistência de vagas ou falha de segurança.
-- [ ] Autorização específica de piloto registrada.
-
-Durante o piloto, acompanhar conversão, handoffs, divergências financeiras, falhas de outbox/DLQ, custos e tempo de atendimento. Produção ampla só é liberada depois da conciliação da edição piloto.
-
-## 5. Rollback
-
-- Suspender novos checkouts e o agente sem apagar dados.
-- Preservar webhooks/outbox para reconciliação; nunca reaplicar pagamento manualmente sem auditoria.
-- Reverter os Workers para o commit anterior compatível com as migrations já aplicadas.
-- Manter a equipe em modo humano até a causa ser corrigida e revalidada em staging.
+Evidências: commit, links do CI, migrations, versões de cada Worker, horário/ambiente, IDs sintéticos/técnicos e resultados dos smokes. Não anexar conteúdo real de clientes, destinatários ou secrets. Produção ampla depende do aceite comercial, operacional e técnico. Recuperação: RECOVERY_RUNBOOK.md.

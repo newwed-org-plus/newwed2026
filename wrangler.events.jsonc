@@ -28,7 +28,12 @@
     "ENABLE_CONFIRMATION": "false",
     "ENABLE_EMAIL": "false",
     "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1",
-    "CHECKOUT_CHANNEL": "uazapi"
+    "CHECKOUT_CHANNEL": "uazapi",
+    "CLOUDFLARE_ACCOUNT_ID": "41245f76790f4922487ec395c9e3bcec",
+    "D1_READ_BUDGET": "",
+    "D1_WRITE_BUDGET": "",
+    "D1_BUDGET_WINDOW": "day",
+    "QUEUE_BUDGET": ""
   },
   "send_email": [
     {
@@ -90,7 +95,12 @@
         "ENABLE_CONFIRMATION": "false",
         "ENABLE_EMAIL": "false",
         "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1",
-        "CHECKOUT_CHANNEL": "uazapi"
+        "CHECKOUT_CHANNEL": "uazapi",
+        "CLOUDFLARE_ACCOUNT_ID": "41245f76790f4922487ec395c9e3bcec",
+        "D1_READ_BUDGET": "",
+        "D1_WRITE_BUDGET": "",
+        "D1_BUDGET_WINDOW": "day",
+        "QUEUE_BUDGET": ""
       },
       "send_email": [
         {
@@ -150,7 +160,12 @@
         "ENABLE_CONFIRMATION": "false",
         "ENABLE_EMAIL": "false",
         "TURNSTILE_HOSTNAMES": "newwed.com.br,www.newwed.com.br",
-        "CHECKOUT_CHANNEL": "uazapi"
+        "CHECKOUT_CHANNEL": "uazapi",
+        "CLOUDFLARE_ACCOUNT_ID": "41245f76790f4922487ec395c9e3bcec",
+        "D1_READ_BUDGET": "",
+        "D1_WRITE_BUDGET": "",
+        "D1_BUDGET_WINDOW": "day",
+        "QUEUE_BUDGET": ""
       },
       "send_email": [
         {

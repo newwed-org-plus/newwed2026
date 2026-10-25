@@ -16,7 +16,7 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Ondas 0–16: funcionalidades e publicações em CP-00 a CP-16.
 - Ondas 17–20: parser de conexão, renovação explícita de QR, fim do polling conectado e recuperação de histórico; CP-17 a CP-20.
 - Último receptor publicado: versão `b06cb9e7-72ac-4c71-b15a-cc612327dba6`.
-- Migrations existentes até 0008; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
+- Migrations remotas até 0008; locais até 0013; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
 - Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`, perfil Wrangler `newwed-production`.
 
 ## Onda 21 concluída
@@ -47,7 +47,7 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Envios incertos não são repetidos; revisão e reconciliação auditadas.
 - Gate aprovado: 96 unitários, 46 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-24.
 
-## Onda atual
+## Onda 25 concluída
 
 - Onda 25, `codex/wave-25-uazapi-checkout`, migration local 0012.
 - Checkout e confirmação na mesma conversa/linha UAZAPI, conciliação de envio incerto e estorno concluído terminal.
@@ -55,9 +55,15 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Gate aprovado: 97 unitários, 49 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-25.
 - PRs 7–10 com CI aprovado; sem merge/deploy automático durante validação local.
 
-## Próxima onda
+## Onda 26 concluída localmente
 
-- 26: métricas reais, alertas, recuperação, documentação e preparação local do piloto.
+- 26, `codex/wave-26-operations-local-pilot`, migration local 0013.
+- Métricas/alertas, revisão de retenções e e-mails, backup/restauração, fixtures e roteiro local implementados. CP-26.
+- Focados: 55 Workers e cinco visuais novos aprovados; ensaio de backup/restauração aprovado.
+- Gate completo aprovado: 97 unitários, 55 Workers, 62 visuais, D1, backup/restauração, build, lint/tipos, auditoria zero e preflights. Assets do cliente sem secrets.
+- Banco local preparado com fixture sem provider. Não houve merge, deploy, envio real ou contratação.
+- Correção de corrida no CTA da PR 11: `fe2180b` (incorporada nesta branch como `fb62826`); novo CI em execução.
+
 
 ## Bloqueios externos
 

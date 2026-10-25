@@ -1,3 +1,4 @@
+import {importHasHeadroom,monitorCron} from "@/server/operations";
 import { processIncomingWhatsApp } from "@/server/conversation-processing";
 import { publishOutbox,retryAt,type QueueEvent } from "@/server/outbox";
 import { processUazapiBatch,processUazapiStatus } from "@/server/uazapi-webhook";
@@ -32,6 +33,7 @@ async function recover(env:ReceiverEnv) {
     if(item.type==='uazapi.status') {await processUazapiStatus(env,event.externalId);await handled(env,item.id);}
     else await publishOutbox(env,{...event,id:item.id,type:item.type});
   }
+  if(!await importHasHeadroom(env))return;
   // Discover durable parent batches even if their Queue message was already accepted.
   const batches=await env.DB.prepare("SELECT external_id,payload_json FROM webhook_events WHERE provider='uazapi' AND event_type='uazapi.batch' AND processed_at IS NULL ORDER BY created_at LIMIT 50").all<{external_id:string;payload_json:string}>();
   for(const batch of batches.results) {
@@ -74,14 +76,14 @@ async function recover(env:ReceiverEnv) {
       console.error(JSON.stringify({event:'uazapi.history.recovery.failed'}));
     } finally {await releaseLease(env,key,token).catch(()=>undefined);}
   }
-  const legacy=await env.DB.prepare("SELECT external_id,payload_json FROM webhook_events WHERE provider='uazapi' AND event_type='uazapi.incoming' AND processed_at IS NULL AND json_extract(payload_json,'$.event.history')=1 ORDER BY created_at LIMIT ?").bind(remaining).all<{external_id:string;payload_json:string}>();
+  const legacy=await env.DB.prepare("SELECT external_id,payload_json,attempts FROM webhook_events WHERE provider='uazapi' AND event_type='uazapi.incoming' AND processed_at IS NULL AND json_extract(payload_json,'$.event.history')=1 AND attempts<10 AND (next_retry_at IS NULL OR next_retry_at<=?) ORDER BY created_at LIMIT ?").bind(now,remaining).all<{external_id:string;payload_json:string;attempts:number}>();
   for(const item of legacy.results) {
     const lineId=(JSON.parse(item.payload_json) as {lineId:string}).lineId;
     const key=`history:${lineId}`;
     const token=await acquireLease(env,key);
     if(!token)continue;
     try {await historyMessage(env,item.external_id);}
-    catch(error) {if(isDailyQuotaError(error))throw error;console.error(JSON.stringify({event:'uazapi.history.message.recovery.failed'}));}
+    catch(error) {if(isDailyQuotaError(error))throw error;await env.DB.prepare("UPDATE webhook_events SET attempts=attempts+1,next_retry_at=?,error='Falha na importação; revisão após o limite.' WHERE provider='uazapi' AND external_id=? AND processed_at IS NULL").bind(retryAt(item.attempts),item.external_id).run();console.error(JSON.stringify({event:'uazapi.history.message.recovery.failed'}));}
     finally {await releaseLease(env,key,token).catch(()=>undefined);}
   }
 }
@@ -110,7 +112,7 @@ export default {
     }
   },
   async scheduled(_controller,env) {
-    try {await recover(env);}
+    try {await monitorCron(env,"receiver",()=>recover(env));}
     catch(error) {
       console.error(JSON.stringify({event:isDailyQuotaError(error) ? 'uazapi.quota.exhausted' : 'uazapi.recovery.failed'}));
       throw new Error("UAZAPI recovery temporarily unavailable");

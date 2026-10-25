@@ -185,3 +185,7 @@ Otimizar e medir antes de propor capacidade paga; contratação exige orçamento
 ## D-045 — Confirmação e estorno sem repetição cega
 
 A confirmação textual do pagamento tem identidade estável por checkout e usa exclusivamente a conversa/linha UAZAPI autorizadas na criação. Resultado incerto é conciliado individualmente; falha conhecida pode ser reenviada por ação auditada. O estado de comunicação não desfaz PAID. Estorno solicitado/em andamento/parcial não libera toda a vaga; somente o evento de estorno concluído faz essa transição, e eventos de pagamento atrasados não revertem REFUNDED.
+
+## D-046 — Operação observável sem inventar disponibilidade
+
+Contagens operacionais vêm de agregações completas, e publicação de Queue não significa conclusão. Ausência de métrica/cron aparece como desconhecida ou desatualizada. Coleta de cota usa a conta inteira e orçamentos explicitamente definidos pelo titular; 80% pausa importação. Alertas internos são deduplicados por critério/dia e não liberam backlog. Rollback posterior à 0011 deve usar consumidor compatível com HELD/flags; consumidores anteriores não são seguros para o schema novo.

@@ -1,3 +1,5 @@
+import {configuredInstance} from "@/server/integrations/uazapi";
+import {getSecrets} from "@/server/secrets";
 import {requireCapability} from "@/server/capabilities";
 import { env } from "cloudflare:workers";
 import { checkoutExpiresAt,currentDateInRecife,installmentsAreAllowed,resolveCheckoutDueDate } from "@/features/billing/checkout-request";
@@ -31,7 +33,8 @@ export async function POST(request: Request,{ params }:{ params:Promise<{ id:str
     const useUazapi=String(env.CHECKOUT_CHANNEL??"uazapi")!=="meta";
     if(useUazapi&&!input.conversationId)throw new HttpError(422,"CHECKOUT_CONVERSATION_REQUIRED","Selecione uma conversa UAZAPI deste lead.");
     const conversation=input.conversationId ? await env.DB.prepare("SELECT id,whatsapp_instance_id,opted_out_at,contact_phone FROM conversations WHERE id=? AND lead_id=? AND channel='whatsapp'").bind(input.conversationId,leadId).first<{id:string;whatsapp_instance_id:string|null;opted_out_at:string|null;contact_phone:string|null}>() : null;
-    if(useUazapi&&(!conversation?.whatsapp_instance_id||conversation.opted_out_at))throw new HttpError(422,"CHECKOUT_CONVERSATION_INVALID","Escolha uma conversa UAZAPI válida e sem opt-out deste lead.");
+    if(useUazapi&&(!conversation?.whatsapp_instance_id||conversation.opted_out_at||!/^\d{10,15}$/.test(conversation.contact_phone??"")))throw new HttpError(422,"CHECKOUT_CONVERSATION_INVALID","Escolha uma conversa UAZAPI válida e sem opt-out deste lead.");
+    if(useUazapi&&conversation?.whatsapp_instance_id&&!configuredInstance(getSecrets(),conversation.whatsapp_instance_id).baseUrl)throw new HttpError(503,"UAZAPI_SERVER_NOT_CONFIGURED","Configure o servidor da linha selecionada antes de criar o checkout.");
     const lead = await env.DB.prepare("SELECT id,stage,edition_id FROM leads WHERE id=?").bind(leadId)
       .first<{ id:string;stage:string;edition_id:string|null }>();
     if (!lead) throw new HttpError(404,"LEAD_NOT_FOUND","Lead não encontrado.");
