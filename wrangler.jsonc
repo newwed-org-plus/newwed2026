@@ -11,6 +11,10 @@
       {
         "name": "ADMIN_PASSWORD_VERIFIER",
         "class_name": "AdminPasswordVerifier"
+      },
+      {
+        "name": "ADMIN_IP_LIMITER",
+        "class_name": "AdminIpLimiter"
       }
     ]
   },
@@ -19,6 +23,12 @@
       "tag": "admin-password-v1",
       "new_sqlite_classes": [
         "AdminPasswordVerifier"
+      ]
+    },
+    {
+      "tag": "admin-ip-limiter-v1",
+      "new_sqlite_classes": [
+        "AdminIpLimiter"
       ]
     }
   ],
@@ -86,6 +96,10 @@
           {
             "name": "ADMIN_PASSWORD_VERIFIER",
             "class_name": "AdminPasswordVerifier"
+          },
+          {
+            "name": "ADMIN_IP_LIMITER",
+            "class_name": "AdminIpLimiter"
           }
         ]
       },
@@ -136,6 +150,10 @@
           {
             "name": "ADMIN_PASSWORD_VERIFIER",
             "class_name": "AdminPasswordVerifier"
+          },
+          {
+            "name": "ADMIN_IP_LIMITER",
+            "class_name": "AdminIpLimiter"
           }
         ]
       },

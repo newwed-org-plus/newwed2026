@@ -75,7 +75,7 @@ export async function acceptUazapiWebhook(env: WebhookEnv,lineId: string,input: 
 }
 
 type NormalizedEvent = {externalId:string;type:string;payload:unknown};
-type ProcessBatchOptions = { processHistory?: (externalId:string)=>Promise<void>;publishContinuation?: boolean };
+type ProcessBatchOptions = { processHistory?: (externalId:string)=>Promise<void>;publishContinuation?: boolean;chunkSize?:number };
 function isHistoryPayload(payload: unknown) {
   return Boolean(payload && typeof payload === "object" && (payload as {event?:{history?:unknown}}).event?.history === true);
 }
@@ -85,7 +85,7 @@ export async function processUazapiBatch(env: WebhookEnv,externalId: string,offs
     .bind(externalId).first<{id:string;payload_json:string;request_id:string}>();
   if (!stored) return {nextOffset:null};
   const candidates = JSON.parse(stored.payload_json) as NormalizedEvent[];
-  const chunk = candidates.slice(offset,offset+10);
+  const chunk = candidates.slice(offset,offset+Math.min(10,Math.max(1,options.chunkSize ?? 10)));
   if (!chunk.length) {
     await env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=? AND processed_at IS NULL").bind(new Date().toISOString(),stored.id).run();
     return {nextOffset:null};

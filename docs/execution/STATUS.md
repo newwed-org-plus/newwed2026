@@ -19,18 +19,24 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Migrations existentes até 0008; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
 - Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`, perfil Wrangler `newwed-production`.
 
-## Onda atual
+## Onda 21 concluída
 
-- Onda 21, branch `codex/wave-21-security-staging`, base `ecbe6e5`.
+- Branch `codex/wave-21-security-staging`, base `ecbe6e5`.
 - Zod 4.6.7, Vite 8.3.5 e transitivas corrigidas; auditoria de produção sem alertas.
 - Preflight por capacidades: R2/Access opcionais, segurança e isolamento verificados. Funções externas desligadas por padrão.
 - D1 staging `d67175d9-52b6-47f7-b7a0-4a75a05af32d`, migrations 0000–0008 aplicadas e quatro filas staging criadas; nenhum consumidor comercial ativado.
 - Recuperação de produção confirmada por contagens em 25/10: 358 conversas e 14.908 mensagens; zero históricos/lotes pendentes. Nenhum conteúdo de mensagem foi lido.
 - Tipos, lint, TypeScript, 95 unitários, 34 Workers, invariantes D1 e build aprovados; 53 cenários visuais aprovados (52 na suíte e um na repetição focada). Detalhes no CP-21.
 
+## Onda atual
+
+- Onda 22, `codex/wave-22-capacity-login`. Migration local 0009 e Durable Object AdminIpLimiter.
+- Cursor de histórico, orçamento 100/tick, lock por linha e login sem bucket D1 por IP.
+- Gate completo aprovado: 96 unitários, 37 Workers, 53 visuais, D1, build, lint/tipos e auditoria sem alertas. CP-22.
+
 ## Próximas ondas
 
-1. 22: capacidade, login resiliente e orçamento de histórico.
+1. 22 concluída localmente; publicação remota de schema ainda não feita.
 2. 23: paginação, erros, polling e identificação de ambiente na Inbox.
 3. 24: processamento comercial durável, retenção do backlog e controles por função.
 4. 25: Turnstile, checkout/confirmacão UAZAPI e Asaas.

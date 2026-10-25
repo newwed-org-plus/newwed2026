@@ -390,3 +390,6 @@ export const rateLimitBuckets = sqliteTable("rate_limit_buckets", {
   expiresAt: text("expires_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 }, (table) => [index("rate_limit_expiry_idx").on(table.expiresAt)]);
+
+export const operationLeases = sqliteTable("operation_leases", { id:text("id").primaryKey(),token:text("token").notNull(),expiresAt:text("expires_at").notNull() });
+export const historyImports = sqliteTable("history_imports", { externalId:text("external_id").primaryKey(),lineId:text("line_id").notNull(),cursor:integer("cursor").default(0).notNull(),attempts:integer("attempts").default(0).notNull(),nextAttemptAt:text("next_attempt_at"),completedAt:text("completed_at"),updatedAt:text("updated_at").notNull() },table=>[index("history_imports_pending_idx").on(table.completedAt,table.nextAttemptAt,table.updatedAt)]);

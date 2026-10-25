@@ -15,7 +15,8 @@
     }
   },
   "vars": {
-    "ENVIRONMENT": "production"
+    "ENVIRONMENT": "production",
+    "HISTORY_CRON_MESSAGE_BUDGET": "100"
   },
   "d1_databases": [
     {
@@ -63,7 +64,8 @@
         }
       },
       "vars": {
-        "ENVIRONMENT": "staging"
+        "ENVIRONMENT": "staging",
+        "HISTORY_CRON_MESSAGE_BUDGET": "100"
       },
       "d1_databases": [
         {
