@@ -13,7 +13,8 @@ export async function GET(request: Request,{ params }:{ params:Promise<{ id:stri
     const before = decodeCursor(`messages:${id}`,url.searchParams.get("before"));
     const limit = pageLimit(url.searchParams.get("limit"),100);
     const conversation = await env.DB.prepare(`SELECT c.id,c.whatsapp_instance_id,c.contact_phone,c.contact_name,wi.name AS line_name,c.channel,c.external_id,c.mode,c.claimed_by,c.claimed_at,c.released_at,c.agent_paused_at,c.agent_error,c.summary,
-      c.summarized_message_count,c.summary_updated_at,c.last_message_at,c.opted_out_at,c.created_at,c.updated_at,
+      c.summarized_message_count,c.summary_updated_at,
+      (SELECT min(o.next_attempt_at) FROM outbox_events o WHERE o.aggregate_id=c.id AND o.type='conversation.reply.requested' AND o.dispatch_state='PENDING' AND o.next_attempt_at IS NOT NULL AND (o.last_error LIKE 'OPENROUTER_%' OR o.last_error='FREE_MODEL_UNAVAILABLE')) AS agent_wait_until,c.last_message_at,c.opted_out_at,c.created_at,c.updated_at,
       l.id AS lead_id,l.name AS lead_name,l.email AS lead_email,l.phone AS lead_phone,l.company,l.city_state,l.stage AS lead_stage,e.name AS edition_name,u.name AS claimed_by_name
       FROM conversations c LEFT JOIN whatsapp_instances wi ON wi.id=c.whatsapp_instance_id LEFT JOIN leads l ON l.id=c.lead_id LEFT JOIN editions e ON e.id=l.edition_id LEFT JOIN users u ON u.id=c.claimed_by WHERE c.id=?`)
       .bind(id).first<Record<string,unknown>>();

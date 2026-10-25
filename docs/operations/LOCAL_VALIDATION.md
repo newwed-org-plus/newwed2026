@@ -63,3 +63,7 @@ O backup do callback e o progresso contêm dados privados e ficam exclusivamente
 Reinícios do runtime local retornam 503 estável, com repetição limitada apenas de leituras. Se a conexão cair durante uma ação, conferir o histórico antes de repetir; a chave de idempotência da mensagem é preservada. Erros reais de compilação continuam sendo exibidos.
 
 Para IA, vincular/ativar o atendente, preservar o contexto e escolher um modelo gratuito validado. A conversa de teste deve ser devolvida ao agente; as demais permanecem humanas, e a allowlist local aceita somente a mesma identidade brasileira com/sem o nono dígito. A pergunta deve vir do WhatsApp do contato para a linha conectada. Responder manualmente pela Inbox ou importar histórico não inicia IA. Ao assumir a conversa, a IA pausa. Limite/falha do modelo encaminha ao humano, sem fallback pago.
+
+### Recuperação de 429 sem custo
+
+Depois da migration 0016, habilitar `ENABLE_FREE_AI_RETRY=true` no perfil privado local. Com essa função, a frase anterior sobre handoff por limite é substituída por espera durável: Inbox mostra o horário mínimo, cron tenta novamente, preservando o modo Agente e o controle humano. Somente modelos gratuitos verificados são candidatos; cota diária/global exige aguardar. Não comprar créditos nem tentar contornar o limite. Resumos extrativos e FAQs oficiais reduzem consumo. Ver `docs/OPENROUTER.md` para limites, retomada explícita de uma pergunta antiga e salvaguardas. Produção/homologação permanecem com a função desligada.

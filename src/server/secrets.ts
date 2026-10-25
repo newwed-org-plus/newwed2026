@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 
 export type RuntimeSecrets = {
+  ENABLE_FREE_AI_RETRY?:string;
   LOCAL_TEST_MODE?: string;
   LOCAL_ALLOW_MANUAL_SEND_ANY?: string;
   LOCAL_CRON_TOKEN?: string;

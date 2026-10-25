@@ -16,7 +16,7 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Ondas 0–16: funcionalidades e publicações em CP-00 a CP-16.
 - Ondas 17–20: parser de conexão, renovação explícita de QR, fim do polling conectado e recuperação de histórico; CP-17 a CP-20.
 - Último receptor publicado: versão `b06cb9e7-72ac-4c71-b15a-cc612327dba6`.
-- Migrations remotas até 0008; locais até 0015; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
+- Migrations remotas até 0008; locais até 0016; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
 - Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`, perfil Wrangler `newwed-production`.
 
 ## Onda 21 concluída
@@ -84,6 +84,16 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Teste externo explicitamente autorizado: uma mensagem pelo fluxo manual local, confirmação DELIVERED no provider e na Inbox. Sem segunda tentativa do mesmo envio.
 - Usuário também autorizou IA local somente para o destinatário de teste e escolheu enviar a pergunta pelo próprio WhatsApp. Prévia com openrouter/free aprovada após 429 no modelo inicial; conversa original liberada em modo Agente para o contato autorizado. Não fabricar mensagem recebida.
 - Gate completo aprovado: 104 unitários, 67 Workers, 65 visuais, D1/recuperação, tipos/lint, build, auditoria zero e preflights. Código `c598df4`; CI consultável nas [execuções da branch](https://github.com/newwed-org-plus/newwed2026/actions?query=branch%3Acodex%2Fwave-28-inbox-delivery-local).
+
+## Onda 29 — IA gratuita com retomada e conhecimento oficial
+
+- Branch `codex/wave-29-free-ai-knowledge`, base `4952a9b`; CP-29. Migration 0016 somente local; sem deploy, merge ou contratação.
+- 429/503 transitórios usam espera durável, cooldown por conta/modelo, pacing e até três alternativas gratuitas verificadas com teto zero. Cota global exige aguardar; flag remota desligada. D-049 substitui o handoff por limite de D-048 quando habilitada.
+- Respostas deduplicadas por pergunta, lease recuperável somente antes de efeito externo, claim/opt-out/versão preservados. Inbox mostra a espera. FAQs oficiais e resumos extrativos locais reduzem consumo.
+- Fonte comum de conteúdo entre páginas/IA cobre Feira Tendência, Destinos/FAMTOUR, Guia, Workshop e quatro edições publicadas. Preços anunciados não prometem reserva; capacidade publicada não é vaga restante. Fixtures e componentes antigos não montados excluídos.
+- Corrida entre pull de cache e callback corrigida: somente o envelope ao vivo autenticado pode promover a mesma mensagem já importada. Histórico isolado nunca responde.
+- Teste real autorizado: pergunta de produtos retomada uma vez, resposta READ; nova pergunta sobre Feira recebeu resposta DELIVERED. Conversa permanece AGENT. Prévia gratuita real aprovada sobre quatro projetos, formatos, combos e datas; dados privados somente em `.local-runtime`.
+- Gate aprovado: 121 unitários, 75 Workers (após correção final), 66 visuais, D1/recuperação, tipos/lint, build, auditoria zero e preflights. Sem pendência crítica deste ajuste local.
 
 ## Bloqueios externos
 
