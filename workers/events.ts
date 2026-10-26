@@ -128,7 +128,7 @@ export default {
     await syncUazapiDelivery(workerEnv,{limit:workerEnv.ENVIRONMENT==='production'?2:10});
     const imported=await processPendingHistorySyncs(workerEnv);
     if(!imported)await reconcileRecentLocalMessages(workerEnv).catch(()=>console.error(JSON.stringify({event:"local.history.reconcile.unavailable"})));
-    await collectUsage(workerEnv).catch(error=>console.error(JSON.stringify({event:"operations.usage.unavailable",code:error instanceof Error&&/^ANALYTICS_(HTTP_[0-9]{3}|SCHEMA|REJECTED)$/.test(error.message)?error.message:'ANALYTICS_TRANSPORT'})));
+    await collectUsage(workerEnv).catch(error=>console.error(JSON.stringify({event:"operations.usage.unavailable",code:error instanceof Error&&/^ANALYTICS_(HTTP_[0-9]{3}|SCHEMA|REJECTED|FETCH_FAILED|RESPONSE|DB_READ|DB_WRITE)$/.test(error.message)?error.message:'ANALYTICS_TRANSPORT'})));
     if (workerEnv.ASAAS_API_KEY) {
       const pendingPayments = await workerEnv.DB.prepare("SELECT provider_payment_id FROM payments WHERE provider_payment_id IS NOT NULL AND status IN ('PENDING','OVERDUE') ORDER BY updated_at LIMIT 50")
         .all<{ provider_payment_id: string }>();
