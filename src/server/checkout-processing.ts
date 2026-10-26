@@ -1,3 +1,4 @@
+import {requireLocalCheckoutRecipients,checkoutText} from './local-checkout-policy';
 import {sendUazapiText} from "./integrations/uazapi";
 import {reconcileUazapiReceipt} from "./uazapi-webhook";
 import {uncertainSend} from "./send-outcome";
@@ -37,6 +38,9 @@ type CheckoutCreationRow = {
   price_name:string;
   edition_name:string;
   request_id:string|null;
+  conversation_id:string|null;
+  whatsapp_instance_id:string|null;
+  delivery_channel:string;
 };
 
 function processingError(error: unknown) {
@@ -105,7 +109,7 @@ export async function processCheckoutCreation(env: CheckoutWorkerEnv,checkoutId:
   if ((claimed.meta.changes ?? 0) !== 1) return { processed:false as const };
 
   const checkout = await env.DB.prepare(`SELECT c.id,c.lead_id,c.edition_id,c.price_batch_id,c.provider_customer_id,c.method,c.installment_count,c.amount_cents,c.expires_at,c.retry_count,
-    l.name,l.email,l.normalized_phone,p.name AS price_name,e.name AS edition_name,c.request_id
+    l.name,l.email,l.normalized_phone,p.name AS price_name,e.name AS edition_name,c.request_id,c.conversation_id,c.whatsapp_instance_id,c.delivery_channel
     FROM checkouts c JOIN leads l ON l.id=c.lead_id JOIN price_batches p ON p.id=c.price_batch_id AND p.edition_id=c.edition_id JOIN editions e ON e.id=c.edition_id
     WHERE c.id=? AND c.processing_token=? AND c.amount_cents=p.amount_cents`)
     .bind(checkoutId,token).first<CheckoutCreationRow>();
@@ -117,6 +121,10 @@ export async function processCheckoutCreation(env: CheckoutWorkerEnv,checkoutId:
   }
 
   try {
+    if(env.ENVIRONMENT==='development'&&env.LOCAL_TEST_MODE==='true') {
+      const bound=checkout.delivery_channel==='uazapi'?await env.DB.prepare('SELECT contact_phone FROM conversations WHERE id=? AND lead_id=? AND whatsapp_instance_id=? AND opted_out_at IS NULL').bind(checkout.conversation_id,checkout.lead_id,checkout.whatsapp_instance_id).first<{contact_phone:string}>():null;
+      requireLocalCheckoutRecipients(env,[checkout.normalized_phone,bound?.contact_phone]);
+    }
     let recovered = await findPaymentsByExternalReference(env,checkoutId,fetcher);
     const recoveredExisting = recovered.length > 0;
     let first = recovered.sort((a,b) => (a.installmentNumber ?? 1) - (b.installmentNumber ?? 1))[0];
@@ -221,7 +229,7 @@ export async function sendCheckout(env: CheckoutWorkerEnv,checkoutId: string,eve
     await env.DB.prepare("UPDATE checkouts SET processing_token=NULL,processing_started_at=NULL WHERE id=? AND processing_token=?").bind(checkoutId,token).run();
     return { sent:true as const,idempotent:true as const };
   }
-  const messageBody=checkout.delivery_channel==="uazapi"?`Olá! Segue o link do seu checkout New Wed: ${checkout.url}`:checkout.url;
+  const messageBody=checkout.delivery_channel==="uazapi"?checkoutText(env,checkout.url):checkout.url;
   await env.DB.prepare(`INSERT INTO messages (id,conversation_id,checkout_id,direction,type,body,status,template_name,payload_json,request_id,created_at)
     VALUES (?,?,?,'OUT',?,?,'SENDING',?, ?,?,?) ON CONFLICT(id) DO UPDATE SET status='SENDING',created_at=excluded.created_at`)
     .bind(eventId,conversation.id,checkoutId,checkout.delivery_channel==="uazapi"?"text":"template",messageBody,checkout.delivery_channel==="uazapi"?null:env.META_CHECKOUT_TEMPLATE,JSON.stringify({ resend }),checkout.request_id,nowIso).run();

@@ -112,9 +112,17 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Validação pública: sem token 401, token válido/payload inválido 422, painel 404, receptor UAZAPI 200. Nenhum cliente, cobrança ou evento financeiro fictício criado. Checkout, confirmação e e-mail desligados.
 - Gate aprovado: 180 unitários finais, 83 Workers, 69 visuais, D1/recuperação, tipos/lint/build, auditoria zero e preflights. Evidências no CP-31; testes financeiros externos pendentes.
 
+## Onda 32 — Checkout e confirmação no Sandbox local
+
+- Branch `codex/wave-32-sandbox-checkout`, base `38934d0`; CP-32. Autorização D-052, sem migration/deploy. Checkout e confirmação locais habilitados somente para o contato autorizado; e-mail e backlog continuam retidos.
+- Edição/lote sintéticos: Pix R$ 1.200,00, capacidade 8. UI qualifica/autoriza; consumidor cria cobrança e envia pela conversa/linha existentes. Documento sintético explícito somente no Sandbox, notificações nativas Asaas desligadas.
+- API e consumidor bloqueiam outro contato antes de cobrar. Webhook aceita opcionais nulos sem relaxar ID/status/valor; rejeição real 422 corrigida e retomada natural validada com HTTP 200.
+- Ciclo validado: uma cobrança PAID, lead PAGO, link e confirmação READ, uma notificação, uma transição e uma vaga vendida. Replay do evento original e mesma chave de criação não duplicam efeitos. Painel mostra estados separados com atualização sem reenvio.
+- Gate aprovado: 185 unitários, 85 Workers, 72 visuais, D1/recuperação, tipos/lint/build, auditoria zero e preflights. CP-32. Cartão/parcelas/estorno externos e produção fora deste aceite.
+
 ## Bloqueios externos
 
-- Asaas: preparação Sandbox local concluída; testes financeiros e ativação comercial pendentes. Domínio de e-mail depende de preparação externa.
+- Pix Sandbox local aprovado; ativação de produção e testes externos de cartão/parcelas/estorno pendentes. Domínio de e-mail ainda não preparado.
 - Sem linha de teste separada configurada em homologação; nunca usar a linha ativa para fixtures.
 - Vídeo final não fornecido; imagem atual preservada.
 - Piloto real e observação por 24h ainda pendentes.

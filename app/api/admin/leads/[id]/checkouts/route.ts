@@ -1,3 +1,4 @@
+import {requireLocalCheckoutRecipients} from '@/server/local-checkout-policy';
 import {configuredInstance} from "@/server/integrations/uazapi";
 import {getSecrets} from "@/server/secrets";
 import {requireCapability} from "@/server/capabilities";
@@ -35,9 +36,10 @@ export async function POST(request: Request,{ params }:{ params:Promise<{ id:str
     const conversation=input.conversationId ? await env.DB.prepare("SELECT id,whatsapp_instance_id,opted_out_at,contact_phone FROM conversations WHERE id=? AND lead_id=? AND channel='whatsapp'").bind(input.conversationId,leadId).first<{id:string;whatsapp_instance_id:string|null;opted_out_at:string|null;contact_phone:string|null}>() : null;
     if(useUazapi&&(!conversation?.whatsapp_instance_id||conversation.opted_out_at||!/^\d{10,15}$/.test(conversation.contact_phone??"")))throw new HttpError(422,"CHECKOUT_CONVERSATION_INVALID","Escolha uma conversa UAZAPI válida e sem opt-out deste lead.");
     if(useUazapi&&conversation?.whatsapp_instance_id&&!configuredInstance(getSecrets(),conversation.whatsapp_instance_id).baseUrl)throw new HttpError(503,"UAZAPI_SERVER_NOT_CONFIGURED","Configure o servidor da linha selecionada antes de criar o checkout.");
-    const lead = await env.DB.prepare("SELECT id,stage,edition_id FROM leads WHERE id=?").bind(leadId)
-      .first<{ id:string;stage:string;edition_id:string|null }>();
+    const lead = await env.DB.prepare("SELECT id,stage,edition_id,normalized_phone FROM leads WHERE id=?").bind(leadId)
+      .first<{ id:string;stage:string;edition_id:string|null;normalized_phone:string }>();
     if (!lead) throw new HttpError(404,"LEAD_NOT_FOUND","Lead não encontrado.");
+    requireLocalCheckoutRecipients({...getSecrets(),ENVIRONMENT:env.ENVIRONMENT},[lead.normalized_phone,conversation?.contact_phone]);
     if (lead.stage !== "QUALIFICADO") throw new HttpError(409,"LEAD_NOT_QUALIFIED","O checkout só pode ser criado para um lead qualificado.");
     if (lead.edition_id !== input.editionId) throw new HttpError(422,"EDITION_MISMATCH","A edição não corresponde ao interesse do lead.");
 

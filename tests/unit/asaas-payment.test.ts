@@ -68,3 +68,10 @@ describe("conciliação de parcelas",() => {
     expect(() => validateAsaasPaymentSeries({ checkoutId:"checkout-1",method:"CREDIT_CARD",installmentCount:3,amountCents:9999,payments:[payment(1,33.33),payment(2,33.33),payment(3,33.35)] })).toThrow();
   });
 });
+
+it('aceita os campos opcionais nulos do webhook real sem relaxar valor, ID ou status',async()=>{
+ const {asaasWebhookSchema}=await import('@/server/integrations/asaas-webhook');
+ const payload={id:'evt_synthetic',event:'PAYMENT_CREATED',dateCreated:null,payment:{id:'pay_synthetic',status:'PENDING',value:1200,externalReference:null,customer:'cus_synthetic',installment:null,installmentNumber:null,invoiceUrl:null,billingType:'PIX',dueDate:null,paymentDate:null,confirmedDate:null}};
+ expect(asaasWebhookSchema.parse(payload).payment).toMatchObject({installment:undefined,paymentDate:undefined,value:1200,status:'PENDING'});
+ for(const payment of [{...payload.payment,value:null},{...payload.payment,value:-1},{...payload.payment,status:null},{...payload.payment,id:''}])expect(asaasWebhookSchema.safeParse({...payload,payment}).success).toBe(false);
+});

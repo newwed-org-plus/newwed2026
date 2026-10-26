@@ -45,7 +45,7 @@ Para validação comercial externa ainda são necessários os testes financeiros
 4. Aguardar a confirmação de callback local no terminal. A ponte publica `/api/webhooks/uazapi/<linha>` e, com a função própria habilitada, somente POST em `/api/webhooks/asaas`; `/admin`, arquivos e depuração não ficam públicos. Não é necessário deploy, reconectar a linha ou gerar QR.
 5. Manter o processo e o computador disponíveis durante o teste. Ao encerrar normalmente, o launcher restaura o callback anterior antes de parar os serviços, somente se a URL ainda pertencer ao túnel atual. Sem rede, a restauração fica pendente e o processo mantém os serviços ativos para outra tentativa.
 
-O controle manual exige `ENABLE_MANUAL_SEND=true`. A exceção `LOCAL_ALLOW_MANUAL_SEND_ANY=true` permite exclusivamente a resposta escolhida pelo operador autenticado e responsável pela conversa. IA e outros envios automáticos continuam limitados por `LOCAL_WHATSAPP_ALLOWED_RECIPIENTS`; lista vazia bloqueia automação real. Não reenviar operações com resultado incerto. Checkout, confirmação e e-mail ficam desligados neste perfil até a preparação própria.
+O controle manual exige `ENABLE_MANUAL_SEND=true`. A exceção `LOCAL_ALLOW_MANUAL_SEND_ANY=true` permite exclusivamente a resposta escolhida pelo operador autenticado e responsável pela conversa. IA e outros envios automáticos continuam limitados por `LOCAL_WHATSAPP_ALLOWED_RECIPIENTS`; lista vazia bloqueia automação real. Não reenviar operações com resultado incerto. Checkout e confirmação podem ser liberados somente conforme a seção de Sandbox autorizado abaixo; e-mail continua desligado.
 
 ## Histórico e recuperação local
 
@@ -82,7 +82,7 @@ Preparação autorizada em D-051: conta Sandbox vinculada, chave **Newwed Local 
 - `ASAAS_API_URL=https://api-sandbox.asaas.com/v3` e `ASAAS_API_KEY` da própria conta Sandbox; o perfil local bloqueia produção e pares de chave/host incompatíveis.
 - `ASAAS_WEBHOOK_TOKEN` aleatório, 32–255 caracteres sem espaços. Nunca reutilizar a chave da API como token de webhook.
 - `LOCAL_ASAAS_WEBHOOK=true` junto do túnel autorizado da stack. O e-mail operacional fica somente em `.local-runtime/asaas-profile.json`, campo `email`; não versionar dados do titular.
-- `ENABLE_CHECKOUT=false`, `ENABLE_CONFIRMATION=false` e `ENABLE_EMAIL=false` até janela/edição/destinatários próprios. Configurar credenciais não libera operações antigas nem envia links ao cliente.
+- Padrão: `ENABLE_CHECKOUT=false`, `ENABLE_CONFIRMATION=false` e `ENABLE_EMAIL=false`. D-052 autorizou os dois primeiros no perfil privado local para o contato de teste. Configurar credenciais não libera operações antigas.
 
 `npm run dev:local` registra ou atualiza o webhook **Newwed Local Sandbox** no novo túnel, com eventos de pagamento e entrega sequencial. O consumidor recebe a chave; o receptor UAZAPI continua sem credenciais Asaas. Metadados e intenção de cadastro ficam em `.local-runtime/asaas-webhook.json`, sem chave/token. Resposta de criação incerta é conciliada pela intenção antes de um novo POST; webhook homônimo desconhecido ou URL alterada por outro operador impedem sobrescrita. Fila interrompida exige revisão explícita.
 
@@ -91,3 +91,21 @@ Validação de transporte sem cobrança: POST público sem token retorna 401; PO
 No encerramento normal, o launcher pausa seu webhook Asaas e verifica a pausa antes de restaurar a UAZAPI e fechar o túnel. Se o cadastro tiver resposta incerta, o encerramento busca pela intenção salva e pausa o cadastro correspondente. Falha de pausa mantém a stack disponível para nova tentativa. Se outro operador alterou a URL/nome, não sobrescrever. Em encerramento forçado ou perda de rede, pausar manualmente **Newwed Local Sandbox** no painel Sandbox antes de fechar o transporte, conferir a UAZAPI e preservar os arquivos privados para recuperação. Não reativar fila com pendências sem conciliar os eventos.
 
 A conta de produção, sua chave antiga desabilitada e os webhooks de produção permanecem inalterados. Testes de Pix/cartão, parcelas, vencimento, cancelamento/estorno e confirmação ao cliente ainda precisam ser executados em janela autorizada.
+
+
+### Fluxo Sandbox autorizado — onda 32
+
+Checkout e confirmação estão habilitados no perfil privado local para o contato autorizado. Configurações remotas continuam desligadas. A geração dos Workers locais recusa cobrança/confirmação sem modo local, host/chave Sandbox e allowlist válida. O consumidor comercial recebe as flags; o receptor mantém ambas desligadas e nenhum secret Asaas.
+
+O pagador de teste usa `ASAAS_SANDBOX_TEST_DOCUMENT` sintético e explícito, mantido somente no arquivo privado. Essa opção é bloqueada fora do Sandbox local. Não usar o CPF/CNPJ real do titular para homologar nem enviar documentos pelo chat. Produção exige uma origem legítima dos dados fiscais obrigatórios do pagador e validação própria; o documento sintético não resolve esse requisito.
+
+1. Conferir operações externas anteriores e manter retenção; não liberar backlog em lote.
+2. Preparar lead sintético com nome VALIDACAO, e-mail de exemplo e o telefone autorizado; vinculá-lo à conversa já existente somente se estiver sem lead, com auditoria. Não alterar contatos de terceiros nem fabricar mensagem recebida.
+3. Assumir a conversa, atribuir responsável e qualificar pelo fluxo humano. Na ficha, escolher a conversa/linha corretas e criar **Pix** da edição **VALIDACAO local — demonstração**, lote de R$ 1.200,00. A fixture tem capacidade 8, reserva atômica e não é uma oferta comercial real.
+4. Aguardar criação da cobrança pelo consumidor e entrega do link UAZAPI. Só aceitar recibo/snapshot DELIVERED ou READ como comprovação de chegada. O link contém aviso TESTE SANDBOX; notificações nativas do novo cliente Asaas ficam desligadas.
+5. Conferir ambiente, método, valor e `externalReference`. Registrar intenção antes de executar uma única vez `POST /v3/sandbox/payment/{id}/confirm`; nenhuma movimentação financeira real ocorre. Em resultado incerto, consultar o pagamento antes de repetir. Não usar `receiveInCash` para simular Pix.
+6. Aguardar `PAYMENT_RECEIVED`, situação PAID, lead PAGO e uma confirmação UAZAPI. Se o webhook falhar, investigar nos logs do provedor; a conciliação agendada deve preservar a recuperação. Campos opcionais nulos são aceitos; ID/status/valor continuam obrigatórios.
+7. Na ficha, **Atualizar pagamentos** consulta os estados sem reenviar. Conferir separadamente Pagamento, Envio e Confirmação ao cliente. Falha de leitura preserva o último estado e mostra erro. O painel gera uma única notificação; o e-mail fica retido.
+8. Repetir a criação somente com a mesma chave idempotente e fazer replay exato de um evento capturado, sem simular novo recebimento. Confirmar uma cobrança, um evento/mensagem de confirmação, uma notificação, uma transição PAGO e capacidade `reservados=0`, `vendidos=1` nesta fixture. Preservar evidências privadas e registros de teste pagos; não apagar ou estornar para ocultar o teste.
+
+Em 25/10/2026 o ciclo Pix foi validado: link e confirmação READ na mesma linha, PAID/PAGO conciliados, eventos reais de criação e recebimento processados com HTTP 200, idempotência e deduplicação preservadas. Houve rejeição inicial 422 por opcionais nulos; corrigida com regressões e replay do evento original. O provedor retomou naturalmente a fila, sem reativação automática. Nenhum deploy, cobrança de produção ou e-mail. Cartão/parcelas/estorno permanecem cobertos por testes simulados; não foram validados externamente nesta janela.

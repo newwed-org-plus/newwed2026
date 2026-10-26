@@ -39,7 +39,7 @@ Criar widget com um token restrito `Account.Turnstile:Edit`, conforme o fluxo da
 4. Aprovar edição, lote, valor, capacidade, vencimento e parcelas. O código não escolhe uma edição comercial real automaticamente.
 5. Validar Pix/cartão, parcelas, última vaga, cancelamento/estorno e repetição/ordem de eventos; conferir `externalReference` e IDs de parcelas.
 
-No local, `LOCAL_ASAAS_WEBHOOK=true` acompanha o túnel autorizado: registra/atualiza somente o webhook **Newwed Local Sandbox**, autentica com token independente e pausa antes de encerrar. A URL muda a cada novo túnel; a intenção é persistida antes de criar, permitindo conciliação de resposta incerta sem POST duplicado. Não reativar fila interrompida automaticamente. Produção não foi alterada e `ENABLE_CHECKOUT`, `ENABLE_CONFIRMATION` e `ENABLE_EMAIL` continuam desligados. Ver `LOCAL_VALIDATION.md` para recuperação.
+No local, `LOCAL_ASAAS_WEBHOOK=true` acompanha o túnel autorizado: registra/atualiza somente o webhook **Newwed Local Sandbox**, autentica com token independente e pausa antes de encerrar. A URL muda a cada novo túnel; a intenção é persistida antes de criar, permitindo conciliação de resposta incerta sem POST duplicado. Não reativar fila interrompida automaticamente. Produção não foi alterada. D-052 habilitou checkout/confirmação apenas no perfil privado local, restritos ao contato autorizado; e-mail continua desligado. Ver `LOCAL_VALIDATION.md` para recuperação.
 
 Checkout novo exige conversa e linha UAZAPI do lead. Confirmar o pagamento somente após conciliação financeira; comunicação incerta não altera PAID. Estorno em andamento/parcial fica para revisão e não libera toda a vaga.
 
@@ -54,3 +54,6 @@ Definir `D1_READ_BUDGET`, `D1_WRITE_BUDGET`, `QUEUE_BUDGET` e `D1_BUDGET_WINDOW=
 Executar preflight estático e o checklist. Ativar progressivamente recebimento → manual → IA → checkout → confirmação → e-mail. App/comercial devem ter flags iguais; receptor acompanha agente/e-mail. Revisar individualmente operações antigas retidas; nenhuma ativação libera backlog automaticamente.
 
 Importação permanece pausada se a medição de um orçamento já configurado ficar desatualizada, até uma coleta nova confirmar a disponibilidade. Uma medição antiga em 80% nunca libera importação por envelhecer. Pendências históricas legadas usam backoff crescente por tentativa.
+
+
+Onda 32: ciclo Pix externo no Sandbox validado até confirmação UAZAPI lida, com notificações nativas do novo pagador desligadas. Documento fiscal sintético opcional é aceito exclusivamente no Sandbox local; produção exige dados fiscais legítimos do pagador e sua entrada própria. Campos opcionais nulos de callbacks são normalizados sem relaxar validações financeiras. Painel permite atualizar pagamento/envio/confirmação sem disparar nova mensagem. Ver CP-32 e o runbook local para evidências, retenções e limites do aceite.
