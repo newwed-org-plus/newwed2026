@@ -2,6 +2,7 @@ import {spawn,type ChildProcess} from 'node:child_process';
 import {existsSync,readFileSync,writeFileSync,openSync,closeSync,rmSync} from 'node:fs';
 import {parseEnv} from 'node:util';
 import {get as httpsGet} from 'node:https';
+import {startLocalAsaasWebhook,stopSavedLocalAsaasWebhook} from './local-asaas-webhook';
 type Hook={id?:string;url:string;enabled?:boolean;events?:string[];excludeMessages?:string[];addUrlEvents?:boolean;addUrlTypesMessages?:boolean};
 function hooks(value:unknown):Hook[]{if(Array.isArray(value))return value as Hook[];if(value&&typeof value==='object'&&'url' in value)return [value as Hook];throw new Error('Formato do webhook não reconhecido.');}
 function project(hook:Hook){return Object.fromEntries(['id','enabled','url','events','excludeMessages','addUrlEvents','addUrlTypesMessages'].filter(key=>key in hook).map(key=>[key,hook[key as keyof Hook]]));}
@@ -27,6 +28,7 @@ export async function startLocalTunnel() {
  let bridge:ChildProcess|undefined;let tunnel:ChildProcess|undefined;let ownedUrl='';let closing=false;let original:Hook|undefined;let stage='consulta do callback';
  const stop=async()=>{
   if(closing)return false;closing=true;
+  if(env.LOCAL_ASAAS_WEBHOOK==='true'){try{await stopSavedLocalAsaasWebhook(env);}catch{writeFileSync('.local-runtime/restore-pending','true',{mode:0o600});console.error('Pausa do webhook Asaas pendente; mantenha o ambiente ativo e tente encerrar novamente.');closing=false;return false;}}
   if(ownedUrl&&original){try{const current=hooks(await provider('GET'));const restored=await restoreOwnedWebhook(current,original,ownedUrl,body=>provider('POST',body));if(restored){const confirmed=hooks(await provider('GET')).some(hook=>hook.url===original!.url&&hook.enabled===original!.enabled);if(!confirmed)throw new Error('Callback anterior ainda não confirmado.');console.log('Callback anterior restaurado.');}const target=restored?original.url:current[0]?.url;if(target){const source=readFileSync('.dev.vars','utf8').replace(/^UAZAPI_WEBHOOK_BASE_URL=.*$/m,`UAZAPI_WEBHOOK_BASE_URL=${new URL(target).origin}`);writeFileSync('.dev.vars',source,{mode:0o600});}}catch{writeFileSync('.local-runtime/restore-pending','true',{mode:0o600});console.error('Restauração pendente do callback; mantenha o ambiente ativo e tente encerrar novamente.');closing=false;return false;}}
   rmSync('.local-runtime/restore-pending',{force:true});tunnel?.kill('SIGINT');bridge?.kill('SIGINT');return true;
  };
@@ -37,7 +39,7 @@ export async function startLocalTunnel() {
   original=previousBackup&&previousOrigin&&current[0].url.startsWith(previousOrigin)?previousBackup:current[0];
   writeFileSync('.local-runtime/webhook-backup.json',JSON.stringify([original]),{mode:0o600});
   stage='inicialização do túnel';
-  bridge=spawn(process.execPath,['scripts/local-webhook-bridge.mjs'],{env:{...process.env,LOCAL_WEBHOOK_PORT:'4175',LOCAL_UAZAPI_LINE:lineId},stdio:'ignore',detached:true});
+  bridge=spawn(process.execPath,['scripts/local-webhook-bridge.mjs'],{env:{...process.env,LOCAL_WEBHOOK_PORT:'4175',LOCAL_APP_PORT:'4173',LOCAL_UAZAPI_LINE:lineId,LOCAL_ASAAS_WEBHOOK:env.LOCAL_ASAAS_WEBHOOK??'false'},stdio:'ignore',detached:true});
   const log='.local-runtime/tunnel-owned.log';writeFileSync(log,'',{mode:0o600});const fd=openSync(log,'a');tunnel=spawn('.local-runtime/bin/cloudflared',['tunnel','--url','http://127.0.0.1:4175','--no-autoupdate','--protocol','http2'],{stdio:['ignore',fd,fd],detached:true});closeSync(fd);
   let origin='';for(let attempt=0;attempt<100&&!origin;attempt++){await new Promise(resolve=>setTimeout(resolve,300));origin=readFileSync(log,'utf8').match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/)?.[0]??'';if(tunnel.exitCode!==null||bridge.exitCode!==null)throw new Error('Túnel local não iniciou.');}
   if(!origin)throw new Error('Túnel local indisponível.');
@@ -55,6 +57,9 @@ export async function startLocalTunnel() {
   await provider('POST',{...project(current[0]),enabled:true,url:ownedUrl,excludeMessages:(current[0].excludeMessages??[]).filter(value=>value!=='wasSentByApi'),events:Array.from(new Set([...(current[0].events??[]),'connection','messages','messages_update','history'])),addUrlEvents:false,addUrlTypesMessages:false});
   if(!hooks(await provider('GET')).some(hook=>hook.enabled&&hook.url===ownedUrl))throw new Error('Callback local não confirmado.');
   writeFileSync('.local-runtime/tunnel-origin',origin,{mode:0o600});console.log('Linha UAZAPI direcionada ao receptor local; callback anterior será restaurado ao encerrar.');
+  if(env.LOCAL_ASAAS_WEBHOOK==='true'){
+   try{await startLocalAsaasWebhook(env,origin);}catch{console.error('Webhook Asaas Sandbox não configurado; recebimento UAZAPI preservado. Confira o perfil local antes de repetir a configuração.');}
+  }
   tunnel.once('exit',()=>{if(!closing)void stop();});return {stop};
  }catch{await stop();throw new Error(`Callback local não ativado na etapa: ${stage}.`);}
 }

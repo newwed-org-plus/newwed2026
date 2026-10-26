@@ -2,23 +2,25 @@ import { z } from "zod";
 import { applyAsaasPayment } from "@/server/integrations/asaas-payment";
 import { retryAt } from "@/server/outbox";
 
+const optionalProviderString=z.string().nullish().transform(value=>value??undefined);
+
 export const asaasWebhookSchema = z.object({
   id:z.string().min(1).optional(),
   event:z.string().min(1),
-  dateCreated:z.string().optional(),
+  dateCreated:optionalProviderString,
   payment:z.object({
     id:z.string().min(1),
-    externalReference:z.string().optional(),
-    customer:z.string().optional(),
-    installment:z.string().optional(),
-    installmentNumber:z.number().int().positive().optional(),
-    invoiceUrl:z.string().url().optional(),
-    billingType:z.string().optional(),
+    externalReference:optionalProviderString,
+    customer:optionalProviderString,
+    installment:optionalProviderString,
+    installmentNumber:z.number().int().positive().nullish().transform(value=>value??undefined),
+    invoiceUrl:z.string().url().nullish().transform(value=>value??undefined),
+    billingType:optionalProviderString,
     value:z.number().positive(),
-    dueDate:z.string().optional(),
+    dueDate:optionalProviderString,
     status:z.string().min(1),
-    paymentDate:z.string().optional(),
-    confirmedDate:z.string().optional(),
+    paymentDate:optionalProviderString,
+    confirmedDate:optionalProviderString,
   }).passthrough(),
 }).passthrough();
 

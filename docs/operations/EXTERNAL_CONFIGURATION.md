@@ -7,7 +7,7 @@ O código usa UAZAPI, OpenRouter gratuito, login próprio, D1 e filas separadas.
 - D1/filas staging criados e independentes. Staging recebeu somente migrations até 0008; aplicar 0009–0013 na janela aprovada antes de publicar estas ondas.
 - Produção conserva o recebimento já publicado. Nenhum deploy, migration remota ou envio comercial foi feito pelas ondas 22–26.
 - Todas as funções comerciais ficam desligadas nos arquivos Wrangler. Inscrição pública também tem controle próprio.
-- Usuário escolheu teste local. Asaas sandbox, e-mail, Turnstile e linha exclusiva de homologação continuam pendentes. O contato informado pelo usuário não está em código/fixtures.
+- Usuário escolheu teste local. Asaas Sandbox local configurado na onda 31; e-mail, Turnstile e linha exclusiva de homologação continuam pendentes. O contato informado pelo usuário não está em código/fixtures.
 
 ## Matriz de secrets por serviço
 
@@ -25,7 +25,7 @@ Segredos diferentes por ambiente. Configurações Meta/OpenAI antigas são apena
 - Provisionar usuários/papéis e login próprio com `scripts/provision-admin.ts`; senha entra pela entrada oculta/stdin. Sessões D1, verificação por identidade e limite por IP em Durable Objects.
 - Conferir `ADMIN_PASSWORD_VERIFIER`, `ADMIN_IP_LIMITER` e migrations DO. `ALLOW_LOCAL_ACCESS=false` em staging/produção.
 - App, receiver e comercial usam o mesmo D1 por ambiente e filas comercial/UAZAPI separadas, com DLQs distintas. Staging nunca aponta a UUID/fila de produção.
-- Nunca apontar o callback da linha ativa ao localhost. Usar linha de teste exclusiva para staging.
+- Homologação usa linha de teste exclusiva. O callback local da linha atendimento foi autorizado especificamente em D-047 e é restaurado ao encerrar.
 
 ## Turnstile
 
@@ -33,11 +33,13 @@ Criar widget com um token restrito `Account.Turnstile:Edit`, conforme o fluxo da
 
 ## Asaas sandbox e produção
 
-1. Criar/habilitar a conta sandbox com os dados do titular e registrar chave sandbox no consumidor comercial.
+1. Sandbox vinculado criado com autorização do titular em 25/10/2026. Chave exclusiva **Newwed Local Sandbox**, válida até **24/11/2026**, sem operações de saque por API, registrada somente em `.dev.vars` privado. API de situação cadastral retornou HTTP 200 e estados aprovados; nenhuma cobrança/cliente criado. Renovar a chave antes de expirar.
 2. Cadastrar webhook HTTPS autenticado por token independente no web; usar `https://api-sandbox.asaas.com/v3` em staging/local. Produção usa `https://api.asaas.com/v3` e outra chave/token.
 3. Assinar os eventos de cobrança recebida/confirmada, vencida, cancelada, estornada, estorno pendente e parcial.
 4. Aprovar edição, lote, valor, capacidade, vencimento e parcelas. O código não escolhe uma edição comercial real automaticamente.
 5. Validar Pix/cartão, parcelas, última vaga, cancelamento/estorno e repetição/ordem de eventos; conferir `externalReference` e IDs de parcelas.
+
+No local, `LOCAL_ASAAS_WEBHOOK=true` acompanha o túnel autorizado: registra/atualiza somente o webhook **Newwed Local Sandbox**, autentica com token independente e pausa antes de encerrar. A URL muda a cada novo túnel; a intenção é persistida antes de criar, permitindo conciliação de resposta incerta sem POST duplicado. Não reativar fila interrompida automaticamente. Produção não foi alterada. D-052 habilitou checkout/confirmação apenas no perfil privado local, restritos ao contato autorizado; e-mail continua desligado. Ver `LOCAL_VALIDATION.md` para recuperação.
 
 Checkout novo exige conversa e linha UAZAPI do lead. Confirmar o pagamento somente após conciliação financeira; comunicação incerta não altera PAID. Estorno em andamento/parcial fica para revisão e não libera toda a vaga.
 
@@ -52,3 +54,6 @@ Definir `D1_READ_BUDGET`, `D1_WRITE_BUDGET`, `QUEUE_BUDGET` e `D1_BUDGET_WINDOW=
 Executar preflight estático e o checklist. Ativar progressivamente recebimento → manual → IA → checkout → confirmação → e-mail. App/comercial devem ter flags iguais; receptor acompanha agente/e-mail. Revisar individualmente operações antigas retidas; nenhuma ativação libera backlog automaticamente.
 
 Importação permanece pausada se a medição de um orçamento já configurado ficar desatualizada, até uma coleta nova confirmar a disponibilidade. Uma medição antiga em 80% nunca libera importação por envelhecer. Pendências históricas legadas usam backoff crescente por tentativa.
+
+
+Onda 32: ciclo Pix externo no Sandbox validado até confirmação UAZAPI lida, com notificações nativas do novo pagador desligadas. Documento fiscal sintético opcional é aceito exclusivamente no Sandbox local; produção exige dados fiscais legítimos do pagador e sua entrada própria. Campos opcionais nulos de callbacks são normalizados sem relaxar validações financeiras. Painel permite atualizar pagamento/envio/confirmação sem disparar nova mensagem. Ver CP-32 e o runbook local para evidências, retenções e limites do aceite.

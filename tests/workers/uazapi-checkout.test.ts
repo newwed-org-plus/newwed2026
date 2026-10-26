@@ -104,3 +104,30 @@ it('deduplica inscrições concorrentes preservando consentimentos e uma única 
  const a=await first.json() as {leadId:string};const b=await second.json() as {leadId:string};expect(a.leadId).toBe(b.leadId);
  expect(await env.DB.prepare('SELECT count(*) AS total FROM leads').first()).toEqual({total:1});expect(await env.DB.prepare("SELECT count(*) AS total FROM pipeline_history WHERE to_stage='NOVO'").first()).toEqual({total:1});
 });
+
+it('bloqueia cobrança local fora da allowlist na API e no consumidor antes de chamar Asaas',async()=>{
+ const id=await seed();
+ Object.assign(env,{LOCAL_TEST_MODE:'true',LOCAL_WHATSAPP_ALLOWED_RECIPIENTS:'5581888880001'});
+ const runtime=env as unknown as Record<string,unknown>;
+ try {
+  const lead=await env.DB.prepare('SELECT lead_id FROM checkouts WHERE id=?').bind(id).first<{lead_id:string}>();
+  const before=await env.DB.prepare('SELECT reserved,sold FROM availability WHERE edition_id=\'e\'').first();
+  expect((await createCheckout(req({editionId:'e',priceBatchId:'b',conversationId:'c',method:'PIX',installmentCount:1}),ctx(lead!.lead_id))).status).toBe(403);
+  expect(await env.DB.prepare('SELECT reserved,sold FROM availability WHERE edition_id=\'e\'').first()).toEqual(before);
+  await env.DB.prepare("UPDATE checkouts SET status='FAILED',send_status='NOT_REQUESTED',processing_started_at=NULL,next_retry_at=NULL WHERE id=?").bind(id).run();
+  const provider=vi.fn();expect(await processCheckoutCreation(env,id,'synthetic',provider)).toMatchObject({status:'FAILED',errorCode:'CHECKOUT_LOCAL_RECIPIENT_BLOCKED'});expect(provider).not.toHaveBeenCalled();
+ }finally{delete runtime.LOCAL_TEST_MODE;delete runtime.LOCAL_WHATSAPP_ALLOWED_RECIPIENTS;}
+});
+
+it('processa webhook com opcionais nulos após conciliação sem regredir PAID ou duplicar confirmação',async()=>{
+ const id=await seed();await applyAsaasPayment(env,'PAYMENT_RECEIVED',payment(id),{});
+ const {POST:receiveWebhook}=await import('../../app/api/webhooks/asaas/route');
+ const token=(env as unknown as Record<string,string>).ASAAS_WEBHOOK_TOKEN;
+ const input={id:'evt_nullable',event:'PAYMENT_CREATED',payment:{...payment(id),status:'PENDING',installment:null,installmentNumber:null,invoiceUrl:null,paymentDate:null,confirmedDate:null}};
+ const request=()=>new Request('https://newwed.test/api/webhooks/asaas',{method:'POST',headers:{'content-type':'application/json','asaas-access-token':token},body:JSON.stringify(input)});
+ expect((await receiveWebhook(request())).status).toBe(200);expect(await (await receiveWebhook(request())).json()).toMatchObject({duplicate:true});
+ expect(await env.DB.prepare('SELECT status,financial_status FROM checkouts WHERE id=?').bind(id).first()).toEqual({status:'PAID',financial_status:'PAID'});
+ expect(await env.DB.prepare("SELECT count(*) AS total FROM notifications WHERE entity_id=?").bind(id).first()).toEqual({total:1});
+ expect(await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE aggregate_id=? AND type='checkout.confirmation.send'").bind(id).first()).toEqual({total:1});
+ expect(await env.DB.prepare("SELECT reserved,sold FROM availability WHERE edition_id='e'").first()).toEqual({reserved:0,sold:1});
+});

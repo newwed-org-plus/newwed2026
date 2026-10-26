@@ -45,3 +45,22 @@ for(const [name,width,height] of [["mobile",390,844],["desktop",1440,900]] as co
  await expect.poll(()=>sent?.conversationId).toBe('c2');await expect(page.getByText(/reservado e em processamento/)).toBeVisible();
  await page.screenshot({path:`test-results/checkout-${name}.png`,fullPage:true});
 });
+
+for(const [name,width,height]of [['mobile',390,844],['tablet',768,1024],['desktop',1440,900]]as const)test(`${name} · atualiza pagamento e confirmação sem reenviar`,async({page})=>{
+ await page.setViewportSize({width,height});let state='PENDING';let confirmation='ACCEPTED';let fail=false;let mutations=0;
+ const lead={id:'synthetic-paid-lead',name:'VALIDACAO pagamento Sandbox',email:'demo@example.invalid',phone:'81000000001',stage:'AGUARDANDO_PAGAMENTO',edition_id:'e'};
+ await page.route('**/api/admin/leads**',route=>{
+  if(route.request().method()!=='GET'){mutations++;return route.fulfill({status:500,json:{message:'Não deve reenviar.'}});}
+  if(new URL(route.request().url()).pathname.endsWith('/synthetic-paid-lead')){
+   if(fail)return route.fulfill({status:503,json:{message:'VALIDACAO indisponibilidade temporária.'}});
+   return route.fulfill({json:{lead:{...lead,stage:state==='PAID'?'PAGO':lead.stage},answers:[],history:[],activities:[],conversations:[],checkouts:[{id:'synthetic-paid-checkout',status:state,financial_status:state,send_status:'DELIVERED',confirmation_status:confirmation,url:'https://sandbox.example/invoice'}]}});
+  }
+  return route.fulfill({json:{items:[lead]}});
+ });
+ await page.goto(`${origin}/admin`);await page.getByRole('button').filter({has:page.getByText('VALIDACAO pagamento Sandbox',{exact:true})}).click();
+ await expect(page.getByText('Pagamento: Aguardando pagamento',{exact:true})).toBeVisible();
+ state='PAID';confirmation='READ';await page.getByRole('button',{name:'Atualizar pagamentos',exact:true}).click();
+ await expect(page.getByText('Pagamento: Pago',{exact:true})).toBeVisible();await expect(page.getByText('Confirmação ao cliente: Lida',{exact:true})).toBeVisible();
+ fail=true;await page.getByRole('button',{name:'Atualizar pagamentos',exact:true}).click();await expect(page.getByRole('status')).toContainText('indisponibilidade');await expect(page.getByText('Pagamento: Pago',{exact:true})).toBeVisible();expect(mutations).toBe(0);
+ await page.screenshot({path:`test-results/checkout-confirmation-${name}.png`,fullPage:true});
+});

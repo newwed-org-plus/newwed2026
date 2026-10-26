@@ -221,3 +221,23 @@ Em 2026-10-25, o usuário pediu reforço da memória da IA sobre todos os produt
 A base é versionada e identificada por hash, disponibilizada em consulta administrativa de leitura para admin/gestor e anexada às evidências de resposta automática. Contexto editável, resumo e fala de cliente não sobrescrevem fatos publicados. Preços privados de lotes não são enviados ao modelo UAZAPI como tabela pública. Perguntas comerciais conhecidas usam dados publicados sem geração; respostas geradas passam por verificação de valores, vínculo com destino, datas, parcelas, desconto/juros, vagas e promessas de reserva/pagamento.
 
 O assunto de cada conversa é persistido no D1 como IDs de projeto/destino, ano solicitado e cursor/revisão, sem copiar conteúdo pessoal para essa memória. Atualização usa somente mensagens IN daquela conversa, preserva correções e esquecimento e ignora sugestões OUT como seleção do cliente. Reconstrução é limitada a 128 registros de assunto por execução e persiste progresso; geração aguarda quando incompleta. Não depender de modelo específico, resumo truncado ou memória do processo. Valores continuam na fonte oficial, nunca na memória do cliente. Esta proteção reduz erros; não é uma promessa de ausência absoluta de alucinação.
+
+
+## D-051 — Asaas Sandbox vinculado exclusivamente ao local
+
+Em 2026-10-25, o usuário autorizou criar o Sandbox vinculado e a chave **Newwed Local Sandbox**, com validade de 30 dias, guardada somente no projeto local. A chave de produção existente estava desabilitada e não foi reativada, substituída nem removida. A nova chave expira em 24/11/2026 e mantém saques por API desabilitados. Não há autorização de cobrança real, deploy ou contratação.
+
+Credenciais ficam em `.dev.vars` ignorado com permissão 0600; token de webhook independente, metadados operacionais em `.local-runtime` privado e sem segredos em Git, logs, screenshots ou respostas. O perfil local aceita somente o host oficial Sandbox e bloqueia credenciais de ambiente incompatível; transporte usa prazo, resposta limitada e não segue redirect com credencial.
+
+O túnel autorizado expõe também POST exato de Asaas, limitado a 128 KiB e autenticado. O launcher gerencia um webhook exclusivo, preserva intenção antes de cadastro, concilia aceite incerto e não substitui configurações alteradas por outro operador nem reativa fila interrompida. Encerramento pausa e verifica o webhook antes de fechar o transporte; falha mantém runtime ativo para recuperação. Configuração e autenticação foram validadas sem criar cliente, cobrança ou evento financeiro fictício. Checkout, confirmação e e-mail permanecem desligados até validação própria.
+
+
+## D-052 — Checkout local e ciclo financeiro Sandbox autorizados
+
+Em 2026-10-25, o usuário autorizou liberar checkout e confirmação no localhost, criar/confirmar uma cobrança Sandbox e enviar o link e a confirmação ao contato de teste informado, sem deploy. A janela é esta validação. Usar edição/lote sintéticos **VALIDACAO local — demonstração**, Pix único de R$ 1.200,00, capacidade 8 e vencimento calculado em Recife. O valor é de fixture, não uma oferta publicada. A qualificação e autorização são ações do operador autenticado; a IA não cria nem aprova checkout.
+
+A liberação existe somente em `.dev.vars` privado e nos Workers locais gerados. Exige Sandbox oficial, chave de homologação, modo local e destinatário autorizado. Conferir tanto o telefone do lead quanto o da conversa na API e novamente antes de chamar o Asaas; outros contatos são bloqueados antes de criar cobrança. Recebimento permanece sem credenciais externas; e-mail continua desligado e operações antigas retidas não são liberadas.
+
+Sandbox utiliza documento fiscal sintético explícito em `ASAAS_SANDBOX_TEST_DOCUMENT`, somente no modo local com host/chave Sandbox. Não copiar documento de teste para produção nem substituir dados legítimos de pagadores. Novos clientes Asaas usam notificações nativas desligadas para preservar o canal UAZAPI. Mensagens locais identificam TESTE SANDBOX e não prometem participação real.
+
+A validação encontrou campos opcionais nulos no webhook real. Aceitar null somente nesses campos e normalizar para ausência; manter ID, status e valor positivos obrigatórios. Conciliação por snapshot recupera pagamentos enquanto há falha de callback; retomada do evento original não regride PAID nem repete confirmação/notificação. Não confirmar novamente o pagamento para reproduzir um webhook; usar replay exato do evento original. Não remover penalização repetidamente nem reativar filas desconhecidas.
