@@ -23,15 +23,16 @@ jobs:
       - run: npm run test:d1:wave2
       - run: npm run test:d1:wave3
       - run: npm run test:d1:wave4
+      - run: npm run test:recovery
       - run: npm run test:workers
       - run: npm run build
       - run: npm run test:visual
-      - name: Upload visual failure evidence
-        if: failure()
+      - name: Upload visual evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: visual-failure-${{ github.run_id }}
-          path: test-results/visual
+          path: test-results
           if-no-files-found: ignore
           retention-days: 7
       - run: npm audit --omit=dev --audit-level=high

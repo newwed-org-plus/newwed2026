@@ -65,6 +65,10 @@ for (const [name,width,height] of [["mobile",390,844],["tablet",768,1024],["desk
     await expect(page.getByRole("img",{name:"QR Code para conectar o WhatsApp"})).toBeVisible();
     await expect(page.getByRole("button",{name:"Gerar QR Code",exact:true})).toHaveCount(0);
     expect(await page.getByRole("img",{name:"QR Code para conectar o WhatsApp"}).evaluate(node=>(node as HTMLImageElement).naturalWidth)).toBe(41);
+    await expect(page.getByRole("button",{name:"Gerar novo QR Code",exact:true})).toBeVisible();
+    await page.getByRole("button",{name:"Gerar novo QR Code",exact:true}).click();
+    await expect(page.getByRole("img",{name:"QR Code para conectar o WhatsApp"})).toBeVisible();
+    expect(actions.filter(action=>action==="restart")).toHaveLength(1);
     await page.evaluate(()=>window.scrollTo(0,0));
     await page.screenshot({path:`test-results/whatsapp-qr-synthetic-${name}.png`,fullPage:true});
     state="connected";
@@ -109,4 +113,41 @@ test("linha somente de recebimento não consulta provider nem oferece QR ativo",
   await expect(page.getByRole("button",{name:"Atualizar estado",exact:true})).toBeDisabled();
   await expect(page.getByText(/Recebimento preparado\. Informe a URL/)).toBeVisible();
   expect(operations).toBe(0);
+});
+
+test("linha conectada faz uma consulta inicial e para o polling automático",async({page})=>{
+  test.skip(Boolean(process.env.VISUAL_BASE_URL),"Provider simulado somente em ambiente local.");
+  let refreshes=0;
+  await page.route("**/api/admin/whatsapp**",route=>{
+    if(route.request().method()==="GET")return route.fulfill({json:{items:[{id:"validacao",name:"VALIDACAO Atendimento",state:"connected",phone:null,profile_name:null,last_error:null,updated_at:new Date().toISOString()}]}});
+    const {action}=route.request().postDataJSON();
+    if(action==="refresh")refreshes++;
+    return route.fulfill({json:{id:"validacao",name:"VALIDACAO Atendimento",state:"connected",qrCode:null,phone:null,profileName:null,updatedAt:new Date().toISOString()}});
+  });
+  await page.goto(`${origin}/admin`);
+  await page.getByRole("button",{name:"WhatsApp",exact:true}).click();
+  await expect(page.getByRole("heading",{name:"VALIDACAO Atendimento",exact:true})).toBeVisible();
+  await expect.poll(()=>refreshes).toBe(1);
+  await page.waitForTimeout(5500);
+  expect(refreshes).toBe(1);
+});
+
+test("importação mostra contagens e progresso sem prometer histórico completo do celular",async({page})=>{
+  test.skip(Boolean(process.env.VISUAL_BASE_URL),"Provider simulado somente em ambiente local.");
+  let requested=false;
+  await page.route("**/api/admin/whatsapp**",route=>{
+    const path=new URL(route.request().url()).pathname;
+    if(path.endsWith('/history')){
+      if(route.request().method()==='POST'){requested=true;return route.fulfill({status:202,json:{id:'synthetic-history'}});}
+      return route.fulfill({json:{job:requested?{status:'PENDING',scanned_count:0,last_error:null}:null,totals:{conversations:161,messages:2}}});
+    }
+    if(route.request().method()==='GET')return route.fulfill({json:{historySyncEnabled:true,localTestMode:true,items:[{id:'validacao',name:'VALIDACAO Atendimento',state:'connected',serverConfigured:true}]}});
+    return route.fulfill({json:{id:'validacao',state:'connected',name:'VALIDACAO Atendimento',qrCode:null,phone:null,profileName:null,updatedAt:new Date().toISOString()}});
+  });
+  await page.goto(`${origin}/admin`);await page.getByRole('button',{name:'WhatsApp',exact:true}).click();
+  const section=page.getByRole('region',{name:'Importação do histórico'});
+  await expect(section.getByText('161 conversas · 2 mensagens')).toBeVisible();
+  await section.getByRole('button',{name:'Importar histórico disponível',exact:true}).click();
+  await expect(section.getByText('Importando mensagens anteriores; você já pode abrir a Inbox.')).toBeVisible();
+  await expect(section.getByRole('button',{name:'Importar histórico disponível',exact:true})).toBeDisabled();
 });

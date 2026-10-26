@@ -1,4 +1,5 @@
 import noronhaCoverAsset from "@/assets/fantour-noronha.jpg";
+import {famtourInformation} from '@/content/famtour-information';
 const noronhaCover = noronhaCoverAsset.src;
 import rioGrandeDoNorteCoverAsset from "@/assets/dest-rn.jpg";
 const rioGrandeDoNorteCover = rioGrandeDoNorteCoverAsset.src;
@@ -29,9 +30,7 @@ export type PreviousEdition = {
 
 export const PREVIOUS_EDITIONS = [
   {
-    slug: "fernando-de-noronha-2026",
-    destino: "Fernando de Noronha",
-    ano: 2026,
+    ...famtourInformation.previousEditions[0],
     capa: noronhaCover,
     capaAlt: "Edição anterior em Fernando de Noronha",
     galeria: [
@@ -43,9 +42,7 @@ export const PREVIOUS_EDITIONS = [
     ],
   },
   {
-    slug: "rio-grande-do-norte-2026",
-    destino: "Rio Grande do Norte",
-    ano: 2026,
+    ...famtourInformation.previousEditions[1],
     capa: rioGrandeDoNorteCover,
     capaAlt: "Edição anterior no Rio Grande do Norte",
     galeria: [
@@ -57,9 +54,7 @@ export const PREVIOUS_EDITIONS = [
     ],
   },
   {
-    slug: "alagoas-2026",
-    destino: "Alagoas",
-    ano: 2026,
+    ...famtourInformation.previousEditions[2],
     capa: alagoasCover,
     capaAlt: "Edição anterior em Alagoas",
     galeria: [

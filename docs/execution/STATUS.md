@@ -1,136 +1,138 @@
 # Status de execução
 
-Atualizado em: 2026-10-20
+Atualizado em: 2026-10-25.
 
-Usuário retomou a correção em `codex/wave-16-uazapi-webhook-production` e autorizou o Wrangler em perfil exclusivo New Wed. Receptor e consumidor dedicado publicados; autenticação, deduplicação, ingestão humana até a Inbox e limpeza sintética aprovadas. Detalhes em `checkpoints/CP-16.md`.
+## Objetivo ativo
 
-## Estado geral
+Implementar as ondas 21–26: site → inscrição → lead → atendimento → qualificação humana → checkout → pagamento → confirmação pela mesma linha UAZAPI.
 
-- Onda atual: onda 16, publicação do recebimento UAZAPI.
-- Branch: `codex/wave-16-uazapi-webhook-production`; base local na onda 15 em `8f30a6b`.
-- Dados legados: inexistentes; o projeto começa vazio.
-- Usuário autorizou deploy, conexão GitHub restrita ao repositório, publicação sem R2 e conexão do domínio existente em 2026-09-30.
+- Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
+- Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Asaas produção exige SMS indisponível; checkout remoto fica desligado.
+- Não contratar capacidade paga sem orçamento aprovado; não liberar mensagens, cobranças ou e-mails antigos ao ativar consumidor.
+- O usuário autorizou usar `atendimento` no localhost e importar o histórico UAZAPI desta linha. D-047 autorizou o callback local; D-053 autoriza a publicação e a devolução do callback para produção.
 
-## Concluído antes das ondas
+## Base preservada
 
-- Institucional, FAMTOUR, formulário e dashboard existentes, com schema D1 comercial e integrações iniciais; 20 unitários e 33 baselines no início.
+- Ondas 0–16: funcionalidades e publicações em CP-00 a CP-16.
+- Ondas 17–20: parser de conexão, renovação explícita de QR, fim do polling conectado e recuperação de histórico; CP-17 a CP-20.
+- Último receptor publicado: versão `b06cb9e7-72ac-4c71-b15a-cc612327dba6`.
+- Migrations de produção, staging e locais até 0018; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
+- Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`, perfil Wrangler `newwed-production`.
 
-## Ondas 0–5 concluídas
+## Onda 21 concluída
 
-- Contexto recuperável, schema D1, checkout assíncrono, outbox, assinatura/deduplicação de webhooks, inbox humana/agente, relatórios, tarefas e notificações implantados.
-- Gates finais: 64 unitários, 18 invariantes D1, 6 cenários Workers, build, 33 visuais e auditoria aprovados no momento dessas ondas.
-- Commits e evidências detalhadas em `checkpoints/CP-00.md` a `CP-05.md`; CI final `34864801713`.
+- Branch `codex/wave-21-security-staging`, base `ecbe6e5`.
+- Zod 4.6.7, Vite 8.3.5 e transitivas corrigidas; auditoria de produção sem alertas.
+- Preflight por capacidades: R2/Access opcionais, segurança e isolamento verificados. Funções externas desligadas por padrão.
+- D1 staging `d67175d9-52b6-47f7-b7a0-4a75a05af32d`, migrations 0000–0008 aplicadas e quatro filas staging criadas; nenhum consumidor comercial ativado.
+- Recuperação de produção confirmada por contagens em 25/10: 358 conversas e 14.908 mensagens; zero históricos/lotes pendentes. Nenhum conteúdo de mensagem foi lido.
+- Tipos, lint, TypeScript, 95 unitários, 34 Workers, invariantes D1 e build aprovados; 53 cenários visuais aprovados (52 na suíte e um na repetição focada). Detalhes no CP-21.
 
-## Onda 6 validada localmente
+## Onda 22 concluída
 
-- Home institucional branca segue a referência editorial, com quatro projetos, indicadores, Cindy e chamada final; commit `127f1f3`.
-- Gate local aprovado; sem schema, envio externo ou deploy nessa onda. Detalhes em `checkpoints/CP-06.md`.
+- Onda 22, `codex/wave-22-capacity-login`. Migration local 0009 e Durable Object AdminIpLimiter.
+- Cursor de histórico, orçamento 100/tick, lock por linha e login sem bucket D1 por IP.
+- Gate completo aprovado: 96 unitários, 37 Workers, 53 visuais, D1, build, lint/tipos e auditoria sem alertas. CP-22.
 
-## Onda 7 publicada
+## Onda 23 concluída
 
-- Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`.
-- D1 production criado: `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
-- Queue production criada: `8e18d7f59d554826bb425c633c6441fa`.
-- R2 production removido por escolha explícita do usuário; assets continuam no build.
-- Publicação inicial: `e6a6614`; configuração de domínio publicada em `2d768bd`, Worker version `0cfbd22d-62b6-4f47-ad63-12decbb102d5`.
-- Workers Build `f96de1e2-3067-4a1d-bb3c-aeee80de073d` aprovado às 16:43 de 2026-09-30 (America/Recife).
-- CI GitHub `36767408991` aprovado; site em `https://new-wed-platform-production.royal-leaf-8110.workers.dev`.
-- Migrations 0000–0005 confirmadas no console D1; oito páginas públicas responderam HTTP 200 no Chrome.
-- Scripts selecionam production no build e publicam o artefato sem recompilar em development.
-- Tipos, lint, typecheck, 64 unitários, 18 invariantes D1, 6 cenários Workers, build production, dry-run e 33 visuais aprovados.
-- Os dois casos visuais com ERR_EMPTY_RESPONSE passaram na repetição direcionada.
-- `fast-uri` atualizado de 3.1.7 para 3.1.8; auditoria de produção sem vulnerabilidades.
+- Onda 23, `codex/wave-23-inbox-pagination`, migration local 0010.
+- Paginação estável, erros globais, polling serial e ambiente visível.
+- Gate aprovado: 96 unitários, 39 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-23.
 
-- Domínios `newwed.com.br` e `www.newwed.com.br` conectados por rotas Workers, preservando DNS e e-mail existentes.
-- Build de domínio `5e18cd05-6dc8-47cc-94ad-c59a70b98313` aprovado às 17:05; apex revalidado HTTP 200/HTTPS após o deploy. CI GitHub `36770039580` aprovado.
+## Onda 24 concluída
 
-## Onda 8 publicada
+- Onda 24, `codex/wave-24-safe-commercial-processing`, migration local 0011.
+- Outbox com retenção/lease/conclusão, flags independentes e intake separado de respostas.
+- Envios incertos não são repetidos; revisão e reconciliação auditadas.
+- Gate aprovado: 96 unitários, 46 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-24.
 
-- Menus e links institucionais navegam por seções atuais; URLs antigas redirecionam para a home branca.
-- Card Destinos conecta `/famtour`; a navegação da landing foi revisada na onda 9 após esclarecimento do usuário.
-- Gate: tipos, lint, typecheck, 64 unitários, build production, 24 visuais/navegação e auditoria aprovados.
-- Commit `c8dc547`; Workers Build `50059df3-a0ef-4eb2-8218-a1af3a392f14` aprovado às 17:55 de 2026-09-30 (America/Recife), version `62da01b3-f45f-4988-ab6f-37703ad240a0`.
-- Os 12 links das navbars e o redirect de `/sobre` foram confirmados no Chrome público; CI GitHub `36775891576` aprovado.
+## Onda 25 concluída
 
-## Onda 9 publicada
+- Onda 25, `codex/wave-25-uazapi-checkout`, migration local 0012.
+- Checkout e confirmação na mesma conversa/linha UAZAPI, conciliação de envio incerto e estorno concluído terminal.
+- Formulário/Turnstile e vínculo de checkout corrigidos; legado Meta preservado.
+- Gate aprovado: 97 unitários, 49 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-25.
+- PRs 7–10 com CI aprovado; sem merge/deploy automático durante validação local.
 
-- Navbar/rodapé navegam pelas seções da FAMTOUR; query de edição preservada e menu mobile fecha após o clique.
-- Galerias e inscrição retornam à landing; alvos respeitam a navbar fixa. Código publicado `5a0cc17`, CI `36777558836`; sem migrations novas.
-- Gate: tipos Cloudflare, lint, typecheck, 64 unitários, build production, 27 visuais/navegação e auditoria aprovados.
+## Onda 26 concluída localmente
 
-## Onda 10 integrada, segurança pendente
+- 26, `codex/wave-26-operations-local-pilot`, migration local 0013.
+- Métricas/alertas, revisão de retenções e e-mails, backup/restauração, fixtures e roteiro local implementados. CP-26.
+- Focados: 55 Workers e cinco visuais novos aprovados; ensaio de backup/restauração aprovado.
+- Gate completo aprovado: 97 unitários, 55 Workers, 62 visuais, D1, backup/restauração, build, lint/tipos, auditoria zero e preflights. Assets do cliente sem secrets.
+- Banco local preparado com fixture sem provider. Não houve merge, deploy, envio real ou contratação.
+- Correção de corrida no CTA da PR 11: `fe2180b` (incorporada nesta branch como `fb62826`); CI aprovado. PRs 7–12 aprovadas no CI, sem merge/deploy.
 
-- Fedra Light 300, Book 350 e Bold 700 locais; BlockGothicRR 500 no destaque FAMTOUR, sem síntese de estilos.
-- Cards usam Solicitar informações (edição selecionada no formulário) e Ver informações da edição (detalhes, sem envio/cobrança).
-- Navbar, rodapé e cabeçalho de edição oferecem Grupo New Wed e Projetos, preservando âncoras locais.
-- Commit `86aa631`, PR #1: tipos, lint, typecheck, 64 unitários, build e 39 visuais macOS aprovados. Baselines Linux revisados pelo CI; revalidação em andamento.
 
-## Onda 11 integrada
+## Onda 27 — UAZAPI inteiramente operada pelo ambiente local
 
-- Usuário autorizou correção e deploy em 2026-10-15 após confirmação no site público.
-- Páginas Feira/Guia/Workshop recuperadas do histórico com visual branco e fontes oficiais.
-- Cards e menus abrem páginas próprias; navegação FAMTOUR preservada. Decisão D-032 substitui D-028 nesses projetos.
-- Tipos Cloudflare, lint, TypeScript, 64 unitários, build production, dry-run e 39 cenários visuais/navegação aprovados.
-- PR #2 integrada em `31979fa`; CI `38786022714` aprovou também D1, Workers e 39 cenários Linux, falhando somente na auditoria preexistente.
-- Integração Workers Builds reconectada a `newwed-org-plus/newwed2026`, branch `main`, comandos production e token existente; acompanhamento final na PR #2.
+- Branch `codex/wave-27-local-uazapi-stack`, base `453ba29`; CP-27. App, receptor, consumidor comercial, D1, filas, DO e cron locais. UAZAPI continua sendo serviço externo.
+- Migration 0014 somente local: progresso e exclusão de importação nativa. Importação limitada, retomável e sem resposta automática.
+- Callback autorizado da linha atendimento aponta ao túnel que expõe somente seu webhook. O launcher restaura o callback anterior ao encerrar normalmente.
+- Importadas 161 conversas individuais e duas mensagens disponíveis no cache do provider na primeira consulta. Histórico completo do celular pendente; usuário sem acesso ao aparelho, helper pausado e progresso privado preservado.
+- Envios manuais escolhidos pelo operador permitidos localmente; automações continuam limitadas ao destinatário previamente autorizado. Não reenviar automaticamente a tentativa bloqueada.
+- Asaas, confirmação e e-mail permanecem desligados. Nenhum deploy, migration remota, cobrança ou envio de validação iniciado pelo agente.
+- Validação: 100 unitários, 61 Workers, D1/recuperação, build, tipos/lint e auditoria zero aprovados. Visuais: 62 na suíte + CTA tablet aprovado na repetição; 11 Inbox/WhatsApp aprovados novamente. CI remoto e commit consultáveis na [PR 13](https://github.com/newwed-org-plus/newwed2026/pull/13/checks).
 
-## Onda 12 publicada
+## Onda 28 — Recuperação local e estados de entrega
 
-- Usuário solicitou e-mail e senha próprios após bloqueio do onboarding Zero Trust; decisão D-033.
-- Migration `0006` adiciona credenciais scrypt e sessões revogáveis; APIs mantêm usuários ativos e papéis.
-- Verificação scrypt e limite por identidade em Durable Object SQLite (plano Free, RPC privado), migration Workers `admin-password-v1`; handler web em `workers/web.ts`.
-- Login com rate limit, CSRF, cookie HttpOnly/Secure/SameSite e logout no servidor; provisionamento por operador, sem segredo no Git.
-- Tipos, lint, TypeScript, 76 unitários, 14 cenários Workers, migrations locais repetíveis e build production aprovados; 43 cenários visuais aprovados, incluindo login real/reload/logout após ajuste de CPU.
-- OAuth Wrangler autorizado pelo usuário para D1, mas retorno falhou por state incompatível; nenhum token/profile New Wed foi persistido. Console D1 preparado como alternativa.
-- PR #3 integrada em `906f412`; Workers Build `96b29de5-c0cd-43fe-a0f7-ddb0619f3fa0` Ready, versão `39e00b42` ativa.
-- Migration 0006 e cadastro inicial confirmados em produção. Login, papel admin, reload, logout/revogação e novo login reais aprovados; evidências finais na PR #3. O handoff descrito em CP-12 foi uma interpretação excessiva para cadastro inicial e não foi necessário.
-- CI `38792552504`: todos os gates funcionais e 43 visuais aprovados; falha somente na auditoria preexistente.
+- Branch `codex/wave-28-inbox-delivery-local`, base `a92c713`; CP-28. Nenhum deploy ou migration remota.
+- Migration 0015 aditiva: horários observados e metadados de consulta de estados. Recibos e consultas por ID/linha progridem sem regredir leitura; variação brasileira do nono dígito validada, sem misturar contatos.
+- Reinício do runtime local retorna 503 estável, sem overlay de compilação para falha de transporte; erros de código continuam visíveis. Somente GET/HEAD têm repetição limitada.
+- Inbox mostra Na fila/Enviando/Aceita/Enviada/Entregue/Lida e permite conferir entrega sem reenviar. Páginas antigas recebem atualizações de estado sem perder texto/posição.
+- Teste externo explicitamente autorizado: uma mensagem pelo fluxo manual local, confirmação DELIVERED no provider e na Inbox. Sem segunda tentativa do mesmo envio.
+- Usuário também autorizou IA local somente para o destinatário de teste e escolheu enviar a pergunta pelo próprio WhatsApp. Prévia com openrouter/free aprovada após 429 no modelo inicial; conversa original liberada em modo Agente para o contato autorizado. Não fabricar mensagem recebida.
+- Gate completo aprovado: 104 unitários, 67 Workers, 65 visuais, D1/recuperação, tipos/lint, build, auditoria zero e preflights. Código `c598df4`; CI consultável nas [execuções da branch](https://github.com/newwed-org-plus/newwed2026/actions?query=branch%3Acodex%2Fwave-28-inbox-delivery-local).
 
-## Onda 13 validada localmente
+## Onda 29 — IA gratuita com retomada e conhecimento oficial
 
-- Referências e assets oficiais recebidos na conversa indicada pelo usuário, somente mensagens de hoje; nenhuma mensagem enviada.
-- Logo script marsala nos cabeçalhos em uso; marca FAMTOUR retorna à home, preservando menus locais.
-- Quatro banners oficiais da home em proporção 9:16, sem repetir as marcas em texto, com descrições e links preservados.
-- Botões institucionais usam o marsala do logo; nova foto de Cindy na seção inferior com enquadramento à direita.
-- Parceiros FAMTOUR em fundo claro, grade fixa 2/4 colunas, sem ticker/divisórias e com contraste para os logos brancos.
-- Vídeo principal fica pendente de material; usuário confirmou que será incluído depois. Imagem atual do hero preservada.
-- Tipos, lint, TypeScript, 76 unitários, build production e 43 cenários visuais/navegação aprovados localmente; nove baselines macOS atualizados. Seis baselines Linux revisados no CI `38826677583`, que aprovou os gates funcionais; nova validação/publicação em acompanhamento.
+- Branch `codex/wave-29-free-ai-knowledge`, base `4952a9b`; CP-29. Migration 0016 somente local; sem deploy ou contratação. PR 15 mesclada externamente na branch 28; ajustes complementares nesta branch, sem merge pelo agente.
+- 429/503 transitórios usam espera durável, cooldown por conta/modelo, pacing e até três alternativas gratuitas verificadas com teto zero. Cota global exige aguardar; flag remota desligada. D-049 substitui o handoff por limite de D-048 quando habilitada.
+- Respostas deduplicadas por pergunta, lease recuperável somente antes de efeito externo, claim/opt-out/versão preservados. Inbox mostra a espera. FAQs oficiais e resumos extrativos locais reduzem consumo.
+- Fonte comum de conteúdo entre páginas/IA cobre Feira Tendência, Destinos/FAMTOUR, Guia, Workshop e quatro edições publicadas. Preços anunciados não prometem reserva; capacidade publicada não é vaga restante. Fixtures e componentes antigos não montados excluídos.
+- Corrida entre pull de cache e callback corrigida: somente o envelope ao vivo autenticado pode promover a mesma mensagem já importada. Histórico isolado nunca responde.
+- Teste real autorizado: pergunta de produtos retomada uma vez, resposta READ; nova pergunta sobre Feira recebeu resposta DELIVERED. Conversa permanece AGENT. Prévia gratuita real aprovada sobre quatro projetos, formatos, combos e datas; dados privados somente em `.local-runtime`.
+- Gate aprovado: 126 unitários, 76 Workers (após correção final), 66 visuais, D1/recuperação, tipos/lint, build, auditoria zero e preflights. CI da implementação `756061f` aprovado. Ajustes finais: rotação persistida entre ciclos e indisponibilidade de endpoint, com prévia comercial real aprovada.
 
-## Onda 14 validada localmente
+## Onda 30 — Conhecimento público e memória de assunto
 
-- Integração UAZAPI por linha, estado/QR efêmero, lock operacional, configuração server-side e RBAC admin/gestor; migration `0007`.
-- Webhooks autenticados por instância, payload normalizado sem tokens, outbox/fan-out limitado e deduplicação.
-- Histórico inicial e mensagens ao vivo entram nas tabelas e na Inbox existentes, com identidade de linha/contato; respostas manuais usam a linha correta. Recibos antecipados e fora de ordem preservam leitura.
-- Mensagens do celular pausam o agente; importação de histórico não dispara respostas. Conversas novas entram humanas.
-- Tipos Cloudflare, lint, TypeScript, 83 unitários, 21 Workers, migrations repetíveis, 18 invariantes D1 legadas e build aprovados. Suíte completa de 47 cenários visuais/navegação aprovada; inspeção visual mobile/desktop com QR sintético aprovada.
-- Guia operacional: `docs/UAZAPI.md`. Sem credenciais reais, pareamento, envio externo, deploy ou alterações de dependências.
-- OpenRouter/contexto por agente implementados na onda 15; contatos de demonstração/sincronização permanecem fora desta fatia.
+- Branch `codex/wave-30-product-memory`, base `4db2426`; CP-30. Migration 0017 somente local, aditiva; sem deploy, merge ou contratação.
+- Usuário determinou usar somente preços publicados. Quatro edições FAMTOUR com valores à vista/12 parcelas; Feira, Guia e Workshop sob consulta. D-050. Conteúdo comum inclui formulários e galerias anteriores, sem ofertas legadas.
+- Memória D1 guarda apenas projetos/destinos e cursor/revisão por conversa; IN define assunto, OUT não. Correção, mudança e esquecimento são preservados. Reconstrução limitada e retomável adia a resposta até concluir, sem inventar seleção.
+- FAQ comercial e prévia utilizam fonte direta sem geração. Prompt retira preços privados; guard bloqueia valores/parcelas/juros/desconto/datas/estoque/promessas sem fonte. Resposta automática registra versão e hash da base.
+- Gestão pode consultar preços, formatos e pendências de informação em Atendentes → Ver conhecimento dos produtos. API somente leitura, sem dados de clientes. Prévia gratuita real comparou corretamente formatos de Guia e Workshop; sem novo WhatsApp.
+- Verificações locais: 161 unitários, 83 Workers, 69 visuais, D1/recuperação, tipos/lint/build, auditoria zero e preflights. CP-30. Stack local/túnel preservados, automação continua restrita ao contato autorizado.
 
-## Onda 15 validada localmente
+## Onda 31 — Asaas Sandbox e webhook local
 
-- Atendentes com nome/contexto/modelo, vínculo opcional e exclusivo por linha UAZAPI, versão otimista e RBAC admin/gestor; migration `0008` aplicada/repetida localmente.
-- Rascunhos e teste sem WhatsApp disponíveis antes da UAZAPI. Catálogo atual filtra modelos gratuitos de texto compatíveis com JSON; cada geração confirma preço zero e impõe teto zero/sem fallback pago.
-- Ingestão e Inbox existentes reaproveitadas: novos contatos podem entrar no agente; histórico/celular/conversas humanas preservam pausa. Contexto antigo, resumo e 12 mensagens recentes acompanham a resposta. Desativação/desvínculo e versão invalidam geração pendente.
-- Chave dedicada OpenRouter criada no Chrome com autorização explícita do usuário: teto US$ 0, expiração 2026-11-18, somente `.dev.vars` ignorado/0600. Não há chave no banco nem nos assets client.
-- Teste real fictício aprovado com `liquid/lfm-2.5-2.6b:free`, em português, sem envio WhatsApp. Tentativa anterior de roteador genérico encontrou saída inválida/limite; falhas tratadas sem envio.
-- Tipos, lint, TypeScript, 90 unitários, 28 Workers, 18 invariantes D1 anteriores e build aprovados. Regressão completa de 51 cenários visuais aprovada. Após ajuste do runtime/redirecionamento, os 8 cenários afetados foram repetidos e aprovados.
-- Teste real pelo painel confirmou os quatro projetos do contexto e continuidade com o atendente. Rascunho local Atendimento New Wed salvo/pausado, sem linha. Clientes OpenRouter/UAZAPI usam redirect manual e recusam 3xx, compatível com o runtime alvo.
-- Guia: `docs/OPENROUTER.md`. Nenhum deploy, push, migração remota ou WhatsApp real nesta onda.
+- Branch `codex/wave-31-asaas-local`, base `51102d0`; CP-31. Sem migration, deploy, merge ou cobrança.
+- Sandbox vinculado e chave exclusiva autorizados, validade até 24/11/2026, saque por API desligado. Credenciais/token somente em arquivo privado 0600; produção preservada.
+- API cadastral aprovada; webhook exclusivo ativo, autenticado e sequencial. Túnel expõe somente os webhooks permitidos; painel bloqueado. Cadastro incerto é conciliado e encerramento pausa antes de fechar o túnel; não reativar fila interrompida.
+- Validação pública: sem token 401, token válido/payload inválido 422, painel 404, receptor UAZAPI 200. Nenhum cliente, cobrança ou evento financeiro fictício criado. Checkout, confirmação e e-mail desligados.
+- Gate aprovado: 180 unitários finais, 83 Workers, 69 visuais, D1/recuperação, tipos/lint/build, auditoria zero e preflights. Evidências no CP-31; testes financeiros externos pendentes.
 
-## Riscos e bloqueios atuais
+## Onda 32 — Checkout e confirmação no Sandbox local
 
-- UAZAPI: callback publicado em 2026-10-20; web version `e224bc76`, consumidor exclusivo `6043eaec`. Migrations 0007/0008 aplicadas. GET 200, token inválido 401, evento autenticado e repetido geraram uma única mensagem humana na Inbox; limpeza confirmada. Webhook do provider continua corretamente configurado/desativado e instância desconectada. Pode-se pedir a ativação; conexão real e respostas automáticas continuam fora desta validação.
-- Turnstile, Meta, Asaas, OpenAI e e-mail ainda dependem de configuração externa. OpenRouter foi validado apenas localmente com mensagem fictícia.
-- O painel permanece autenticado; inscrições falham de forma segura sem Turnstile.
-- Recebimento UAZAPI opera em fila/consumidor exclusivos, sem credenciais externas e sem respostas automáticas. O consumidor comercial permanece desativado.
-- O preflight comercial completo permanece bloqueado sem R2 e os demais requisitos de lançamento.
-- Nesta janela, o usuário autorizou conversar individualmente com Ximenes sobre o webhook. Nenhum envio operacional pela integração, cobrança ou e-mail foi autorizado.
-- Auditoria atual aponta 9 alertas altos nas dependências existentes (incluindo Vite/launch-editor de desenvolvimento); lockfile preservado e gate de auditoria continua integral.
+- Branch `codex/wave-32-sandbox-checkout`, base `38934d0`; CP-32. Autorização D-052, sem migration/deploy. Checkout e confirmação locais habilitados somente para o contato autorizado; e-mail e backlog continuam retidos.
+- Edição/lote sintéticos: Pix R$ 1.200,00, capacidade 8. UI qualifica/autoriza; consumidor cria cobrança e envia pela conversa/linha existentes. Documento sintético explícito somente no Sandbox, notificações nativas Asaas desligadas.
+- API e consumidor bloqueiam outro contato antes de cobrar. Webhook aceita opcionais nulos sem relaxar ID/status/valor; rejeição real 422 corrigida e retomada natural validada com HTTP 200.
+- Ciclo validado: uma cobrança PAID, lead PAGO, link e confirmação READ, uma notificação, uma transição e uma vaga vendida. Replay do evento original e mesma chave de criação não duplicam efeitos. Painel mostra estados separados com atualização sem reenvio.
+- Gate aprovado: 185 unitários, 85 Workers, 72 visuais, D1/recuperação, tipos/lint/build, auditoria zero e preflights. CP-32. Cartão/parcelas/estorno externos e produção fora deste aceite.
 
-## Onda 16 publicada
+## Onda 33 — Produção publicada; aceite externo parcial
 
-- Implementação `ae1ad1b`, teste adicional `3036afe`; PR #5. Perfil Wrangler `newwed-production` autorizado e vinculado apenas ao checkout.
-- Secrets UAZAPI somente no Worker web; consumidor sem secrets, sem OpenRouter/envios/cobranças/e-mail e sem consumidor da fila comercial.
-- Gates: tipos/lint/TypeScript, 91 unitários, 30 Workers, invariantes D1, 52 visuais, build production, dry-run e varredura sem credenciais nos assets/Git. Auditoria herdada permanece com 9 alertas altos.
-- Smoke remoto: GET 200, duas rejeições 401, POST 200/queued=1 e repetição 200/queued=0; lote e mensagem processados uma vez, conversa HUMAN, zero saída. Fixture removida; quatro contagens de limpeza iguais a zero.
-- Ximenes confirmou ausência de ajuste anterior e recebeu retorno breve de conclusão; a ativação ainda não foi solicitada.
+- Branch codex/wave-33-production-launch, base 04137df. D-053 e CP-33.
+- Backup cifrado de schema/dados com recuperação da chave pelo Chaveiro verificada; 358 conversas/14.908 mensagens preservadas após migrations 0009–0018. 76 operações antigas HELD.
+- Dados fiscais do checkout protegidos; gate aprovado: 189 unitários, 89 Workers, 72 visuais, D1/recuperação, tipos/lint/build e auditoria zero.
+- Revalidação local: Marina Costa, Famtour Alagoas/R$ 7.697,00, uma cobrança Pix Sandbox PAID, lead PAGO e link/confirmação entregues. Nenhuma cobrança real.
+- Web, receptor e consumidor publicados; recebimento, envio manual e IA gratuitos habilitados. Callback atendimento em produção e conectado; histórico remoto pausado e operações antigas HELD.
+- Consumo real D1/filas coletado pelo cron; falha de transporte resolvida com redirect manual. Plano gratuito/e-mail desligado por decisão do usuário. Checkout/confirmação aguardam SMS Asaas.
+- Local revalidado: Pix e cartão em 12 parcelas com nomes comuns, cobrança/notificação/confirmação únicas. Login autenticado remoto e teste de token real do formulário dependem do usuário.
+
+## Bloqueios externos
+
+- Asaas produção: titular sem acesso ao SMS necessário para criar a chave; não há chave de produção nem checkout remoto habilitado. Cartão/parcelas/estorno externos e domínio de e-mail pendentes.
+- Sem linha de teste separada configurada em homologação; nunca usar a linha ativa para fixtures.
+- Vídeo final não fornecido; imagem atual preservada.
+- Piloto real e observação por 24h ainda pendentes.

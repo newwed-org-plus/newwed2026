@@ -1,3 +1,5 @@
+import {siteKnowledge} from '../site-knowledge';
+import {productFocusFromHistory,type ProductFocus} from '../product-memory';
 import { agentResultSchema,type AgentResult } from "@/features/conversations/model";
 import type { RuntimeSecrets } from "@/server/secrets";
 
@@ -25,7 +27,7 @@ async function createResponse(env: OpenAIEnv,body: Record<string,unknown>,fetche
   return response.json() as Promise<ResponsePayload>;
 }
 
-export async function loadAgentContext(env: Pick<Env,"DB">,input: { leadId?:string|null;conversationId:string }) {
+export async function loadAgentContext(env: Pick<Env,"DB">,input: { leadId?:string|null;conversationId:string;productMemory?:ProductFocus }) {
   const [catalog,lead,conversation,messages] = await Promise.all([
     env.DB.prepare(`SELECT e.name,e.destination,e.starts_at,e.ends_at,e.capacity,a.reserved,a.sold,p.name AS price_name,p.amount_cents,p.installment_count
       FROM editions e JOIN availability a ON a.edition_id=e.id LEFT JOIN price_batches p ON p.edition_id=e.id AND p.active=1
@@ -36,11 +38,14 @@ export async function loadAgentContext(env: Pick<Env,"DB">,input: { leadId?:stri
     env.DB.prepare("SELECT direction,body,created_at FROM messages WHERE conversation_id=? AND body IS NOT NULL ORDER BY created_at DESC LIMIT 12")
       .bind(input.conversationId).all<{ direction:string;body:string;created_at:string }>(),
   ]);
+  const recentMessages=messages.results.slice().reverse();
   return {
-    catalog:catalog.results,
+    siteKnowledge,
+    productMemory:input.productMemory??productFocusFromHistory(recentMessages),
+    catalog:catalog.results.filter(row=>!/(?:validacao|validação|demonstração|demonstracao)/i.test(String(row.name??''))),
     lead,
     summary:conversation?.summary ?? null,
-    recentMessages:messages.results.reverse(),
+    recentMessages,
   };
 }
 

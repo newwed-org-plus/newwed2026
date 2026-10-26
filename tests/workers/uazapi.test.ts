@@ -43,7 +43,7 @@ describe("UAZAPI no runtime Workers",()=>{
   it("isola a fila de recebimento, processa até a Inbox e recupera somente eventos UAZAPI",async()=>{
     const dedicatedSend=vi.fn<(event:unknown)=>Promise<void>>().mockResolvedValue(undefined);
     const commercialSend=vi.fn<(event:unknown)=>Promise<void>>().mockResolvedValue(undefined);
-    const inboundEnv={...runtime,UAZAPI_EVENTS_QUEUE:{send:dedicatedSend} as unknown as Queue,EVENTS_QUEUE:{send:commercialSend} as unknown as Queue};
+    const inboundEnv={...runtime,ENABLE_AGENT:"false" as const,UAZAPI_EVENTS_QUEUE:{send:dedicatedSend} as unknown as Queue,EVENTS_QUEUE:{send:commercialSend} as unknown as Queue};
     await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"messages",message:message("INBOUND-ONLY")},"request-inbound-only");
     expect(dedicatedSend).toHaveBeenCalledTimes(1);expect(commercialSend).not.toHaveBeenCalled();
     const context=createExecutionContext();
@@ -64,7 +64,7 @@ describe("UAZAPI no runtime Workers",()=>{
     await env.DB.prepare("UPDATE outbox_events SET published_at=NULL WHERE type='uazapi.incoming'").run();
     dedicatedSend.mockClear();
     await receiver.scheduled({} as ScheduledController,inboundEnv);
-    expect(dedicatedSend).toHaveBeenCalledTimes(1);expect(commercialSend).not.toHaveBeenCalled();
+    expect(dedicatedSend).not.toHaveBeenCalled();expect(commercialSend).not.toHaveBeenCalled();
     expect(await env.DB.prepare("SELECT published_at FROM outbox_events WHERE id='commercial'").first()).toMatchObject({published_at:null});
     await publishOutbox(inboundEnv,{id:"commercial",type:"checkout.send"});
     expect(commercialSend).toHaveBeenCalledTimes(1);
@@ -97,7 +97,7 @@ describe("UAZAPI no runtime Workers",()=>{
     const fetcher = vi.fn(async (url:RequestInfo|URL,init?:RequestInit) => {
       const path = new URL(String(url)).pathname;paths.push(path);
       if (path === "/webhook") {
-        expect(JSON.parse(String(init?.body))).toMatchObject({events:["connection","messages","messages_update","history"],excludeMessages:["wasSentByApi","isGroupYes"]});
+        expect(JSON.parse(String(init?.body))).toMatchObject({events:["connection","messages","messages_update","history"],excludeMessages:["isGroupYes"]});
         return Response.json([]);
       }
       if (path === "/instance/connect") {state="connecting";return Response.json({response:"Connecting"});}
@@ -117,6 +117,27 @@ describe("UAZAPI no runtime Workers",()=>{
     expect(await operateWhatsAppLine(runtime,"vendas","disconnect",actorId,fetcher)).toMatchObject({state:"disconnected",qrCode:null});
     expect((await env.DB.prepare("SELECT count(*) AS total FROM messages").first<{total:number}>())?.total).toBe(1);
   });
+  it("gera um QR novo encerrando apenas uma tentativa pendente",async()=>{
+    const actorId=await admin();
+    let state="connecting";
+    const paths:string[]=[];
+    const fetcher=vi.fn(async(url:RequestInfo|URL)=>{
+      const path=new URL(String(url)).pathname;paths.push(path);
+      if(path==="/instance/disconnect"){state="disconnected";return Response.json({});}
+      if(path==="/webhook")return Response.json([]);
+      if(path==="/instance/connect"){state="connecting";return Response.json({response:"Connecting"});}
+      return Response.json({instance:{status:state,qrcode:state==="connecting"?"data:image/png;base64,bmV3LXFy":"",token:"never-return"},status:{jid:null}});
+    });
+    const result=await operateWhatsAppLine(runtime,"vendas","restart",actorId,fetcher);
+    expect(paths).toEqual(["/instance/status","/instance/disconnect","/instance/status","/webhook","/instance/connect","/instance/status"]);
+    expect(result).toMatchObject({state:"connecting",qrCode:"data:image/png;base64,bmV3LXFy"});
+    expect(JSON.stringify(result)).not.toContain("never-return");
+
+    state="connected";
+    paths.length=0;
+    await expect(operateWhatsAppLine(runtime,"vendas","restart",actorId,fetcher)).rejects.toMatchObject({code:"WHATSAPP_QR_RESTART_NOT_AVAILABLE"});
+    expect(paths).toEqual(["/instance/status"]);
+  });
   it("exclui operações simultâneas e libera o lock depois de falha sem vazar a resposta",async()=>{
     const actorId = await admin();
     await env.DB.prepare("UPDATE whatsapp_instances SET operation_token='busy',operation_started_at=? WHERE id='vendas'").bind(new Date().toISOString()).run();
@@ -127,6 +148,18 @@ describe("UAZAPI no runtime Workers",()=>{
     await expect(operateWhatsAppLine(runtime,"vendas","refresh",actorId,fetcher)).rejects.toMatchObject({code:"UAZAPI_HTTP_401"});
     const stored = await env.DB.prepare("SELECT operation_token,last_error FROM whatsapp_instances WHERE id='vendas'").first<{operation_token:string|null;last_error:string}>();
     expect(stored?.operation_token).toBeNull();expect(stored?.last_error).not.toContain("provider-secret");
+  });
+  it("persiste conexão confirmada por JID textual usando somente consulta de estado",async()=>{
+    const actorId=await admin();
+    const fetcher=vi.fn(async(url:RequestInfo|URL,init?:RequestInit)=>{
+      expect(new URL(String(url)).pathname).toBe("/instance/status");expect(init?.method).toBe("GET");
+      return Response.json({instance:{status:"connected",profileName:"VALIDACAO",token:"synthetic-private-token"},status:{connected:true,loggedIn:true,jid:"5581999999999:42@s.whatsapp.net"}});
+    });
+    const result=await operateWhatsAppLine(runtime,"vendas","refresh",actorId,fetcher);
+    expect(result).toMatchObject({state:"connected",phone:"5581999999999",qrCode:null});
+    expect(JSON.stringify(result)).not.toContain("synthetic-private-token");
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(await env.DB.prepare("SELECT state,phone,last_error,operation_token FROM whatsapp_instances WHERE id='vendas'").first()).toEqual({state:"connected",phone:"5581999999999",last_error:null,operation_token:null});
   });
   it("autentica webhooks por linha, remove credenciais, deduplica e separa o mesmo contato entre números",async()=>{
     expect((await webhook("vendas",{token:instances[1].token,EventType:"messages",message:message()})).status).toBe(401);
@@ -197,4 +230,59 @@ describe("UAZAPI no runtime Workers",()=>{
     expect(await acceptUazapiWebhook({...runtime,EVENTS_QUEUE:offlineQueue},"vendas",{token:instances[0].token,EventType:"messages",message:message("QUEUE-RETRY")},"req-uazapi-retry")).toMatchObject({received:true,queued:0});
     expect((await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE type='uazapi.batch' AND published_at IS NULL AND attempts=1").first<{total:number}>())?.total).toBe(1);
   });
+  it("processa histórico em lotes D1 sem enfileirar uma mensagem por item",async()=>{
+    const queueSend=vi.fn(async()=>{});
+    const inboundEnv={...runtime,UAZAPI_EVENTS_QUEUE:{send:queueSend} as unknown as Queue,EVENTS_QUEUE:{send:vi.fn(async()=>{})} as unknown as Queue};
+    const response=await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"history",event:"messages",messages:Array.from({length:25},(_,i)=>message(`DIRECT-${i}`))},"req-history-direct");
+    expect(response.queued).toBe(25);
+    const batch=await env.DB.prepare("SELECT external_id FROM webhook_events WHERE event_type='uazapi.batch'").first<{external_id:string}>();
+    const processHistory=async(externalId:string)=>{
+      const result=await processIncomingWhatsApp({...inboundEnv,OPENROUTER_API_KEY:undefined},externalId,{},"uazapi");
+      expect(result.processed).toBe(true);
+    };
+    await processUazapiBatch(inboundEnv,batch!.external_id,0,{processHistory});
+    await processUazapiBatch(inboundEnv,batch!.external_id,10,{processHistory});
+    await processUazapiBatch(inboundEnv,batch!.external_id,20,{processHistory});
+    expect(queueSend).toHaveBeenCalledTimes(3); // One parent plus two continuations, not 25 leaf messages.
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM messages").first<{total:number}>())?.total).toBe(25);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM conversations WHERE mode='HUMAN'").first<{total:number}>())?.total).toBe(1);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM webhook_events WHERE event_type='uazapi.incoming' AND processed_at IS NULL").first<{total:number}>())?.total).toBe(0);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE type='uazapi.incoming'").first<{total:number}>())?.total).toBe(0);
+  });
+  it("recupera o histórico no cron quando a Queue recusa escritas",async()=>{
+    const queueSend=vi.fn().mockRejectedValue(new Error("Synthetic daily write limit"));
+    const inboundEnv={...runtime,UAZAPI_EVENTS_QUEUE:{send:queueSend} as unknown as Queue,EVENTS_QUEUE:{send:queueSend} as unknown as Queue};
+    const result=await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"history",event:"messages",messages:Array.from({length:3},(_,i)=>message(`RECOVER-${i}`))},"req-history-recovery");
+    expect(result).toMatchObject({received:true,queued:0});
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(queueSend).toHaveBeenCalledTimes(1);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM messages").first<{total:number}>())?.total).toBe(3);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM conversations WHERE mode='HUMAN'").first<{total:number}>())?.total).toBe(1);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM webhook_events WHERE event_type='uazapi.incoming' AND processed_at IS NULL").first<{total:number}>())?.total).toBe(0);
+    expect((await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE type='uazapi.batch' AND published_at IS NULL").first<{total:number}>())?.total).toBe(0);
+  });
+  it("respeita orçamento compartilhado de histórico e retoma do cursor persistido",async()=>{
+    const queueSend=vi.fn(async()=>{});
+    const inboundEnv={...runtime,HISTORY_CRON_MESSAGE_BUDGET:"12",UAZAPI_EVENTS_QUEUE:{send:queueSend} as unknown as Queue};
+    await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"history",event:"messages",messages:Array.from({length:25},(_,i)=>message(`BUDGET-${i}`))},"req-history-budget");
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM messages").first()).toEqual({total:12});
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM messages").first()).toEqual({total:24});
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM messages").first()).toEqual({total:25});
+    expect(queueSend).toHaveBeenCalledTimes(1);
+  });
+  it("não importa histórico quando outra execução possui o lease da linha",async()=>{
+    const queueSend=vi.fn(async()=>{});
+    const inboundEnv={...runtime,UAZAPI_EVENTS_QUEUE:{send:queueSend} as unknown as Queue};
+    await acceptUazapiWebhook(inboundEnv,"vendas",{token:instances[0].token,EventType:"history",event:"messages",messages:[message("LOCKED-HISTORY")]},"req-history-lease");
+    await env.DB.prepare("INSERT INTO operation_leases VALUES ('history:vendas','other',?)").bind(new Date(Date.now()+60000).toISOString()).run();
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM messages").first()).toEqual({total:0});
+    await env.DB.prepare("DELETE FROM operation_leases").run();
+    await receiver.scheduled({} as ScheduledController,inboundEnv);
+    expect(await env.DB.prepare("SELECT count(*) AS total FROM messages").first()).toEqual({total:1});
+  });
+
 });

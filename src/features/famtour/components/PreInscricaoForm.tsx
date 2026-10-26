@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { getTurnstileToken } from "@/features/famtour/turnstile";
+import { getTurnstileToken,resetTurnstile,removeTurnstile } from "@/features/famtour/turnstile";
 import { OptionCard } from "./OptionCard";
 import {
   preInscricaoSchema,
@@ -37,7 +37,7 @@ function formatTelefone(value: string): string {
 
 function normalizeTelefone(value: string): string {
   const d = value.replace(/\D/g, "");
-  return d.startsWith("55") ? d : `55${d}`;
+  return `55${d}`;
 }
 
 const labelStyle: React.CSSProperties = {
@@ -109,6 +109,8 @@ export function PreInscricaoForm({
     famtours.find((f) => f.slug === preSelectedSlug)?.id ??
     (famtours.length === 1 ? famtours[0].id : "");
 
+  const turnstileContainer=useRef<HTMLDivElement>(null);
+  useEffect(()=>{const container=turnstileContainer.current;return()=>removeTurnstile(container);},[]);
   const [restored, setRestored] = useState(false);
   const [showResumeBanner, setShowResumeBanner] = useState(false);
   const [pending, setPending] = useState(false);
@@ -223,7 +225,7 @@ export function PreInscricaoForm({
         },
         body: JSON.stringify({
           ...normalizedData,
-          editionSlug: resolvedFamtourId,
+          editionSlug: famtours.find(f=>f.id===resolvedFamtourId)?.slug??resolvedFamtourId,
           consent: { version: "2026-09-11", accepted: normalizedData.lgpd },
           landingUrl: window.location.href,
           referrer: document.referrer || undefined,
@@ -232,7 +234,7 @@ export function PreInscricaoForm({
               .map((key) => [key, new URLSearchParams(window.location.search).get(key)])
               .filter((entry): entry is [string, string] => Boolean(entry[1])),
           ),
-          turnstileToken: await getTurnstileToken(),
+          turnstileToken: await getTurnstileToken(turnstileContainer.current),
         }),
       });
 
@@ -258,6 +260,7 @@ export function PreInscricaoForm({
         { duration: 8000 },
       );
     } finally {
+      resetTurnstile(turnstileContainer.current);
       setPending(false);
     }
   };
@@ -790,6 +793,7 @@ export function PreInscricaoForm({
           gap: "0.75rem",
         }}
       >
+        <div ref={turnstileContainer} className="empty:hidden" aria-label="Verificação de segurança" />
         <button
           type="submit"
           disabled={submitting}

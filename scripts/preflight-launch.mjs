@@ -1,69 +1,56 @@
 #!/usr/bin/env node
-
 import { readFileSync } from "node:fs";
-
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 const target = process.argv[2];
-if (!new Set(["staging", "production"]).has(target)) {
-  console.error("Uso: node scripts/preflight-launch.mjs <staging|production>");
+if (!["staging", "production"].includes(target)) {
+  console.error("Uso: node scripts/preflight-launch.mjs <staging|production> [--config-dir=path]");
   process.exit(2);
 }
-
-const configs = ["wrangler.jsonc", "wrangler.events.jsonc"].map((file) => ({
-  file,
-  value: JSON.parse(readFileSync(new URL(`../${file}`, import.meta.url), "utf8")),
-}));
+const directory = process.argv.find(arg => arg.startsWith("--config-dir="))?.slice(13) ?? fileURLToPath(new URL("..", import.meta.url));
+const load = file => JSON.parse(readFileSync(resolve(directory, file), "utf8"));
+const selected = config => config.env?.[target] ?? (config.vars?.ENVIRONMENT === target ? config : undefined);
+const app = selected(load("wrangler.jsonc"));
+const events = selected(load("wrangler.events.jsonc"));
+const receiver = selected(load("wrangler.uazapi.jsonc"));
 const errors = [];
-const placeholder = "00000000-0000-0000-0000-000000000000";
-
-for (const { file, value } of configs) {
-  const selected = value.env?.[target];
-  if (!selected) {
-    errors.push(`${file}: ambiente ${target} ausente`);
-    continue;
-  }
-
-  if (selected.vars?.ENVIRONMENT !== target) {
-    errors.push(`${file}: ENVIRONMENT deve ser ${target}`);
-  }
-  if (selected.vars?.ALLOW_LOCAL_ACCESS === "true") {
-    errors.push(`${file}: ALLOW_LOCAL_ACCESS não pode estar ativo`);
-  }
-
-  for (const database of selected.d1_databases ?? []) {
-    if (!database.database_id || database.database_id === placeholder) {
-      errors.push(`${file}: D1 ${database.database_name} ainda usa ID marcador`);
-    }
-  }
-  if (!(selected.queues?.producers?.length > 0)) {
-    errors.push(`${file}: producer de Queue ausente`);
-  }
+const enabled = name => app?.vars?.[name] === "true";
+const commercial = ["ENABLE_MANUAL_SEND","ENABLE_AGENT","ENABLE_CHECKOUT","ENABLE_CONFIRMATION","ENABLE_EMAIL"].some(enabled);
+const configs = [["app",app],["receiver",receiver],...(commercial ? [["events",events]] : [])];
+for (const [name, config] of configs) {
+  if (!config) { errors.push(`${name}: ambiente ${target} ausente`); continue; }
+  if (config.vars?.ENVIRONMENT !== target) errors.push(`${name}: ENVIRONMENT divergente`);
+  if (config.vars?.ALLOW_LOCAL_ACCESS === "true") errors.push(`${name}: bypass local ativo`);
+  const database = config.d1_databases?.find(db => db.binding === "DB");
+  if (!database?.database_id || /^0{8}-/.test(database.database_id)) errors.push(`${name}: D1 usa ID marcador`);
+  if (database?.database_name !== `new-wed-platform-${target}`) errors.push(`${name}: nome do D1 incompatível com ambiente`);
+  if (target === "staging" && database?.database_id === load("wrangler.jsonc").env?.production?.d1_databases?.[0]?.database_id) errors.push(`${name}: D1 production compartilhado`);
+  if (database?.database_id !== app?.d1_databases?.[0]?.database_id) errors.push(`${name}: D1 diverge do app`);
+  if (!config.queues?.producers?.length) errors.push(`${name}: producer ausente`);
+  if (name === "receiver" && config.queues?.consumers?.[0]?.queue !== `new-wed-uazapi-${target}`) errors.push("receiver: fila incompatível com ambiente");
+  if (name !== "app" && !config.queues?.consumers?.[0]?.dead_letter_queue) errors.push(`${name}: DLQ ausente`);
 }
-
-const app = configs.find(({ file }) => file === "wrangler.jsonc")?.value.env[target];
-const events = configs.find(({ file }) => file === "wrangler.events.jsonc")?.value.env[target];
-if (!(app?.r2_buckets?.length > 0)) errors.push("wrangler.jsonc: binding R2 MEDIA ausente");
-if (!(events?.queues?.consumers?.[0]?.dead_letter_queue)) {
-  errors.push("wrangler.events.jsonc: DLQ do consumidor ausente");
+if (!app?.durable_objects?.bindings?.some(binding => binding.name === "ADMIN_PASSWORD_VERIFIER")) errors.push("app: login próprio sem Durable Object");
+if (!app?.durable_objects?.bindings?.some(binding=>binding.name==="ADMIN_IP_LIMITER")) errors.push("app: proteção de login por IP ausente");
+if(commercial&&(!Number(events?.vars?.D1_READ_BUDGET)||!Number(events?.vars?.D1_WRITE_BUDGET)||!Number(events?.vars?.QUEUE_BUDGET))) errors.push("Monitoramento: definir orçamentos D1 conforme plano aprovado");
+for (const name of ["ENABLE_MANUAL_SEND","ENABLE_AGENT","ENABLE_CHECKOUT","ENABLE_CONFIRMATION","ENABLE_EMAIL"]) {
+  if (commercial && app?.vars?.[name] !== events?.vars?.[name]) errors.push(`${name}: controles web/consumer divergentes`);
 }
-if (!(events?.send_email?.[0]?.allowed_sender_addresses?.length > 0)) {
-  errors.push("wrangler.events.jsonc: remetente EMAIL não configurado");
+if (enabled("ENABLE_AGENT") && receiver?.vars?.ENABLE_AGENT !== app.vars.ENABLE_AGENT) errors.push("ENABLE_AGENT: receptor divergente");
+if(enabled("ENABLE_EMAIL")&&receiver?.vars?.ENABLE_EMAIL!==app.vars.ENABLE_EMAIL) errors.push("ENABLE_EMAIL: receptor divergente");
+if (enabled("ENABLE_PUBLIC_LEADS") && (!app.vars.TURNSTILE_SITE_KEY || !app.vars.TURNSTILE_HOSTNAMES)) errors.push("Turnstile: site key ou hostnames ausentes");
+if (enabled("ENABLE_CHECKOUT")) {
+  if(app.vars.CHECKOUT_CHANNEL!=="uazapi" || events?.vars?.CHECKOUT_CHANNEL!=="uazapi") errors.push("Checkout novo deve usar UAZAPI");
+  const origin = target === "production" ? "https://api.asaas.com/v3" : "https://api-sandbox.asaas.com/v3";
+  if (app.vars.ASAAS_API_URL !== origin || events?.vars?.ASAAS_API_URL !== origin) errors.push("Asaas: origem incompatível com ambiente");
 }
-if (!(events?.send_email?.[0]?.allowed_destination_addresses?.length > 0)) {
-  errors.push("wrangler.events.jsonc: destinatários EMAIL não configurados");
+if (enabled("ENABLE_EMAIL")) {
+  const binding = events?.send_email?.find(binding => binding.name === "EMAIL");
+  if (!binding?.allowed_sender_addresses?.length || !binding.allowed_destination_addresses?.length) errors.push("EMAIL: remetentes/destinatários restritos ausentes");
 }
-const expectedAsaas = target === "production"
-  ? "https://api.asaas.com/v3"
-  : "https://api-sandbox.asaas.com/v3";
-if (app?.vars?.ASAAS_API_URL !== expectedAsaas || events?.vars?.ASAAS_API_URL !== expectedAsaas) {
-  errors.push(`ASAAS_API_URL deve ser ${expectedAsaas} nos dois Workers`);
-}
-
-if (errors.length > 0) {
-  console.error(`Preflight ${target}: BLOQUEADO`);
-  for (const error of errors) console.error(`- ${error}`);
-  console.error("Segredos, permissões, webhooks e aprovações devem ser conferidos pelo runbook; valores nunca são impressos.");
+if (errors.length) {
+  console.error(`Preflight ${target}: BLOQUEADO\n${errors.map(error => `- ${error}`).join("\n")}`);
   process.exit(1);
 }
-
-console.log(`Preflight ${target}: configuração estática aprovada.`);
-console.log("Próximo gate: conferir recursos, secrets, Access, webhooks e autorização conforme docs/operations/LAUNCH_CHECKLIST.md.");
+console.log(`Preflight ${target}: configuração estática aprovada (${commercial ? "comercial" : "somente recebimento"}).`);
+console.log("Secrets, recursos remotos, autorizações e backlog devem ser conferidos no runbook. R2 e Access são opcionais.");

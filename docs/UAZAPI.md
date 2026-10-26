@@ -19,7 +19,9 @@ Exemplo **estrutural**, com valores fictícios que devem ser substituídos somen
 
 ## Conexão
 
-No painel, abra **WhatsApp**, selecione a linha e clique em **Gerar QR Code**. O backend consulta `/instance/status`, configura o webhook da linha e chama `/instance/connect` sem `phone` apenas se não houver conexão ou tentativa em andamento. O QR vem de consultas a `/instance/status`, atualizadas a cada cinco segundos enquanto a tela está visível. A UI não reinicia tentativas automaticamente. Se uma chamada falhar, o QR anterior é retirado e o operador pode atualizar o estado.
+Ao abrir ou selecionar uma linha, o painel faz uma consulta inicial a `/instance/status`. Enquanto a resposta for `connecting`, consulta novamente a cada cinco segundos se a aba estiver visível; o polling automático para ao conectar, desconectar ou pausar a sessão. **Atualizar estado** continua disponível para consulta manual.
+
+Para conectar, clique em **Gerar QR Code**. O backend configura o webhook da linha e chama `/instance/connect` sem `phone` apenas se não houver conexão ou tentativa em andamento. Se o WhatsApp rejeitar o QR, clique em **Gerar novo QR Code**: essa ação só está disponível durante `connecting`, encerra a tentativa pendente, confirma `disconnected` e inicia outro fluxo QR. Se o encerramento não for confirmado, o painel pede para atualizar o estado antes de tentar novamente. Se uma chamada falhar, o QR anterior é retirado e o operador pode atualizar o estado.
 
 Se a instância já estiver conectada ao cadastrar sua credencial, use **Ativar recebimento** para configurar ou atualizar o callback sem desconectar nem iniciar um novo pareamento. A mesma ação pode ser usada após uma mudança do endereço público.
 
@@ -33,10 +35,14 @@ Somente a imagem PNG do QR e os campos necessários chegam ao navegador. QR, pai
 - `messages` registra recebidos e mensagens enviadas pelo celular. Ecos da API e grupos são filtrados na configuração e também na aplicação. Uma mensagem nova enviada pelo celular pausa o agente da conversa.
 - `history` com `event=messages` importa os lotes disponíveis após o pareamento, sem disparar respostas. Preserva o timestamp e não regride a data da última mensagem. A disponibilidade e extensão desse histórico dependem do WhatsApp/UAZAPI; isso não promete a importação completa da agenda ou do histórico antigo.
 - Cada conversa UAZAPI tem identidade de linha + telefone. IDs de mensagem incluem a linha; o mesmo contato em dois números não compartilha uma conversa. O vínculo com um lead existente é feito pelo telefone normalizado, sem criar leads comerciais artificialmente.
-- Ingressão salva um lote normalizado e uma outbox atomicamente; o consumidor divide o trabalho em grupos de dez antes de publicar eventos individuais. O cron existente recupera publicações pendentes. Repetições são deduplicadas no webhook e em `messages`.
+- Ingestão salva um lote normalizado e uma outbox atomicamente. O consumidor persiste mensagens históricas em grupos de dez, sem enfileirar um evento por mensagem; mensagens novas continuam no fluxo assíncrono normal. O cron recupera lotes e mensagens de histórico já persistidos quando a Queue recusa gravações. Repetições são deduplicadas no webhook e em `messages`.
 - Respostas da Inbox continuam exigindo claim, dono da conversa, ausência de opt-out e ausência de resposta automática em andamento. O consumidor escolhe UAZAPI pela linha da conversa; conversas Meta continuam usando a integração anterior. O envio UAZAPI usa `/send/text` sem retry automático de um envio incerto.
 - `messages_update` atualiza entrega/leitura sem regredir `READ`. Recibos recebidos antes da gravação da mensagem são reaplicados quando o envio ou eco é persistido.
 - Grupos, canais, chats identificados somente por LID, download de anexos, sincronização completa de contatos e checkout por UAZAPI ficam fora desta fatia. Anexos sem texto aparecem como marcadores na Inbox; legendas disponíveis são preservadas como texto. O checkout anterior continua usando Meta.
+
+## Ambientes local e publicado
+
+O painel `localhost:4173` usa o D1 local. `UAZAPI_WEBHOOK_BASE_URL` define para onde a UAZAPI envia mensagens e histórico: se apontar para `newwed.com.br`, os eventos são persistidos no D1 publicado e não aparecem na Inbox local. Para consultar conversas reais, use o Admin publicado; não copie histórico real para o banco local nem redirecione o webhook da linha ativa para um túnel de desenvolvimento.
 
 ## Validação sem serviços reais
 
@@ -77,3 +83,7 @@ O Worker `new-wed-uazapi-receiver` é publicado por `npm run deploy:uazapi`, usa
 O consumidor processa lotes, mensagens recebidas e recibos, força atendimento humano sem OpenRouter e recupera apenas outboxes UAZAPI no cron. Não executa envio manual, cobrança, e-mail ou resposta automática. Não precisa receber o token da instância nem chaves de provedores. Resumos e demais trabalhos comerciais permanecem na fila anterior, sem consumidor ativado nesta publicação.
 
 Configure `UAZAPI_INSTANCES` e `UAZAPI_WEBHOOK_BASE_URL` como secrets somente no Worker web. Validar o recebimento com evento sintético não envolve `/send/text`, QR, pareamento nem ativação do webhook no provedor. Só liberar a ativação depois de comprovar mensagem única na Inbox e limpar a validação.
+
+## Estado após conectar
+
+A resposta de `/instance/status` pode trazer `status.jid` como texto WhatsApp (`número:dispositivo@s.whatsapp.net`) ou como objeto legado com `user`. O parser aceita os dois formatos, extrai somente um telefone individual válido e ignora JIDs de grupo/LID como identidade telefônica. A confirmação vem de `instance.status`; nenhuma identidade é exibida antes do estado connected. QR é removido da resposta normalizada quando a conexão está concluída.

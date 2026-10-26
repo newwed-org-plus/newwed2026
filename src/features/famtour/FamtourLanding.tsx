@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { SiteShell } from "@/features/famtour/components/SiteShell";
 import { HeroSplit } from "@/features/famtour/components/HeroSplit";
@@ -16,6 +16,7 @@ import { PreInscricaoForm } from "@/features/famtour/components/PreInscricaoForm
 import { SuccessScreen } from "@/features/famtour/components/SuccessScreen";
 import { FAMTOUR_EDITIONS, toLegacyFamTour } from "@/features/famtour/lib/famtours";
 import type { PreInscricaoData } from "@/features/famtour/lib/schemas/preInscricao";
+import {famtourInformation} from '@/content/famtour-information';
 
 function Divisor({ children }: { children: React.ReactNode }) {
   return (
@@ -59,16 +60,22 @@ export function FamtourLanding() {
     famtourNome: string;
   } | null>(null);
 
-  const scrollTo = (id: string) => {
+  const scrollTo = useCallback((id: string) => {
     if (typeof document !== "undefined") {
       const el = document.getElementById(id);
-      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      el?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
     }
-  };
+  },[]);
+
+  useEffect(()=>{
+    if(!edicao)return;
+    const frame=requestAnimationFrame(()=>scrollTo("form"));
+    return()=>cancelAnimationFrame(frame);
+  },[edicao,scrollTo]);
 
   const handleRequestInformation = (slug: string) => {
-    router.push(`/famtour?edicao=${encodeURIComponent(slug)}#form`);
-    setTimeout(() => scrollTo("form"), 50);
+    router.push(`/famtour?edicao=${encodeURIComponent(slug)}#form`,{scroll:false});
+    scrollTo("form");
   };
 
   const handleViewEdition = (slug: string) => {
@@ -123,10 +130,7 @@ export function FamtourLanding() {
                   textAlign: "center",
                 }}
               >
-                O Famtour New Wed é uma experiência fechada e curada para
-                assessores e profissionais de casamentos que querem entrar no
-                mercado de Destination Wedding com autoridade, guiada por quem
-                tem autoridade no Nordeste.
+                {famtourInformation.landingDescription}
               </p>
               <button
                 type="button"

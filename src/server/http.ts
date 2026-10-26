@@ -1,4 +1,5 @@
 import { ZodError } from "zod";
+import { isDatabaseUnavailable } from "./database-availability";
 
 export function json(data: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -8,6 +9,10 @@ export function json(data: unknown, init: ResponseInit = {}) {
 }
 
 export function errorResponse(error: unknown, requestId?: string) {
+  if (isDatabaseUnavailable(error)) {
+    console.error(JSON.stringify({event:"database.unavailable",requestId}));
+    return json({code:"DATABASE_UNAVAILABLE",message:"Serviço temporariamente indisponível. Tente novamente em instantes."},{status:503,headers:{"retry-after":"60"}});
+  }
   if (error instanceof ZodError) {
     return json({ code: "VALIDATION_ERROR", message: "Dados inválidos.", fields: error.flatten().fieldErrors }, { status: 422 });
   }

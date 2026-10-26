@@ -4,7 +4,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores:["dist/**",".next/**","node_modules/**",".wrangler/**","src/types/cloudflare-env.d.ts","tests/visual/baselines/**"] },
+  { ignores:["dist/**",".next/**","node_modules/**",".wrangler/**",".local-runtime/**","src/types/cloudflare-env.d.ts","tests/visual/baselines/**"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

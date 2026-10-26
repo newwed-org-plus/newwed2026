@@ -1,3 +1,4 @@
+import {applyUazapiDelivery,normalizeDeliveryStatus,receiptTime,type DeliveryStatus} from "./uazapi-delivery";
 import { z } from "zod";
 import { configuredInstance,uazapiMessageId,type UazapiEnv } from "@/server/integrations/uazapi";
 import { ensureWhatsAppLines } from "@/server/whatsapp-lines";
@@ -6,19 +7,21 @@ import { sha256 } from "@/server/normalization";
 import { timingSafeEqual } from "@/server/crypto";
 import { publishOutbox } from "@/server/outbox";
 
-const messageSchema = z.object({
+export const uazapiHistoryMessageSchema = z.object({
   id:z.string().max(256).optional(),messageid:z.string().max(256).optional(),chatid:z.string().max(100),
   senderName:z.string().max(200).optional(),fromMe:z.boolean().optional(),wasSentByApi:z.boolean().optional(),isGroup:z.boolean().optional(),
-  messageType:z.string().max(100).optional(),text:z.string().max(32_000).nullish(),messageTimestamp:z.number().optional(),
+  status:z.string().max(80).optional(),messageType:z.string().max(100).optional(),text:z.string().max(32_000).nullish(),messageTimestamp:z.number().optional(),
 });
+const messageSchema=uazapiHistoryMessageSchema;
 type MessageInput = z.infer<typeof messageSchema>;
 export type UazapiIncoming = { event:{ id:string;from:string;type:string;text:{body:string};fromMe:boolean;history:boolean;createdAt:string;contactName:string|null };lineId:string };
 
 export function normalizeUazapiMessage(lineId: string,message: MessageInput,history = false): UazapiIncoming|null {
   const match = /^(\d{10,15})@s\.whatsapp\.net$/.exec(message.chatid);
   const id = message.messageid || message.id;
-  if (!match || !id || message.isGroup || message.wasSentByApi) return null;
-  const timestamp = message.messageTimestamp;
+  if (!match || !id || message.isGroup || (message.wasSentByApi&&!history)) return null;
+  const rawTimestamp = message.messageTimestamp;
+  const timestamp = rawTimestamp&&rawTimestamp<100_000_000_000?rawTimestamp*1000:rawTimestamp;
   const createdAt = timestamp && timestamp > 0 && timestamp < Date.now()+86_400_000 ? new Date(timestamp).toISOString() : new Date().toISOString();
   return { lineId,event:{ id:uazapiMessageId(lineId,id),from:match[1],type:message.text ? "text" : (message.messageType ?? "unknown").slice(0,100),
     text:{body:message.text ?? ""},fromMe:message.fromMe ?? false,history,createdAt,contactName:message.fromMe ? null : message.senderName ?? null } };
@@ -46,13 +49,13 @@ export async function acceptUazapiWebhook(env: WebhookEnv,lineId: string,input: 
       if (payload) candidates.push({externalId:`${history ? "history" : "message"}:${payload.event.id}`,type:"uazapi.incoming",payload});
     }
   } else if (type === "messages_update") {
-    const body = z.object({ state:z.string().optional(),event:z.object({ MessageIDs:z.array(z.string().max(256)).max(200),Type:z.string().optional(),IsGroup:z.boolean().optional(),IsFromMe:z.boolean().optional() }) }).parse(input);
+    const body = z.object({ state:z.string().optional(),event:z.object({ MessageIDs:z.array(z.string().max(256)).max(200),Type:z.string().optional(),Timestamp:z.number().optional(),IsGroup:z.boolean().optional(),IsFromMe:z.boolean().optional() }) }).parse(input);
     const state = (body.state ?? body.event.Type ?? "").toLowerCase();
-    const status = state === "read" || state === "played" ? "READ" : state === "delivered" ? "DELIVERED" : null;
+    const status=normalizeDeliveryStatus(state);
     if (!status || body.event.IsGroup || body.event.IsFromMe === false) return { received:true,queued:0,ignored:true };
     for (const id of body.event.MessageIDs) {
       const messageId = uazapiMessageId(lineId,id);
-      candidates.push({externalId:`status:${messageId}:${status}`,type:"uazapi.status",payload:{lineId,messageId,status}});
+      candidates.push({externalId:`status:${messageId}:${status}`,type:"uazapi.status",payload:{lineId,messageId,status,observedAt:receiptTime(body.event.Timestamp)}});
     }
   } else {
     // Connection webhooks can arrive out of order. /instance/status is authoritative.
@@ -75,50 +78,69 @@ export async function acceptUazapiWebhook(env: WebhookEnv,lineId: string,input: 
 }
 
 type NormalizedEvent = {externalId:string;type:string;payload:unknown};
-export async function processUazapiBatch(env: WebhookEnv,externalId: string,offset = 0) {
+type ProcessBatchOptions = { processHistory?: (externalId:string)=>Promise<void>;publishContinuation?: boolean;chunkSize?:number };
+function isHistoryPayload(payload: unknown) {
+  return Boolean(payload && typeof payload === "object" && (payload as {event?:{history?:unknown}}).event?.history === true);
+}
+
+export async function processUazapiBatch(env: WebhookEnv,externalId: string,offset = 0,options: ProcessBatchOptions = {}) {
   const stored = await env.DB.prepare("SELECT id,payload_json,request_id FROM webhook_events WHERE provider='uazapi' AND external_id=?")
     .bind(externalId).first<{id:string;payload_json:string;request_id:string}>();
-  if (!stored) return;
+  if (!stored) return {nextOffset:null};
   const candidates = JSON.parse(stored.payload_json) as NormalizedEvent[];
-  const chunk = candidates.slice(offset,offset+10);
-  if (!chunk.length) return;
+  const chunk = candidates.slice(offset,offset+Math.min(10,Math.max(1,options.chunkSize ?? 10)));
+  if (!chunk.length) {
+    await env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=? AND processed_at IS NULL").bind(new Date().toISOString(),stored.id).run();
+    return {nextOffset:null};
+  }
   const now = new Date().toISOString();
   const statements = chunk.flatMap(item => [
-    env.DB.prepare("INSERT OR IGNORE INTO webhook_events (id,provider,external_id,event_type,payload_json,request_id,created_at) VALUES (?,'uazapi',?,?,?,?,?)")
+    // A cache pull may win the race before this authenticated live callback.
+    // Promote only that same message to its live evidence; history alone never replies.
+    env.DB.prepare(`INSERT INTO webhook_events (id,provider,external_id,event_type,payload_json,request_id,created_at) VALUES (?,'uazapi',?,?,?,?,?)
+      ON CONFLICT(provider,external_id) DO UPDATE SET payload_json=excluded.payload_json,request_id=excluded.request_id,processed_at=NULL,error=NULL
+      WHERE json_extract(webhook_events.payload_json,'$.event.history')=1 AND json_extract(excluded.payload_json,'$.event.history')=0`)
       .bind(crypto.randomUUID(),item.externalId,item.type,JSON.stringify(item.payload),stored.request_id,now),
-    env.DB.prepare("INSERT OR IGNORE INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,request_id,created_at) SELECT ?,?,?,?,?,0,?,? WHERE changes()=1")
-      .bind(`uazapi:${item.externalId}`,item.type,item.externalId,`uazapi:${item.externalId}`,JSON.stringify({externalId:item.externalId,requestId:stored.request_id}),stored.request_id,now),
+    ...(options.processHistory && isHistoryPayload(item.payload) ? [] : [env.DB.prepare("INSERT OR IGNORE INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,request_id,created_at) SELECT ?,?,?,?,?,0,?,? WHERE changes()=1")
+      .bind(`uazapi:${item.externalId}`,item.type,item.externalId,`uazapi:${item.externalId}`,JSON.stringify({externalId:item.externalId,requestId:stored.request_id}),stored.request_id,now)]),
   ]);
   const next = offset+chunk.length;
   const continuationId = `uazapi.batch:${externalId}:${next}`;
   if (next < candidates.length) statements.push(env.DB.prepare("INSERT OR IGNORE INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,request_id,created_at) VALUES (?,'uazapi.batch',?,?,?,0,?,?)")
     .bind(continuationId,externalId,continuationId,JSON.stringify({externalId,targetCount:next,requestId:stored.request_id}),stored.request_id,now));
-  else statements.push(env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=?").bind(now,stored.id));
   await env.DB.batch(statements);
   for (const item of chunk) {
-    // Repeated publication is safe: each leaf event has a persistent processed marker.
-    await publishOutbox(env,{id:`uazapi:${item.externalId}`,type:item.type,externalId:item.externalId,requestId:stored.request_id});
+    if (options.processHistory && isHistoryPayload(item.payload)) {
+      await options.processHistory(item.externalId);
+      // Older deployments created one outbox row per historical message. Mark it handled
+      // after direct D1 processing so quota recovery does not enqueue it again.
+      await env.DB.prepare("UPDATE outbox_events SET published_at=coalesce(published_at,?),next_attempt_at=NULL,last_error=NULL WHERE id=?")
+        .bind(now,`uazapi:${item.externalId}`).run();
+    } else {
+      // Repeated publication is safe: each leaf event has a persistent processed marker.
+      await publishOutbox(env,{id:`uazapi:${item.externalId}`,type:item.type,externalId:item.externalId,requestId:stored.request_id});
+    }
   }
-  if (next < candidates.length) await publishOutbox(env,{id:continuationId,type:"uazapi.batch",externalId,targetCount:next,requestId:stored.request_id});
+  if (next < candidates.length && options.publishContinuation !== false) await publishOutbox(env,{id:continuationId,type:"uazapi.batch",externalId,targetCount:next,requestId:stored.request_id});
+  if (next >= candidates.length) await env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=? AND processed_at IS NULL").bind(now,stored.id).run();
+  return {nextOffset:next < candidates.length ? next : null};
 }
 
 export async function processUazapiStatus(env: Pick<Env,"DB">,externalId: string) {
   const stored = await env.DB.prepare("SELECT id,payload_json FROM webhook_events WHERE provider='uazapi' AND external_id=? AND processed_at IS NULL")
     .bind(externalId).first<{id:string;payload_json:string}>();
   if (!stored) return;
-  const {messageId,status} = JSON.parse(stored.payload_json) as {messageId:string;status:"READ"|"DELIVERED"};
-  // Persist first; replay receipts when an API send/phone echo is saved later.
-  await env.DB.batch([
-    env.DB.prepare("UPDATE messages SET status=CASE WHEN status='READ' THEN 'READ' ELSE ? END WHERE external_id=? AND direction='OUT'").bind(status,messageId),
-    env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=?").bind(new Date().toISOString(),stored.id),
-  ]);
+  const {messageId,status,observedAt} = JSON.parse(stored.payload_json) as {messageId:string;status:DeliveryStatus;observedAt?:string};
+  await applyUazapiDelivery(env,messageId,status,observedAt);
+  await env.DB.prepare("UPDATE webhook_events SET processed_at=? WHERE id=?").bind(new Date().toISOString(),stored.id).run();
+  await reconcileUazapiReceipt(env,messageId);
 }
 
 export async function reconcileUazapiReceipt(env: Pick<Env,"DB">,messageId: string) {
   if (!messageId.startsWith("uazapi:")) return;
-  await env.DB.prepare(`UPDATE messages SET status=CASE
-    WHEN EXISTS(SELECT 1 FROM webhook_events WHERE provider='uazapi' AND external_id=?) THEN 'READ'
-    WHEN status!='READ' AND EXISTS(SELECT 1 FROM webhook_events WHERE provider='uazapi' AND external_id=?) THEN 'DELIVERED'
-    ELSE status END WHERE external_id=? AND direction='OUT'`)
-    .bind(`status:${messageId}:READ`,`status:${messageId}:DELIVERED`,messageId).run();
+  const evidence=await env.DB.prepare(`SELECT external_id,payload_json,created_at FROM webhook_events WHERE provider='uazapi' AND external_id IN (?,?,?,?)
+   ORDER BY CASE external_id WHEN ? THEN 4 WHEN ? THEN 3 WHEN ? THEN 2 ELSE 1 END DESC LIMIT 1`)
+   .bind(`status:${messageId}:READ`,`status:${messageId}:DELIVERED`,`status:${messageId}:FAILED`,`status:${messageId}:SENT`,
+    `status:${messageId}:READ`,`status:${messageId}:DELIVERED`,`status:${messageId}:FAILED`).first<{external_id:string;payload_json:string;created_at:string}>();
+  if(evidence){const data=JSON.parse(evidence.payload_json) as {status?:DeliveryStatus;observedAt?:string};const status=normalizeDeliveryStatus(data.status)??normalizeDeliveryStatus(evidence.external_id.split(':').at(-1));if(status)await applyUazapiDelivery(env,messageId,status,data.observedAt??evidence.created_at);}
 }

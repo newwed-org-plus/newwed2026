@@ -67,27 +67,30 @@ export async function processNotificationEmail(env:EmailEnv,eventId:string,notif
     FROM notification_recipients nr JOIN users u ON u.id=nr.user_id JOIN notifications n ON n.id=nr.notification_id
     WHERE nr.notification_id=? AND nr.user_id=? AND nr.channel='EMAIL'`)
     .bind(notificationId,userId).first<{delivery_status:string;attempts:number;email:string;name:string;title:string;body:string}>();
-  if (!row || row.delivery_status === "SENT") return { sent:false,duplicate:true };
+  if (!row || ["SENT","SEND_UNKNOWN"].includes(row.delivery_status)) return { sent:false,duplicate:true };
   const now = new Date().toISOString();
+  let attempted=false;
   try {
     const from = safeText(env.EMAIL_FROM ?? "");
     if (!env.EMAIL || !from) throw new Error("Cloudflare Email binding or EMAIL_FROM is not configured");
     if (!recipientAllowed(row.email,env.EMAIL_ALLOWED_RECIPIENT_DOMAINS)) throw new Error("Email recipient domain is not allowed");
-    await env.EMAIL.send({
+    attempted=true;
+    const accepted=await env.EMAIL.send({
       from,to:safeText(row.email),subject:safeText(row.title),replyTo:env.EMAIL_REPLY_TO ? safeText(env.EMAIL_REPLY_TO) : undefined,
       text:`Olá, ${row.name}.\n\n${row.body}\n\nAcesse o dashboard comercial New Wed para conferir os detalhes.`,
       html:`<p>Olá, ${escapeHtml(row.name)}.</p><p>${escapeHtml(row.body)}</p><p>Acesse o dashboard comercial New Wed para conferir os detalhes.</p>`,
     });
+    if(!accepted?.messageId)throw new Error("O serviço de e-mail não confirmou o aceite.");
     await env.DB.batch([
-      env.DB.prepare("UPDATE notification_recipients SET delivery_status='SENT',sent_at=?,attempts=attempts+1,last_error=NULL,updated_at=? WHERE notification_id=? AND user_id=? AND channel='EMAIL' AND delivery_status!='SENT'").bind(now,now,notificationId,userId),
+      env.DB.prepare("UPDATE notification_recipients SET provider_message_id=?,delivery_status='SENT',sent_at=?,attempts=attempts+1,last_error=NULL,updated_at=? WHERE notification_id=? AND user_id=? AND channel='EMAIL' AND delivery_status!='SENT'").bind(accepted.messageId,now,now,notificationId,userId),
       env.DB.prepare("UPDATE outbox_events SET last_error=NULL WHERE id=?").bind(eventId),
     ]);
     return { sent:true,duplicate:false };
   } catch (error) {
     const message = (error instanceof Error ? error.message : String(error)).slice(0,1000);
-    await env.DB.prepare("UPDATE notification_recipients SET delivery_status='FAILED',attempts=attempts+1,last_error=?,updated_at=? WHERE notification_id=? AND user_id=? AND channel='EMAIL'")
-      .bind(message,now,notificationId,userId).run();
-    await deferOutbox(env,eventId,error,row.attempts);
-    return { sent:false,duplicate:false,error:message };
+    await env.DB.prepare("UPDATE notification_recipients SET delivery_status=?,attempts=attempts+1,last_error=?,updated_at=? WHERE notification_id=? AND user_id=? AND channel='EMAIL'")
+      .bind(attempted?"SEND_UNKNOWN":"FAILED",message,now,notificationId,userId).run();
+    if(!attempted)await deferOutbox(env,eventId,error,row.attempts);
+    return { sent:false,duplicate:false,error:message,uncertain:attempted };
   }
 }

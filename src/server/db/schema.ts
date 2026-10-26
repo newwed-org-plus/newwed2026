@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 const timestamps = {
@@ -172,6 +173,7 @@ export const conversations = sqliteTable("conversations", {
   requestId: text("request_id"),
   ...timestamps,
 }, (table) => [
+  index("conversations_page_idx").on(sql`coalesce(${table.lastMessageAt},${table.updatedAt}) DESC`,sql`${table.id} DESC`),
   uniqueIndex("conversation_external_uidx").on(table.channel, table.externalId),
   index("conversations_mode_updated_idx").on(table.mode, table.updatedAt),
   index("conversations_claimed_by_idx").on(table.claimedBy),
@@ -183,6 +185,7 @@ export const messages = sqliteTable("messages", {
   checkoutId: text("checkout_id").references(() => checkouts.id),
   actorId: text("actor_id").references(() => users.id),
   externalId: text("external_id"),
+  inReplyTo:text("in_reply_to"),
   direction: text("direction").notNull(),
   type: text("type").notNull(),
   body: text("body"),
@@ -190,13 +193,18 @@ export const messages = sqliteTable("messages", {
   templateName: text("template_name"),
   payloadJson: text("payload_json"),
   lastError: text("last_error"),
+  sendStartedAt:text("send_started_at"),
   acceptedAt: text("accepted_at"),
+  sentAt:text("sent_at"),deliveredAt:text("delivered_at"),readAt:text("read_at"),statusUpdatedAt:text("status_updated_at"),statusCheckedAt:text("status_checked_at"),statusCheckError:text("status_check_error"),
   failedAt: text("failed_at"),
   requestId: text("request_id"),
   createdAt: text("created_at").notNull(),
 }, (table) => [
   uniqueIndex("messages_external_uidx").on(table.externalId),
+  uniqueIndex("messages_agent_reply_uidx").on(table.conversationId,table.inReplyTo).where(sql`${table.inReplyTo} IS NOT NULL`),
+  index("messages_conversation_page_idx").on(table.conversationId,sql`${table.createdAt} DESC`,sql`${table.id} DESC`),
   index("messages_checkout_idx").on(table.checkoutId),
+  index("messages_delivery_poll_idx").on(table.statusCheckedAt,table.createdAt).where(sql`${table.direction}='OUT' AND ${table.status} IN ('ACCEPTED','SENT','DELIVERED','SEND_UNKNOWN')`),
 ]);
 
 export const checkouts = sqliteTable("checkouts", {
@@ -204,7 +212,9 @@ export const checkouts = sqliteTable("checkouts", {
   leadId: text("lead_id").notNull().references(() => leads.id),
   editionId: text("edition_id").notNull().references(() => editions.id),
   priceBatchId: text("price_batch_id").notNull().references(() => priceBatches.id),
+  conversationId:text("conversation_id").references(()=>conversations.id),whatsappInstanceId:text("whatsapp_instance_id").references(()=>whatsappInstances.id),deliveryChannel:text("delivery_channel").notNull().default("meta"),
   provider: text("provider").notNull().default("asaas"),
+  billingDocumentCiphertext:text("billing_document_ciphertext"),
   providerCustomerId: text("provider_customer_id"),
   providerPaymentId: text("provider_payment_id"),
   providerInstallmentId: text("provider_installment_id"),
@@ -238,6 +248,7 @@ export const checkouts = sqliteTable("checkouts", {
   version: integer("version").notNull().default(1),
   ...timestamps,
 }, (table) => [
+  index("checkouts_conversation_idx").on(table.conversationId),
   index("checkouts_status_idx").on(table.status),
   index("checkouts_financial_status_idx").on(table.financialStatus),
   index("checkouts_send_status_idx").on(table.sendStatus),
@@ -283,6 +294,7 @@ export const webhookEvents = sqliteTable("webhook_events", {
 }, (table) => [
   uniqueIndex("webhook_provider_external_uidx").on(table.provider, table.externalId),
   index("webhook_pending_retry_idx").on(table.provider, table.processedAt, table.nextRetryAt),
+  index("webhook_operations_idx").on(table.provider,table.processedAt,table.attempts,table.createdAt),
 ]);
 
 export const users = sqliteTable("users", {
@@ -334,6 +346,7 @@ export const notificationRecipients = sqliteTable("notification_recipients", {
   notificationId: text("notification_id").notNull().references(() => notifications.id),
   userId: text("user_id").notNull().references(() => users.id),
   channel: text("channel").notNull(),
+  providerMessageId:text("provider_message_id"),
   deliveryStatus: text("delivery_status").notNull().default("PENDING"),
   readAt: text("read_at"),
   sentAt: text("sent_at"),
@@ -376,11 +389,12 @@ export const outboxEvents = sqliteTable("outbox_events", {
   payloadJson: text("payload_json").notNull(),
   attempts: integer("attempts").notNull().default(0),
   publishedAt: text("published_at"),
+  dispatchState:text("dispatch_state").notNull().default("PENDING"),holdReason:text("hold_reason"),processingToken:text("processing_token"),processingStartedAt:text("processing_started_at"),processedAt:text("processed_at"),processingAttempts:integer("processing_attempts").notNull().default(0),deferredAttempts:integer("deferred_attempts").notNull().default(0),
   nextAttemptAt: text("next_attempt_at"),
   lastError: text("last_error"),
   requestId: text("request_id"),
   createdAt: text("created_at").notNull(),
-}, (table) => [index("outbox_pending_idx").on(table.publishedAt, table.nextAttemptAt, table.createdAt)]);
+}, (table) => [index("outbox_pending_idx").on(table.publishedAt, table.nextAttemptAt, table.createdAt),index("outbox_operations_idx").on(table.dispatchState,table.type,table.createdAt),index("outbox_completed_idx").on(table.processedAt).where(sql`${table.processedAt} IS NOT NULL`)]);
 
 export const rateLimitBuckets = sqliteTable("rate_limit_buckets", {
   key: text("key").primaryKey(),
@@ -390,3 +404,26 @@ export const rateLimitBuckets = sqliteTable("rate_limit_buckets", {
   expiresAt: text("expires_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 }, (table) => [index("rate_limit_expiry_idx").on(table.expiresAt)]);
+
+export const operationLeases = sqliteTable("operation_leases", { id:text("id").primaryKey(),token:text("token").notNull(),expiresAt:text("expires_at").notNull() });
+export const historyImports = sqliteTable("history_imports", { externalId:text("external_id").primaryKey(),lineId:text("line_id").notNull(),cursor:integer("cursor").default(0).notNull(),attempts:integer("attempts").default(0).notNull(),nextAttemptAt:text("next_attempt_at"),completedAt:text("completed_at"),updatedAt:text("updated_at").notNull() },table=>[index("history_imports_pending_idx").on(table.completedAt,table.nextAttemptAt,table.updatedAt)]);
+
+export const operationalHealth=sqliteTable("operational_health",{
+ service:text("service").primaryKey(),lastStartedAt:text("last_started_at"),lastCompletedAt:text("last_completed_at"),lastSuccessAt:text("last_success_at"),lastErrorCode:text("last_error_code"),pending:integer("pending").notNull().default(0),oldestPendingAt:text("oldest_pending_at"),watermark:text("watermark"),failures:integer("failures").notNull().default(0),stalledRuns:integer("stalled_runs").notNull().default(0),failureStreak:integer("failure_streak").notNull().default(0),peakPending:integer("peak_pending").notNull().default(0),
+});
+export const resourceUsage=sqliteTable("resource_usage",{
+ resource:text("resource").primaryKey(),windowStart:text("window_start").notNull(),windowEnd:text("window_end").notNull(),used:integer("used").notNull(),budget:integer("budget"),observedAt:text("observed_at").notNull(),source:text("source").notNull(),oldestItemAt:text("oldest_item_at"),
+});
+
+export const uazapiHistorySyncs=sqliteTable("uazapi_history_syncs",{
+ id:text("id").primaryKey(),lineId:text("line_id").notNull().references(()=>whatsappInstances.id),status:text("status").notNull().default("PENDING"),providerOffset:integer("provider_offset").notNull().default(0),scannedCount:integer("scanned_count").notNull().default(0),skippedCount:integer("skipped_count").notNull().default(0),attempts:integer("attempts").notNull().default(0),nextAttemptAt:text("next_attempt_at"),lastError:text("last_error"),requestedBy:text("requested_by").references(()=>users.id),createdAt:text("created_at").notNull(),updatedAt:text("updated_at").notNull(),completedAt:text("completed_at"),
+},table=>[uniqueIndex("uazapi_history_active_idx").on(table.lineId).where(sql`${table.status} IN ('PENDING','RUNNING')`),index("uazapi_history_pending_idx").on(table.status,table.nextAttemptAt,table.updatedAt)]);
+
+export const aiProviderCooldowns=sqliteTable('ai_provider_cooldowns',{
+ scope:text('scope').primaryKey(),availableAt:text('available_at').notNull(),errorCode:text('error_code').notNull(),updatedAt:text('updated_at').notNull(),
+});
+export const conversationProductMemory=sqliteTable('conversation_product_memory',{
+ conversationId:text('conversation_id').primaryKey().references(()=>conversations.id,{onDelete:'cascade'}),
+ focusJson:text('focus_json').notNull(),lastMessageAt:text('last_message_at').notNull(),lastMessageId:text('last_message_id').notNull(),
+ revision:integer('revision').notNull().default(1),updatedAt:text('updated_at').notNull(),
+});
