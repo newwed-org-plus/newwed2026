@@ -129,3 +129,12 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Ponte HTTP real com upstream sintético em portas aleatórias: flags desligadas, POST exato de Asaas, 128 KiB, query/GET/admin bloqueados, tokens separados por provider e UAZAPI preservada.
 - Externo autorizado: API cadastral e webhook HTTP 200; transporte público sem token 401, token correto/payload inválido 422, painel 404 e UAZAPI 200. Pausa/retomada do mesmo webhook, exatamente um cadastro ativo. Sem cliente, cobrança ou evento financeiro fictício. Evidências privadas; screenshot sem credenciais.
 - Scan do cliente e isolamento de secrets por serviço. Checkout/confirmação/e-mail desligados. Pix/cartão/parcelas/estorno reais de Sandbox não executados; testes simulados e transporte não aprovam o fluxo financeiro externo.
+
+
+## Onda 32 — Ciclo Pix Sandbox real e confirmação verificável
+
+- Perfil local recusa produção/chave divergente/allowlist vazia; receptor sem flags/credenciais de cobrança. Documento sintético fica restrito ao Sandbox. Novo cliente sem notificações paralelas do Asaas.
+- API e consumidor bloqueiam contato divergente antes de Asaas e sem reservar nova vaga. Mensagens de teste não prometem participação real.
+- Webhook real com `installmentNumber`, datas e outros opcionais nulos: normalizar ausência, preservar campos obrigatórios e rejeitar ID vazio, status nulo e valor inválido. Evento PENDING após PAID não regride, duplica vaga, notificação ou confirmação.
+- Painel mobile/tablet/desktop atualiza pagamento e confirmação sem POST de envio; falha mantém PAID e último estado conhecido. A consulta distingue pagamento, entrega do link e leitura da confirmação.
+- Externo autorizado: um Pix Sandbox da fixture de R$ 1.200,00 criado pelo painel, link READ; confirmação simulada pela API oficial, PAID/PAGO e confirmação READ. Eventos reais recebidos com HTTP 200 após corrigir 422; replay exato e criação idempotente sem efeitos adicionais. Uma cobrança, confirmação, notificação e venda. E-mail retido, sem deploy. Evidências e IDs somente em `.local-runtime` privado.

@@ -16,6 +16,7 @@ export type RuntimeSecrets = {
   META_VERIFY_TOKEN?: string;
   META_PHONE_NUMBER_ID?: string;
   ASAAS_API_KEY?: string;
+  ASAAS_SANDBOX_TEST_DOCUMENT?: string;
   ASAAS_WEBHOOK_TOKEN?: string;
   TURNSTILE_SECRET_KEY?: string;
 };

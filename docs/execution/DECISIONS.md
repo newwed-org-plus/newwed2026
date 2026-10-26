@@ -230,3 +230,14 @@ Em 2026-10-25, o usuário autorizou criar o Sandbox vinculado e a chave **Newwed
 Credenciais ficam em `.dev.vars` ignorado com permissão 0600; token de webhook independente, metadados operacionais em `.local-runtime` privado e sem segredos em Git, logs, screenshots ou respostas. O perfil local aceita somente o host oficial Sandbox e bloqueia credenciais de ambiente incompatível; transporte usa prazo, resposta limitada e não segue redirect com credencial.
 
 O túnel autorizado expõe também POST exato de Asaas, limitado a 128 KiB e autenticado. O launcher gerencia um webhook exclusivo, preserva intenção antes de cadastro, concilia aceite incerto e não substitui configurações alteradas por outro operador nem reativa fila interrompida. Encerramento pausa e verifica o webhook antes de fechar o transporte; falha mantém runtime ativo para recuperação. Configuração e autenticação foram validadas sem criar cliente, cobrança ou evento financeiro fictício. Checkout, confirmação e e-mail permanecem desligados até validação própria.
+
+
+## D-052 — Checkout local e ciclo financeiro Sandbox autorizados
+
+Em 2026-10-25, o usuário autorizou liberar checkout e confirmação no localhost, criar/confirmar uma cobrança Sandbox e enviar o link e a confirmação ao contato de teste informado, sem deploy. A janela é esta validação. Usar edição/lote sintéticos **VALIDACAO local — demonstração**, Pix único de R$ 1.200,00, capacidade 8 e vencimento calculado em Recife. O valor é de fixture, não uma oferta publicada. A qualificação e autorização são ações do operador autenticado; a IA não cria nem aprova checkout.
+
+A liberação existe somente em `.dev.vars` privado e nos Workers locais gerados. Exige Sandbox oficial, chave de homologação, modo local e destinatário autorizado. Conferir tanto o telefone do lead quanto o da conversa na API e novamente antes de chamar o Asaas; outros contatos são bloqueados antes de criar cobrança. Recebimento permanece sem credenciais externas; e-mail continua desligado e operações antigas retidas não são liberadas.
+
+Sandbox utiliza documento fiscal sintético explícito em `ASAAS_SANDBOX_TEST_DOCUMENT`, somente no modo local com host/chave Sandbox. Não copiar documento de teste para produção nem substituir dados legítimos de pagadores. Novos clientes Asaas usam notificações nativas desligadas para preservar o canal UAZAPI. Mensagens locais identificam TESTE SANDBOX e não prometem participação real.
+
+A validação encontrou campos opcionais nulos no webhook real. Aceitar null somente nesses campos e normalizar para ausência; manter ID, status e valor positivos obrigatórios. Conciliação por snapshot recupera pagamentos enquanto há falha de callback; retomada do evento original não regride PAID nem repete confirmação/notificação. Não confirmar novamente o pagamento para reproduzir um webhook; usar replay exato do evento original. Não remover penalização repetidamente nem reativar filas desconhecidas.

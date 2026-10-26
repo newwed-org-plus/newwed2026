@@ -41,7 +41,7 @@ export async function startLocalAsaasWebhook(env:LocalEnv,origin:string){
  const profile=JSON.parse(readFileSync('.local-runtime/asaas-profile.json','utf8')) as {email:string};
  const file='.local-runtime/asaas-webhook.json';const previous=existsSync(file)?JSON.parse(readFileSync(file,'utf8')) as State:undefined;
  const state=await ensureLocalAsaasWebhook(env,url,profile.email,previous,value=>writeFileSync(file,JSON.stringify(value,null,2),{mode:0o600}));
- console.log('Webhook Asaas Sandbox vinculado ao localhost; cobranças continuam desligadas.');
+ console.log('Webhook Asaas Sandbox vinculado ao localhost.');
  return state;
 }
 

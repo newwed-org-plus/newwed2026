@@ -1,3 +1,4 @@
+import {confirmationText} from './local-checkout-policy';
 import {publishOutbox} from "./outbox";
 import {sendUazapiText} from "./integrations/uazapi";
 import {reconcileUazapiReceipt} from "./uazapi-webhook";
@@ -20,7 +21,7 @@ export async function sendPaidConfirmation(env:Env & RuntimeSecrets,checkoutId:s
  const prior=await env.DB.prepare("SELECT status FROM messages WHERE id=?").bind(eventId).first<{status:string}>();
  if(prior&&['ACCEPTED','DELIVERED','READ'].includes(prior.status))return {sent:true as const,duplicate:true};
  if(prior&&['SEND_UNKNOWN','SENDING'].includes(prior.status))return {sent:false as const,uncertain:true};
- const now=new Date().toISOString();const text=`Pagamento confirmado para ${checkout.edition_name}. Obrigado! A equipe New Wed seguirá com os detalhes da sua participação.`;
+ const now=new Date().toISOString();const text=confirmationText(env,checkout.edition_name);
  await env.DB.prepare("INSERT OR IGNORE INTO messages (id,conversation_id,checkout_id,direction,type,body,status,request_id,created_at) VALUES (?,?,?,'OUT','payment_confirmation',?,'SEND_PENDING',?,?)").bind(eventId,checkout.conversation_id,checkoutId,text,eventId,now).run();
  const claimed=await env.DB.prepare("UPDATE messages SET status='SENDING',send_started_at=? WHERE id=? AND status='SEND_PENDING'").bind(now,eventId).run();
  if(!claimed.meta.changes)return {sent:false as const,paused:true};

@@ -53,11 +53,13 @@ export async function asaasRequest<T>(env: AsaasEnvironment,path: string,init: R
 const asaas=asaasRequest;
 
 export async function findOrCreateCustomer(env: AsaasEnvironment,lead: LeadForBilling,fetcher: AsaasFetcher = fetch) {
+  const document=env.ASAAS_SANDBOX_TEST_DOCUMENT;
+  if(document&&(env.LOCAL_TEST_MODE!=='true'||baseUrl(env)!==DEFAULT_BASE_URL||!env.ASAAS_API_KEY?.startsWith('$aact_hmlg_')||!/^\d{11}(\d{3})?$/.test(document)))throw new HttpError(503,'ASAAS_TEST_DATA_BLOCKED','Documento sintético permitido somente no Sandbox local autorizado.');
   const found = await asaas<{ data:Array<{ id:string }> }>(env,`/customers?externalReference=${encodeURIComponent(lead.id)}&limit=1`,{},fetcher);
   if (found.data[0]) return found.data[0].id;
   const created = await asaas<{ id:string }>(env,"/customers",{
     method:"POST",
-    body:JSON.stringify({ name:lead.name,email:lead.email,mobilePhone:lead.normalizedPhone.replace(/^\+55/,""),externalReference:lead.id }),
+    body:JSON.stringify({ name:lead.name,email:lead.email,mobilePhone:lead.normalizedPhone.replace(/^\+55/,""),externalReference:lead.id,notificationDisabled:true,...(document?{cpfCnpj:document}:{}) }),
   },fetcher);
   return created.id;
 }
