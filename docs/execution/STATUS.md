@@ -124,7 +124,7 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 
 - Branch codex/wave-33-production-launch, base 04137df. D-053 e CP-33.
 - Backup cifrado de schema/dados com recuperação da chave pelo Chaveiro verificada; 358 conversas/14.908 mensagens preservadas após migrations 0009–0018. 76 operações antigas HELD.
-- Dados fiscais do checkout protegidos; gate aprovado: 189 unitários, 87 Workers, 72 visuais, D1/recuperação, tipos/lint/build e auditoria zero.
+- Dados fiscais do checkout protegidos; gate aprovado: 189 unitários, 88 Workers, 72 visuais, D1/recuperação, tipos/lint/build e auditoria zero.
 - Revalidação local: Marina Costa, Famtour Alagoas/R$ 7.697,00, uma cobrança Pix Sandbox PAID, lead PAGO e link/confirmação entregues. Nenhuma cobrança real.
 - Receptor e consumidor comercial publicados inicialmente com flags desligadas. Secret Turnstile cifrado no Worker web; ativação e evidências remotas em andamento.
 - Asaas produção bloqueado por SMS sem acesso; checkout e confirmação continuam desligados. E-mail ainda em preparação, sem contratação.

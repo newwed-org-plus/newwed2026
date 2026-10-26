@@ -213,7 +213,7 @@
         "ENABLE_HISTORY_SYNC": "false",
         "ENABLE_MESSAGE_STATUS_SYNC": "true",
         "ENABLE_FREE_AI_RETRY": "true",
-        "HISTORY_CRON_MESSAGE_BUDGET": "100"
+        "HISTORY_CRON_MESSAGE_BUDGET": "0"
       },
       "d1_databases": [
         {

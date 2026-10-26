@@ -175,7 +175,7 @@
         "ENABLE_HISTORY_SYNC": "false",
         "ENABLE_MESSAGE_STATUS_SYNC": "true",
         "ENABLE_FREE_AI_RETRY": "true",
-        "HISTORY_CRON_MESSAGE_BUDGET": "100"
+        "HISTORY_CRON_MESSAGE_BUDGET": "0"
       },
       "send_email": [
         {
@@ -207,7 +207,7 @@
         "consumers": [
           {
             "queue": "new-wed-events-production",
-            "max_batch_size": 10,
+            "max_batch_size": 1,
             "max_batch_timeout": 5,
             "max_retries": 5,
             "dead_letter_queue": "new-wed-events-dead-production"

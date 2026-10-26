@@ -16,7 +16,7 @@
   },
   "vars": {
     "ENVIRONMENT": "production",
-    "HISTORY_CRON_MESSAGE_BUDGET": "100",
+    "HISTORY_CRON_MESSAGE_BUDGET": "0",
     "ENABLE_AGENT": "true",
     "ENABLE_EMAIL": "false"
   },
@@ -42,7 +42,7 @@
     "consumers": [
       {
         "queue": "new-wed-uazapi-production",
-        "max_batch_size": 10,
+        "max_batch_size": 1,
         "max_batch_timeout": 5,
         "max_retries": 5,
         "dead_letter_queue": "new-wed-uazapi-dead-production"

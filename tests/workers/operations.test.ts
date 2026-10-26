@@ -11,11 +11,18 @@ import {hashPassword} from '@/server/auth/password';
 import {acceptUazapiWebhook,processUazapiBatch} from '@/server/uazapi-webhook';
 import {processIncomingWhatsApp} from '@/server/conversation-processing';
 import receiver from '../../workers/uazapi-receiver';
+import commercial from '../../workers/events';
 const now=()=>new Date().toISOString();
 const ctx=(id:string)=>({params:Promise.resolve({id})});
 const req=(body:unknown)=>new Request('https://newwed.test/api/admin/operations',{method:'POST',headers:{origin:'https://newwed.test','content-type':'application/json'},body:JSON.stringify(body)});
 async function actor(){return (await (await me(new Request('https://newwed.test/api/admin/me'))).json() as {id:string}).id;}
 describe('observabilidade e recuperação operacional',()=>{
+ it('limita recuperação de produção e retoma o restante no próximo cron',async()=>{
+  const queue=vi.fn(async()=>{});const runtime={...env,ENVIRONMENT:'production',ENABLE_AGENT:'false',ENABLE_MANUAL_SEND:'false',ENABLE_CHECKOUT:'false',ENABLE_CONFIRMATION:'false',ENABLE_EMAIL:'false',ENABLE_HISTORY_SYNC:'false',ENABLE_MESSAGE_STATUS_SYNC:'false',ENABLE_FREE_AI_RETRY:'false',CLOUDFLARE_ANALYTICS_TOKEN:undefined,ASAAS_API_KEY:undefined,EVENTS_QUEUE:{send:queue} as unknown as Queue};
+  await env.DB.batch(Array.from({length:7},(_,i)=>env.DB.prepare("INSERT INTO outbox_events(id,type,aggregate_id,payload_json,dispatch_state,created_at) VALUES (?,'lead.submitted','synthetic',?,'PENDING',?)").bind(`recovery-${i}`,JSON.stringify({leadId:'synthetic'}),now())));
+  await commercial.scheduled({} as ScheduledController,runtime);expect(queue).toHaveBeenCalledTimes(3);expect(await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE dispatch_state='PENDING'").first()).toEqual({total:4});
+  await commercial.scheduled({} as ScheduledController,runtime);expect(queue).toHaveBeenCalledTimes(6);expect(await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE dispatch_state='PENDING'").first()).toEqual({total:1});
+ });
  it('conta todo o backlog e alerta uma vez após três execuções sem progresso',async()=>{
   await actor();await env.DB.batch(Array.from({length:75},(_,i)=>env.DB.prepare("INSERT INTO outbox_events(id,type,aggregate_id,payload_json,last_error,dispatch_state,created_at) VALUES (?,'checkout.send','synthetic','{}','VALIDACAO','PENDING',?)").bind(`job-${i}`,now())));
   for(let i=0;i<5;i++)await monitorCron({...env,ENABLE_EMAIL:'false'},'commercial',async()=>{});

@@ -86,6 +86,7 @@ export default {
   async scheduled(_controller, env) {
     return monitorCron(env,"commercial",async()=>{
     const workerEnv = env as WorkerEnv;
+    const recoveryLimit=workerEnv.ENVIRONMENT==='production'?3:50;
     const now = new Date().toISOString();
     const stale = new Date(Date.now() - 10 * 60_000).toISOString();
     if(recoveryEnabled(workerEnv))await workerEnv.DB.prepare(`UPDATE outbox_events SET dispatch_state='PENDING',published_at=NULL,processing_token=NULL,processing_started_at=NULL,next_attempt_at=?
@@ -112,19 +113,19 @@ export default {
       workerEnv.DB.prepare("UPDATE messages SET status='SEND_UNKNOWN',last_error='O resultado do envio não foi confirmado dentro do lease.',failed_at=? WHERE status='SENDING' AND coalesce(send_started_at,created_at)<=?")
         .bind(now,stale),
     ]);
-    const pending = await workerEnv.DB.prepare("SELECT id,type,aggregate_id,payload_json FROM outbox_events WHERE type NOT LIKE 'uazapi.%' AND dispatch_state='PENDING' AND published_at IS NULL AND attempts<10 AND (next_attempt_at IS NULL OR next_attempt_at<=?) ORDER BY created_at LIMIT 50")
-      .bind(now).all<{ id:string;type:string;aggregate_id:string;payload_json:string }>();
+    const pending = await workerEnv.DB.prepare("SELECT id,type,aggregate_id,payload_json FROM outbox_events WHERE type NOT LIKE 'uazapi.%' AND dispatch_state='PENDING' AND published_at IS NULL AND attempts<10 AND (next_attempt_at IS NULL OR next_attempt_at<=?) ORDER BY created_at LIMIT ?")
+      .bind(now,recoveryLimit).all<{ id:string;type:string;aggregate_id:string;payload_json:string }>();
     for (const event of pending.results) {
       await publishOutbox(workerEnv,{ id:event.id,type:event.type,...JSON.parse(event.payload_json) });
     }
-    const pendingWebhooks = await workerEnv.DB.prepare("SELECT id,external_id,payload_json,attempts,request_id FROM webhook_events WHERE provider='asaas' AND processed_at IS NULL AND attempts<10 AND (next_retry_at IS NULL OR next_retry_at<=?) ORDER BY created_at LIMIT 50")
-      .bind(now).all<StoredAsaasWebhook>();
+    const pendingWebhooks = await workerEnv.DB.prepare("SELECT id,external_id,payload_json,attempts,request_id FROM webhook_events WHERE provider='asaas' AND processed_at IS NULL AND attempts<10 AND (next_retry_at IS NULL OR next_retry_at<=?) ORDER BY created_at LIMIT ?")
+      .bind(now,workerEnv.ENVIRONMENT==='production'?1:50).all<StoredAsaasWebhook>();
     for (const webhook of pendingWebhooks.results) {
       await processStoredAsaasWebhook(workerEnv,webhook);
     }
     if(capabilityEnabled(workerEnv,"checkout"))await expireCheckoutReservations(workerEnv);
     await workerEnv.DB.prepare("DELETE FROM rate_limit_buckets WHERE expires_at<?").bind(now).run();
-    await syncUazapiDelivery(workerEnv);
+    await syncUazapiDelivery(workerEnv,{limit:workerEnv.ENVIRONMENT==='production'?2:10});
     const imported=await processPendingHistorySyncs(workerEnv);
     if(!imported)await reconcileRecentLocalMessages(workerEnv).catch(()=>console.error(JSON.stringify({event:"local.history.reconcile.unavailable"})));
     await collectUsage(workerEnv).catch(()=>console.error(JSON.stringify({event:"operations.usage.unavailable"})));

@@ -22,7 +22,7 @@ async function historyMessage(env:ReceiverEnv,externalId:string) {
 async function recover(env:ReceiverEnv) {
   const now=new Date().toISOString();
   // Retry live events first; history is always recovered through the bounded path below.
-  const pending=await env.DB.prepare("SELECT id,type,payload_json FROM outbox_events WHERE type IN ('uazapi.incoming','uazapi.status','uazapi.batch') AND published_at IS NULL AND attempts<10 AND (next_attempt_at IS NULL OR next_attempt_at<=?) ORDER BY created_at LIMIT 50").bind(now).all<{id:string;type:string;payload_json:string}>();
+  const pending=await env.DB.prepare("SELECT id,type,payload_json FROM outbox_events WHERE type IN ('uazapi.incoming','uazapi.status','uazapi.batch') AND published_at IS NULL AND attempts<10 AND (next_attempt_at IS NULL OR next_attempt_at<=?) ORDER BY created_at LIMIT ?").bind(now,env.ENVIRONMENT==='production'?3:50).all<{id:string;type:string;payload_json:string}>();
   for(const item of pending.results) {
     const event=JSON.parse(item.payload_json) as QueueEvent;
     if(!event.externalId)continue;
@@ -33,7 +33,9 @@ async function recover(env:ReceiverEnv) {
     if(item.type==='uazapi.status') {await processUazapiStatus(env,event.externalId);await handled(env,item.id);}
     else await publishOutbox(env,{...event,id:item.id,type:item.type});
   }
-  if(!await importHasHeadroom(env))return;
+  const configured=Number(env.HISTORY_CRON_MESSAGE_BUDGET ?? 100);
+  let remaining=Number.isFinite(configured) ? Math.min(1000,Math.max(0,Math.floor(configured))) : 100;
+  if(remaining===0||!await importHasHeadroom(env))return;
   // Discover durable parent batches even if their Queue message was already accepted.
   const batches=await env.DB.prepare("SELECT external_id,payload_json FROM webhook_events WHERE provider='uazapi' AND event_type='uazapi.batch' AND processed_at IS NULL ORDER BY created_at LIMIT 50").all<{external_id:string;payload_json:string}>();
   for(const batch of batches.results) {
@@ -42,8 +44,6 @@ async function recover(env:ReceiverEnv) {
     if(!item?.payload?.lineId)continue;
     await env.DB.prepare("INSERT OR IGNORE INTO history_imports (external_id,line_id,updated_at) VALUES (?,?,?)").bind(batch.external_id,item.payload.lineId,now).run();
   }
-  const configured=Number(env.HISTORY_CRON_MESSAGE_BUDGET ?? 100);
-  let remaining=Number.isFinite(configured) ? Math.min(1000,Math.max(0,Math.floor(configured))) : 100;
   const jobs=await env.DB.prepare("SELECT external_id,line_id,cursor,attempts FROM history_imports WHERE completed_at IS NULL AND attempts<10 AND (next_attempt_at IS NULL OR next_attempt_at<=?) ORDER BY updated_at LIMIT 50").bind(now).all<{external_id:string;line_id:string;cursor:number;attempts:number}>();
   for(const job of jobs.results) {
     if(remaining===0)break;

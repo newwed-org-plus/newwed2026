@@ -22,7 +22,8 @@ export async function operationalAlert(env:OperationsEnv,key:string,title:string
  const day=new Date().toISOString().slice(0,10);const id=`ops:${key}:${day}`;const now=new Date().toISOString();
  const recipients=(await env.DB.prepare("SELECT DISTINCT u.id FROM users u JOIN roles r ON r.user_id=u.id WHERE u.active=1 AND r.role IN ('admin','gestor')").all<{id:string}>()).results;
  if(!recipients.length)return;
- await env.DB.prepare("INSERT OR IGNORE INTO notifications(id,type,entity_type,entity_id,title,body,dedupe_key,created_at) VALUES (?,'OPERATION_ALERT','operation',?,?,?,?,?)").bind(id,key,title,body,id,now).run();
+  const created=await env.DB.prepare("INSERT OR IGNORE INTO notifications(id,type,entity_type,entity_id,title,body,dedupe_key,created_at) VALUES (?,'OPERATION_ALERT','operation',?,?,?,?,?)").bind(id,key,title,body,id,now).run();
+  if(!created.meta.changes)return;
  for(const user of recipients) {
   const eventId=`${id}:${user.id}`;
   await env.DB.batch([
