@@ -120,14 +120,15 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Ciclo validado: uma cobrança PAID, lead PAGO, link e confirmação READ, uma notificação, uma transição e uma vaga vendida. Replay do evento original e mesma chave de criação não duplicam efeitos. Painel mostra estados separados com atualização sem reenvio.
 - Gate aprovado: 185 unitários, 85 Workers, 72 visuais, D1/recuperação, tipos/lint/build, auditoria zero e preflights. CP-32. Cartão/parcelas/estorno externos e produção fora deste aceite.
 
-## Onda 33 — Publicação em andamento
+## Onda 33 — Produção publicada; aceite externo parcial
 
 - Branch codex/wave-33-production-launch, base 04137df. D-053 e CP-33.
 - Backup cifrado de schema/dados com recuperação da chave pelo Chaveiro verificada; 358 conversas/14.908 mensagens preservadas após migrations 0009–0018. 76 operações antigas HELD.
-- Dados fiscais do checkout protegidos; gate aprovado: 189 unitários, 88 Workers, 72 visuais, D1/recuperação, tipos/lint/build e auditoria zero.
+- Dados fiscais do checkout protegidos; gate aprovado: 189 unitários, 89 Workers, 72 visuais, D1/recuperação, tipos/lint/build e auditoria zero.
 - Revalidação local: Marina Costa, Famtour Alagoas/R$ 7.697,00, uma cobrança Pix Sandbox PAID, lead PAGO e link/confirmação entregues. Nenhuma cobrança real.
-- Receptor e consumidor comercial publicados inicialmente com flags desligadas. Secret Turnstile cifrado no Worker web; ativação e evidências remotas em andamento.
-- Asaas produção bloqueado por SMS sem acesso; checkout e confirmação continuam desligados. E-mail ainda em preparação, sem contratação.
+- Web, receptor e consumidor publicados; recebimento, envio manual e IA gratuitos habilitados. Callback atendimento em produção e conectado; histórico remoto pausado e operações antigas HELD.
+- Consumo real D1/filas coletado pelo cron; falha de transporte resolvida com redirect manual. Plano gratuito/e-mail desligado por decisão do usuário. Checkout/confirmação aguardam SMS Asaas.
+- Local revalidado: Pix e cartão em 12 parcelas com nomes comuns, cobrança/notificação/confirmação únicas. Login autenticado remoto e teste de token real do formulário dependem do usuário.
 
 ## Bloqueios externos
 

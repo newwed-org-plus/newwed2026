@@ -44,6 +44,12 @@ describe('observabilidade e recuperação operacional',()=>{
   await env.DB.prepare('UPDATE resource_usage SET observed_at=?').bind('2020-01-01T00:00:00.000Z').run();expect(await importHasHeadroom(env)).toBe(false);
   await env.DB.prepare('UPDATE resource_usage SET used=0,observed_at=?,window_end=?').bind(now(),now().slice(0,10)).run();expect(await importHasHeadroom(env)).toBe(true);
  });
+ it('recusa redirecionamento na API de métricas sem encaminhar a credencial ou gravar consumo',async()=>{
+  const provider=vi.fn<typeof fetch>(async()=>new Response(null,{status:302,headers:{location:'https://other.example.invalid'}}));
+  await expect(collectUsage({...env,CLOUDFLARE_ANALYTICS_TOKEN:'synthetic-analytics-only',CLOUDFLARE_ACCOUNT_ID:'synthetic-account'},provider)).rejects.toThrow('ANALYTICS_HTTP_302');
+  expect(provider).toHaveBeenCalledTimes(1);expect(provider.mock.calls[0][1]).toMatchObject({redirect:'manual'});
+  expect(await env.DB.prepare("SELECT count(*) AS total FROM resource_usage").first()).toEqual({total:0});
+ });
  it('concilia e-mail incerto sem enviar e só então aceita nova tentativa auditada',async()=>{
   const user=await actor();await env.DB.batch([
    env.DB.prepare("INSERT INTO notifications(id,type,entity_type,entity_id,title,body,dedupe_key,created_at) VALUES('n','CHECKOUT_PAID','checkout','synthetic','VALIDACAO','VALIDACAO','n',?)").bind(now()),
