@@ -1,3 +1,4 @@
+import {checkoutDocument,encryptBillingDocument} from '@/server/billing-document';
 import {requireLocalCheckoutRecipients} from '@/server/local-checkout-policy';
 import {configuredInstance} from "@/server/integrations/uazapi";
 import {getSecrets} from "@/server/secrets";
@@ -56,6 +57,8 @@ export async function POST(request: Request,{ params }:{ params:Promise<{ id:str
     const dueDate = resolveCheckoutDueDate(input.dueDate);
     if (dueDate < currentDateInRecife()) throw new HttpError(422,"INVALID_DUE_DATE","O vencimento não pode estar no passado.");
     const checkoutId = crypto.randomUUID();
+    const document=checkoutDocument(env,input.cpfCnpj);
+    const encryptedDocument=document?await encryptBillingDocument(getSecrets(),checkoutId,document):null;
     const outboxId = crypto.randomUUID();
     const now = new Date().toISOString();
     const expiresAt = checkoutExpiresAt(dueDate);
@@ -73,9 +76,9 @@ export async function POST(request: Request,{ params }:{ params:Promise<{ id:str
           AND EXISTS (SELECT 1 FROM leads WHERE id=? AND stage='QUALIFICADO' AND edition_id=?)
           AND NOT EXISTS (SELECT 1 FROM checkouts WHERE lead_id=? AND reservation_released_at IS NULL AND status NOT IN ('PAID','OVERDUE','CANCELLED','REFUNDED'))`)
           .bind(now,input.editionId,input.editionId,leadId,input.editionId,leadId),
-        env.DB.prepare(`INSERT INTO checkouts (id,lead_id,edition_id,price_batch_id,provider,method,installment_count,amount_cents,status,financial_status,send_status,idempotency_key,authorized_by,expires_at,request_id,created_at,updated_at,conversation_id,whatsapp_instance_id,delivery_channel)
-          SELECT ?,?,?,?,'asaas',?,?,?,'CREATING','NOT_STARTED','NOT_REQUESTED',?,?,?,?,?,?,?,?,? WHERE changes()=1`)
-          .bind(checkoutId,leadId,input.editionId,input.priceBatchId,input.method,input.installmentCount,offer.amount_cents,idempotencyKey,actor.id,expiresAt,requestId,now,now,conversation?.id??null,conversation?.whatsapp_instance_id??null,useUazapi?"uazapi":"meta"),
+        env.DB.prepare(`INSERT INTO checkouts (id,lead_id,edition_id,price_batch_id,provider,method,installment_count,amount_cents,status,financial_status,send_status,idempotency_key,authorized_by,expires_at,request_id,created_at,updated_at,conversation_id,whatsapp_instance_id,delivery_channel,billing_document_ciphertext)
+          SELECT ?,?,?,?,'asaas',?,?,?,'CREATING','NOT_STARTED','NOT_REQUESTED',?,?,?,?,?,?,?,?,?,? WHERE changes()=1`)
+          .bind(checkoutId,leadId,input.editionId,input.priceBatchId,input.method,input.installmentCount,offer.amount_cents,idempotencyKey,actor.id,expiresAt,requestId,now,now,conversation?.id??null,conversation?.whatsapp_instance_id??null,useUazapi?"uazapi":"meta",encryptedDocument),
         env.DB.prepare("INSERT INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,request_id,created_at) SELECT ?,'checkout.create',? ,?,?,0,?,? WHERE changes()=1")
           .bind(outboxId,checkoutId,`checkout.create:${checkoutId}`,payload,requestId,now),
         env.DB.prepare("INSERT INTO idempotency_keys (key,scope,resource_id,response_json,created_at) SELECT ?,'checkout',?,?,? WHERE changes()=1")

@@ -1,3 +1,4 @@
+import {decryptBillingDocument} from './billing-document';
 import {requireLocalCheckoutRecipients,checkoutText} from './local-checkout-policy';
 import {sendUazapiText} from "./integrations/uazapi";
 import {reconcileUazapiReceipt} from "./uazapi-webhook";
@@ -38,6 +39,7 @@ type CheckoutCreationRow = {
   price_name:string;
   edition_name:string;
   request_id:string|null;
+  billing_document_ciphertext:string|null;
   conversation_id:string|null;
   whatsapp_instance_id:string|null;
   delivery_channel:string;
@@ -109,7 +111,7 @@ export async function processCheckoutCreation(env: CheckoutWorkerEnv,checkoutId:
   if ((claimed.meta.changes ?? 0) !== 1) return { processed:false as const };
 
   const checkout = await env.DB.prepare(`SELECT c.id,c.lead_id,c.edition_id,c.price_batch_id,c.provider_customer_id,c.method,c.installment_count,c.amount_cents,c.expires_at,c.retry_count,
-    l.name,l.email,l.normalized_phone,p.name AS price_name,e.name AS edition_name,c.request_id,c.conversation_id,c.whatsapp_instance_id,c.delivery_channel
+    l.name,l.email,l.normalized_phone,p.name AS price_name,e.name AS edition_name,c.request_id,c.conversation_id,c.whatsapp_instance_id,c.delivery_channel,c.billing_document_ciphertext
     FROM checkouts c JOIN leads l ON l.id=c.lead_id JOIN price_batches p ON p.id=c.price_batch_id AND p.edition_id=c.edition_id JOIN editions e ON e.id=c.edition_id
     WHERE c.id=? AND c.processing_token=? AND c.amount_cents=p.amount_cents`)
     .bind(checkoutId,token).first<CheckoutCreationRow>();
@@ -131,7 +133,7 @@ export async function processCheckoutCreation(env: CheckoutWorkerEnv,checkoutId:
     let customerId = checkout.provider_customer_id ?? first?.customer;
     if (!first) {
       customerId = customerId ?? await findOrCreateCustomer(env,{
-        id:checkout.lead_id,name:checkout.name,email:checkout.email,normalizedPhone:checkout.normalized_phone,
+        id:checkout.lead_id,name:checkout.name,email:checkout.email,normalizedPhone:checkout.normalized_phone,cpfCnpj:checkout.billing_document_ciphertext?await decryptBillingDocument(env,checkout.id,checkout.billing_document_ciphertext):undefined,
       },fetcher);
       first = await createAsaasPayment(env,{
         customerId,checkoutId,method:checkout.method,amountCents:checkout.amount_cents,installmentCount:checkout.installment_count,
@@ -146,7 +148,7 @@ export async function processCheckoutCreation(env: CheckoutWorkerEnv,checkoutId:
     const readyAt = new Date().toISOString();
     const financialStatus = normalizeAsaasPaymentStatus(first.status);
     const [stored] = await env.DB.batch([
-      env.DB.prepare(`UPDATE checkouts SET provider_customer_id=coalesce(?,provider_customer_id),provider_payment_id=?,provider_installment_id=?,url=?,status='READY',financial_status=?,ready_at=?,last_error_code=NULL,last_error=NULL,last_error_at=NULL,processing_token=NULL,processing_started_at=NULL,next_retry_at=NULL,updated_at=?,version=version+1
+      env.DB.prepare(`UPDATE checkouts SET provider_customer_id=coalesce(?,provider_customer_id),billing_document_ciphertext=NULL,provider_payment_id=?,provider_installment_id=?,url=?,status='READY',financial_status=?,ready_at=?,last_error_code=NULL,last_error=NULL,last_error_at=NULL,processing_token=NULL,processing_started_at=NULL,next_retry_at=NULL,updated_at=?,version=version+1
         WHERE id=? AND processing_token=? AND status='CREATING'`)
         .bind(customerId ?? null,first.id,first.installment ?? null,first.invoiceUrl ?? null,financialStatus,readyAt,readyAt,checkoutId,token),
       ...payments.map((payment) => paymentStatement(env,checkoutId,payment,readyAt)),

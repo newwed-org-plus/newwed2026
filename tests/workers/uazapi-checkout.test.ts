@@ -131,3 +131,18 @@ it('processa webhook com opcionais nulos após conciliação sem regredir PAID o
  expect(await env.DB.prepare("SELECT count(*) AS total FROM outbox_events WHERE aggregate_id=? AND type='checkout.confirmation.send'").bind(id).first()).toEqual({total:1});
  expect(await env.DB.prepare("SELECT reserved,sold FROM availability WHERE edition_id='e'").first()).toEqual({reserved:0,sold:1});
 });
+
+it('protege o documento pendente e o envia somente ao Asaas, removendo a cópia após vincular o pagador',async()=>{
+ const id=await seed();const runtime=env as unknown as Record<string,unknown>;runtime.BILLING_ENCRYPTION_KEY='a'.repeat(64);
+ const {encryptBillingDocument}=await import('@/server/billing-document');const document='99991111140';const encrypted=await encryptBillingDocument({BILLING_ENCRYPTION_KEY:'a'.repeat(64)},id,document);
+ try{
+  await env.DB.prepare("UPDATE checkouts SET billing_document_ciphertext=?,provider_customer_id=NULL,status='FAILED',send_status='NOT_REQUESTED',processing_started_at=NULL,next_retry_at=NULL WHERE id=?").bind(encrypted,id).run();
+  const {GET:leadDetail}=await import('../../app/api/admin/leads/[id]/route');const lead=await env.DB.prepare('SELECT lead_id FROM checkouts WHERE id=?').bind(id).first<{lead_id:string}>();
+  const response=await leadDetail(new Request('https://newwed.test/api/admin/leads/'+lead!.lead_id),ctx(lead!.lead_id));const body=await response.text();expect(body).not.toContain('billing_document_ciphertext');expect(body).not.toContain(document);
+  let sentDocument:string|undefined;
+  const provider=vi.fn(async(input:RequestInfo|URL,init?:RequestInit)=>{const url=String(input);if(url.includes('/payments?'))return Response.json({data:[]});if(url.includes('/customers')&&!init?.method)return Response.json({data:[]});if(url.endsWith('/customers')){sentDocument=JSON.parse(String(init?.body)).cpfCnpj;return Response.json({id:'cus_document'});}if(url.endsWith('/payments'))return Response.json({...payment(id),status:'PENDING',invoiceUrl:'https://sandbox.asaas.test/invoice'});throw new Error('Unexpected request');});
+  expect(await processCheckoutCreation(env,id,'synthetic-document-event',provider as typeof fetch)).toMatchObject({status:'READY'});expect(sentDocument).toBe(document);
+  expect(await env.DB.prepare('SELECT billing_document_ciphertext,provider_customer_id FROM checkouts WHERE id=?').bind(id).first()).toEqual({billing_document_ciphertext:null,provider_customer_id:'cus_document'});
+  const audit=await env.DB.prepare("SELECT after_json FROM audit_log WHERE entity_id=?").bind(id).all();expect(JSON.stringify(audit.results)).not.toContain(document);
+ }finally{delete runtime.BILLING_ENCRYPTION_KEY;}
+});

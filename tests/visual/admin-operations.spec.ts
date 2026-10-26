@@ -41,7 +41,7 @@ for(const [name,width,height] of [["mobile",390,844],["desktop",1440,900]] as co
  await page.goto(`${origin}/admin`);await page.getByRole('button').filter({has:page.getByText('VALIDACAO checkout',{exact:true})}).click();
  const create=page.getByRole('button',{name:'Criar checkout',exact:true});await expect(create).toBeDisabled();
  await page.getByLabel('Conversa para o checkout',{exact:true}).selectOption('c2');await expect(create).toBeDisabled();await expect(page.getByText('Carregando oferta da edição…')).toBeVisible();
- releaseCatalog();await expect(create).toBeEnabled();await create.click();
+ releaseCatalog();await expect(create).toBeDisabled();await page.getByLabel('CPF/CNPJ do pagador',{exact:true}).fill('999.911.111-40');await expect(create).toBeEnabled();await create.click();
  await expect.poll(()=>sent?.conversationId).toBe('c2');await expect(page.getByText(/reservado e em processamento/)).toBeVisible();
  await page.screenshot({path:`test-results/checkout-${name}.png`,fullPage:true});
 });

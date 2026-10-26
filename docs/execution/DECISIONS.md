@@ -241,3 +241,16 @@ A liberação existe somente em `.dev.vars` privado e nos Workers locais gerados
 Sandbox utiliza documento fiscal sintético explícito em `ASAAS_SANDBOX_TEST_DOCUMENT`, somente no modo local com host/chave Sandbox. Não copiar documento de teste para produção nem substituir dados legítimos de pagadores. Novos clientes Asaas usam notificações nativas desligadas para preservar o canal UAZAPI. Mensagens locais identificam TESTE SANDBOX e não prometem participação real.
 
 A validação encontrou campos opcionais nulos no webhook real. Aceitar null somente nesses campos e normalizar para ausência; manter ID, status e valor positivos obrigatórios. Conciliação por snapshot recupera pagamentos enquanto há falha de callback; retomada do evento original não regride PAID nem repete confirmação/notificação. Não confirmar novamente o pagamento para reproduzir um webhook; usar replay exato do evento original. Não remover penalização repetidamente nem reativar filas desconhecidas.
+
+
+## D-053 — Publicação autorizada e dados fiscais protegidos
+
+Em 25/10/2026, o usuário autorizou publicar e configurar produção e repetir o ciclo local com nomes comuns de clientes fictícios. Esta decisão substitui a proibição de deploy de D-047/D-052, preservando a separação Sandbox/produção, as operações antigas em retenção e a exigência de orçamento para contratar capacidade. Revalidação local utiliza Marina Costa e a oferta publicada do Famtour Alagoas; os testes pagos anteriores permanecem intactos. Não criar cobranças reais para validação.
+
+Checkout em produção exige CPF/CNPJ legítimo informado pelo operador. O documento é validado, cifrado com AES-GCM/nonce exclusivo e vinculado ao checkout, excluído das respostas administrativas e auditoria e removido após vincular o pagador no Asaas. Chave de cifra pertence aos secrets web/comercial. Documento sintético continua restrito ao Sandbox local. Divergência com pagador já vinculado bloqueia nova cobrança.
+
+Usuário aprovou a chave Asaas Produção, sem saques e com validade até 24/11/2026 às 23:59, exclusivamente no secret do consumidor comercial. O Asaas exigiu SMS no telefone cadastrado; o usuário informou não ter acesso. Nenhuma chave foi criada e checkout/confirmação remotos ficam desligados até concluir essa etapa. A origem de produção está configurada; não copiar chave Sandbox nem simular pagamento real.
+
+Usuário aprovou token Cloudflare temporário Account.Turnstile:Edit, restrito à conta Newwed por 30 dias, no Chaveiro local. Widget cobre os domínios públicos e hosts locais; produção valida somente newwed.com.br/www.newwed.com.br e action public_lead. Secret somente no Worker web. Credencial inicialmente exposta na saída de acessibilidade foi substituída antes de uso; apenas a substituta foi guardada.
+
+Produção mantém orçamento conservador diário do plano gratuito (D1: 5 milhões de leituras/100 mil escritas; Queues: 10 mil operações); não representa medição de consumo. Importação continua desligada até medir e dimensionar. Atendimento usa somente OpenRouter gratuito, sem fallback pago. A implantação começa com funções externas desligadas; versões compatíveis e migrations são registradas antes da ativação progressiva.

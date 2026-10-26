@@ -19,4 +19,11 @@ describe('checkout restrito no perfil local',()=>{
   await expect(findOrCreateCustomer(policy,lead,fetcher as typeof fetch)).resolves.toBe('cus_synthetic');expect(JSON.parse(String(calls[1].body))).toMatchObject({notificationDisabled:true,cpfCnpj:'99991111140',externalReference:lead.id});
   const blocked=vi.fn();await expect(findOrCreateCustomer({...policy,LOCAL_TEST_MODE:'false'},lead,blocked)).rejects.toMatchObject({code:'ASAAS_TEST_DATA_BLOCKED'});expect(blocked).not.toHaveBeenCalled();
  });
+ it('bloqueia produção sem documento e evita cobrar outro pagador no mesmo vínculo',async()=>{
+  const policy={ASAAS_API_URL:'https://api.asaas.com/v3',ASAAS_API_KEY:'$aact_prod_synthetic'};
+  const lead={id:'synthetic-lead',name:'Marina Costa',email:'marina@example.invalid',normalizedPhone:'+5581999990001'};
+  const blocked=vi.fn();await expect(findOrCreateCustomer(policy,lead,blocked)).rejects.toMatchObject({code:'BILLING_DOCUMENT_REQUIRED'});expect(blocked).not.toHaveBeenCalled();
+  const existing=vi.fn(async()=>Response.json({data:[{id:'cus_existing',cpfCnpj:'11222333000181'}]}));
+  await expect(findOrCreateCustomer(policy,{...lead,cpfCnpj:'99991111140'},existing as typeof fetch)).rejects.toMatchObject({code:'BILLING_DOCUMENT_MISMATCH'});expect(existing).toHaveBeenCalledTimes(1);
+ });
 });

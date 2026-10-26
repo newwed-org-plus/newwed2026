@@ -214,6 +214,7 @@ export const checkouts = sqliteTable("checkouts", {
   priceBatchId: text("price_batch_id").notNull().references(() => priceBatches.id),
   conversationId:text("conversation_id").references(()=>conversations.id),whatsappInstanceId:text("whatsapp_instance_id").references(()=>whatsappInstances.id),deliveryChannel:text("delivery_channel").notNull().default("meta"),
   provider: text("provider").notNull().default("asaas"),
+  billingDocumentCiphertext:text("billing_document_ciphertext"),
   providerCustomerId: text("provider_customer_id"),
   providerPaymentId: text("provider_payment_id"),
   providerInstallmentId: text("provider_installment_id"),

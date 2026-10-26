@@ -17,7 +17,7 @@
   "vars": {
     "ENVIRONMENT": "production",
     "HISTORY_CRON_MESSAGE_BUDGET": "100",
-    "ENABLE_AGENT": "false",
+    "ENABLE_AGENT": "true",
     "ENABLE_EMAIL": "false"
   },
   "d1_databases": [

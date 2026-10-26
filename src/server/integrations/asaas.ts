@@ -1,6 +1,7 @@
 import { HttpError } from "@/server/http";
 import type { RuntimeSecrets } from "@/server/secrets";
 import {readJsonWithLimit} from '@/server/request-context';
+import {normalizeBillingDocument,validBillingDocument} from '@/features/billing/billing-document';
 
 const DEFAULT_BASE_URL = "https://api-sandbox.asaas.com/v3";
 
@@ -22,7 +23,7 @@ export type AsaasPaymentSnapshot = {
   confirmedDate?: string;
 };
 
-type LeadForBilling = { id:string;name:string;email:string;normalizedPhone:string };
+type LeadForBilling = { id:string;name:string;email:string;normalizedPhone:string;cpfCnpj?:string };
 
 function baseUrl(env: AsaasEnvironment) {
   const url=(env.ASAAS_API_URL || DEFAULT_BASE_URL).replace(/\/$/,"");
@@ -53,10 +54,17 @@ export async function asaasRequest<T>(env: AsaasEnvironment,path: string,init: R
 const asaas=asaasRequest;
 
 export async function findOrCreateCustomer(env: AsaasEnvironment,lead: LeadForBilling,fetcher: AsaasFetcher = fetch) {
-  const document=env.ASAAS_SANDBOX_TEST_DOCUMENT;
-  if(document&&(env.LOCAL_TEST_MODE!=='true'||baseUrl(env)!==DEFAULT_BASE_URL||!env.ASAAS_API_KEY?.startsWith('$aact_hmlg_')||!/^\d{11}(\d{3})?$/.test(document)))throw new HttpError(503,'ASAAS_TEST_DATA_BLOCKED','Documento sintético permitido somente no Sandbox local autorizado.');
-  const found = await asaas<{ data:Array<{ id:string }> }>(env,`/customers?externalReference=${encodeURIComponent(lead.id)}&limit=1`,{},fetcher);
-  if (found.data[0]) return found.data[0].id;
+  const testDocument=env.ASAAS_SANDBOX_TEST_DOCUMENT;
+  const document=lead.cpfCnpj??testDocument;
+  if(testDocument&&(env.LOCAL_TEST_MODE!=='true'||baseUrl(env)!==DEFAULT_BASE_URL||!env.ASAAS_API_KEY?.startsWith('$aact_hmlg_')||!/^\d{11}(\d{3})?$/.test(testDocument)))throw new HttpError(503,'ASAAS_TEST_DATA_BLOCKED','Documento sintético permitido somente no Sandbox local autorizado.');
+  if(baseUrl(env)!==DEFAULT_BASE_URL&&(!document||!validBillingDocument(document)))throw new HttpError(422,'BILLING_DOCUMENT_REQUIRED','Informe o CPF/CNPJ válido do pagador antes de criar a cobrança.');
+  const found = await asaas<{ data:Array<{ id:string;cpfCnpj?:string|null }> }>(env,`/customers?externalReference=${encodeURIComponent(lead.id)}&limit=1`,{},fetcher);
+  if (found.data[0]) {
+    const customer=found.data[0];
+    if(document&&customer.cpfCnpj&&normalizeBillingDocument(document)!==normalizeBillingDocument(customer.cpfCnpj))throw new HttpError(409,'BILLING_DOCUMENT_MISMATCH','O documento informado diverge do pagador já vinculado. Revise o cadastro antes de cobrar.');
+    if(document&&!customer.cpfCnpj)await asaas(env,`/customers/${encodeURIComponent(customer.id)}`,{method:'PUT',body:JSON.stringify({cpfCnpj:document,notificationDisabled:true})},fetcher);
+    return customer.id;
+  }
   const created = await asaas<{ id:string }>(env,"/customers",{
     method:"POST",
     body:JSON.stringify({ name:lead.name,email:lead.email,mobilePhone:lead.normalizedPhone.replace(/^\+55/,""),externalReference:lead.id,notificationDisabled:true,...(document?{cpfCnpj:document}:{}) }),

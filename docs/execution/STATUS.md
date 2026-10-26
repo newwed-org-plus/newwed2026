@@ -7,16 +7,16 @@ Atualizado em: 2026-10-25.
 Implementar as ondas 21–26: site → inscrição → lead → atendimento → qualificação humana → checkout → pagamento → confirmação pela mesma linha UAZAPI.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
-- Usuário vai testar localmente; Asaas Sandbox configurado (D-051), e-mail ainda não preparado.
+- Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Asaas produção exige SMS indisponível; checkout remoto fica desligado.
 - Não contratar capacidade paga sem orçamento aprovado; não liberar mensagens, cobranças ou e-mails antigos ao ativar consumidor.
-- O usuário autorizou usar `atendimento` no localhost e importar o histórico UAZAPI desta linha. D-047 substitui a restrição local anterior; sem deploy.
+- O usuário autorizou usar `atendimento` no localhost e importar o histórico UAZAPI desta linha. D-047 autorizou o callback local; D-053 autoriza a publicação e a devolução do callback para produção.
 
 ## Base preservada
 
 - Ondas 0–16: funcionalidades e publicações em CP-00 a CP-16.
 - Ondas 17–20: parser de conexão, renovação explícita de QR, fim do polling conectado e recuperação de histórico; CP-17 a CP-20.
 - Último receptor publicado: versão `b06cb9e7-72ac-4c71-b15a-cc612327dba6`.
-- Migrations remotas até 0008; locais até 0017; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
+- Migrations de produção, staging e locais até 0018; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
 - Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`, perfil Wrangler `newwed-production`.
 
 ## Onda 21 concluída
@@ -120,9 +120,18 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Ciclo validado: uma cobrança PAID, lead PAGO, link e confirmação READ, uma notificação, uma transição e uma vaga vendida. Replay do evento original e mesma chave de criação não duplicam efeitos. Painel mostra estados separados com atualização sem reenvio.
 - Gate aprovado: 185 unitários, 85 Workers, 72 visuais, D1/recuperação, tipos/lint/build, auditoria zero e preflights. CP-32. Cartão/parcelas/estorno externos e produção fora deste aceite.
 
+## Onda 33 — Publicação em andamento
+
+- Branch codex/wave-33-production-launch, base 04137df. D-053 e CP-33.
+- Backup cifrado de schema/dados com recuperação da chave pelo Chaveiro verificada; 358 conversas/14.908 mensagens preservadas após migrations 0009–0018. 76 operações antigas HELD.
+- Dados fiscais do checkout protegidos; gate aprovado: 189 unitários, 86 Workers, 72 visuais, D1/recuperação, tipos/lint/build e auditoria zero.
+- Revalidação local: Marina Costa, Famtour Alagoas/R$ 7.697,00, uma cobrança Pix Sandbox PAID, lead PAGO e link/confirmação entregues. Nenhuma cobrança real.
+- Receptor e consumidor comercial publicados inicialmente com flags desligadas. Secret Turnstile cifrado no Worker web; ativação e evidências remotas em andamento.
+- Asaas produção bloqueado por SMS sem acesso; checkout e confirmação continuam desligados. E-mail ainda em preparação, sem contratação.
+
 ## Bloqueios externos
 
-- Pix Sandbox local aprovado; ativação de produção e testes externos de cartão/parcelas/estorno pendentes. Domínio de e-mail ainda não preparado.
+- Asaas produção: titular sem acesso ao SMS necessário para criar a chave; não há chave de produção nem checkout remoto habilitado. Cartão/parcelas/estorno externos e domínio de e-mail pendentes.
 - Sem linha de teste separada configurada em homologação; nunca usar a linha ativa para fixtures.
 - Vídeo final não fornecido; imagem atual preservada.
 - Piloto real e observação por 24h ainda pendentes.
