@@ -4,7 +4,7 @@ import {HttpError} from "@/server/http";
 import {getSecrets} from "@/server/secrets";
 import {readJsonWithLimit} from "@/server/request-context";
 export async function verifyTurnstile(token:string|undefined,ip:string|null) {
- const secret=getSecrets().TURNSTILE_SECRET_KEY;
+ const secrets=getSecrets();const secret=secrets.TURNSTILE_SECRET??secrets.TURNSTILE_SECRET_KEY;
  if(!secret) {if(env.ENVIRONMENT==='development')return;throw new HttpError(503,'TURNSTILE_NOT_CONFIGURED','Verificação temporariamente indisponível.');}
  const hosts=String(env.TURNSTILE_HOSTNAMES??'').split(',').map(host=>host.trim()).filter(Boolean);
  if(!hosts.length||(env.ENVIRONMENT==='production'&&hosts.some(host=>['localhost','127.0.0.1'].includes(host))))throw new HttpError(503,'TURNSTILE_NOT_CONFIGURED','Verificação temporariamente indisponível.');

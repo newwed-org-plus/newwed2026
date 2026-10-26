@@ -81,6 +81,15 @@ describe('checkout e confirmação na conversa UAZAPI',()=>{
  });
 });
 describe('Turnstile valida o domínio e a ação no servidor',()=>{
+ it('usa o secret canônico de produção e preserva a compatibilidade com o nome antigo',async()=>{
+  const runtime=env as unknown as Record<string,unknown>;const previous={ENVIRONMENT:runtime.ENVIRONMENT,TURNSTILE_SECRET:runtime.TURNSTILE_SECRET,TURNSTILE_SECRET_KEY:runtime.TURNSTILE_SECRET_KEY,TURNSTILE_HOSTNAMES:runtime.TURNSTILE_HOSTNAMES};
+  const network=vi.spyOn(globalThis,'fetch');
+  try{
+   Object.assign(runtime,{ENVIRONMENT:'production',TURNSTILE_SECRET:'synthetic-primary',TURNSTILE_SECRET_KEY:'synthetic-legacy',TURNSTILE_HOSTNAMES:'newwed.com.br,www.newwed.com.br'});
+   network.mockResolvedValueOnce(Response.json({success:true,action:'public_lead',hostname:'newwed.com.br'}));await expect(verifyTurnstile('fresh',null)).resolves.toBeUndefined();expect(new URLSearchParams(network.mock.calls[0][1]?.body as URLSearchParams).get('secret')).toBe('synthetic-primary');
+   delete runtime.TURNSTILE_SECRET;network.mockResolvedValueOnce(Response.json({success:true,action:'public_lead',hostname:'www.newwed.com.br'}));await expect(verifyTurnstile('legacy',null)).resolves.toBeUndefined();expect(new URLSearchParams(network.mock.calls[1][1]?.body as URLSearchParams).get('secret')).toBe('synthetic-legacy');
+  }finally{network.mockRestore();Object.assign(runtime,previous);}
+ });
  it('exige configuração em staging e verifica resultado, ação, hostname e token consumido',async()=>{
   const runtime=env as unknown as Record<string,unknown>;const previous={ENVIRONMENT:runtime.ENVIRONMENT,TURNSTILE_SECRET_KEY:runtime.TURNSTILE_SECRET_KEY,TURNSTILE_HOSTNAMES:runtime.TURNSTILE_HOSTNAMES};
   Object.assign(runtime,{ENVIRONMENT:'staging',TURNSTILE_SECRET_KEY:undefined});
