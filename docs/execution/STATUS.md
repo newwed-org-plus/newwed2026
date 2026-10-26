@@ -1,6 +1,6 @@
 # Status de execução
 
-Atualizado em: 2026-10-25.
+Atualizado em: 2026-10-26.
 
 ## Objetivo ativo
 
@@ -129,6 +129,15 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Web, receptor e consumidor publicados; recebimento, envio manual e IA gratuitos habilitados. Callback atendimento em produção e conectado; histórico remoto pausado e operações antigas HELD.
 - Consumo real D1/filas coletado pelo cron; falha de transporte resolvida com redirect manual. Plano gratuito/e-mail desligado por decisão do usuário. Checkout/confirmação aguardam SMS Asaas.
 - Local revalidado: Pix e cartão em 12 parcelas com nomes comuns, cobrança/notificação/confirmação únicas. Login autenticado remoto e teste de token real do formulário dependem do usuário.
+
+## Onda 34 — Login e orçamento de manutenção
+
+- Branch codex/wave-34-production-login, base 388a0a4. CP-34 e D-054.
+- Login real retorna 503 por cota diária D1, inclusive na criação da sessão; senha e autenticação preservadas. Plano Free mantido.
+- Migration 0019: índices parciais eliminam varreduras ociosas; cron sintético com 3 mil mensagens e eventos usa menos de 100 leituras.
+- Erro de cota informa motivo e renovação, preservando DATABASE_UNAVAILABLE e 503; falha transitória continua distinta.
+- Gate aprovado: 190 unitários, 91 Workers, 73 visuais, tipos/lint/build, D1/recuperação e auditoria zero. Remoto bloqueado pela cota; smoke autenticado pendente.
+- Prints locais para Lucas Ximenes em banco isolado e com dados fictícios, conforme autorização do usuário.
 
 ## Bloqueios externos
 

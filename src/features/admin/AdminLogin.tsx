@@ -18,8 +18,12 @@ export function AdminLogin() {
     setError("");
     try {
       const response = await fetch("/api/auth/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: email.trim(), password }) });
-      const result = await response.json() as { message?: string };
-      if (!response.ok) throw new Error(result.message ?? "Não foi possível entrar. Tente novamente.");
+      const result = await response.json() as { message?: string; reason?: string; retryAt?: string };
+      if (!response.ok) {
+        const retryAt=result.reason==="DAILY_QUOTA"&&result.retryAt?new Date(result.retryAt):null;
+        if(retryAt&&Number.isFinite(retryAt.getTime()))throw new Error(`O limite diário do banco foi atingido. Tente novamente em ${retryAt.toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}, no seu horário local.`);
+        throw new Error(result.message ?? "Não foi possível entrar. Tente novamente.");
+      }
       setPassword("");
       window.location.replace("/admin");
     } catch (reason) {

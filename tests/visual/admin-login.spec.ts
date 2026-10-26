@@ -2,6 +2,16 @@ import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 
 const origin = (process.env.VISUAL_BASE_URL ?? "http://localhost:4173").replace(/\/$/, "");
+test('informa o horário de renovação da cota sem atribuir a falha à senha',async({page})=>{
+  await page.route('**/api/auth/login',route=>route.fulfill({status:503,json:{code:'DATABASE_UNAVAILABLE',reason:'DAILY_QUOTA',retryAt:'2026-10-27T00:00:00.000Z'}}));
+  await page.goto(`${origin}/admin/login`);
+  await page.getByLabel('E-mail',{exact:true}).fill('quota@example.test');
+  await page.getByLabel('Senha',{exact:true}).fill('Synthetic-test-password!');
+  await page.getByRole('button',{name:'Entrar',exact:true}).click();
+  await expect(page.getByRole('alert')).toContainText('O limite diário do banco foi atingido.');
+  await expect(page.getByRole('alert')).toContainText('no seu horário local.');
+  await expect(page.getByLabel('Senha',{exact:true})).toHaveValue('');
+});
 test.beforeAll(() => {
   if (process.env.VISUAL_BASE_URL) return;
   execFileSync("npx", ["wrangler", "d1", "migrations", "apply", "new-wed-platform-development", "--local"], { stdio: "pipe" });

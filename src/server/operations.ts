@@ -15,7 +15,7 @@ export async function operationalSnapshot(env:Pick<Env,'DB'>,service:Service):Pr
  return (await env.DB.prepare(`SELECT
   (SELECT count(*) FROM outbox_events WHERE type NOT LIKE 'uazapi.%' AND dispatch_state IN ('PENDING','PUBLISHED','PROCESSING'))+(SELECT count(*) FROM webhook_events WHERE provider='asaas' AND processed_at IS NULL AND attempts<10) AS pending,
   (SELECT min(created_at) FROM (SELECT created_at FROM outbox_events WHERE type NOT LIKE 'uazapi.%' AND dispatch_state IN ('PENDING','PUBLISHED','PROCESSING') UNION ALL SELECT created_at FROM webhook_events WHERE provider='asaas' AND processed_at IS NULL AND attempts<10)) AS oldest,
-  (SELECT max(processed_at) FROM outbox_events WHERE type NOT LIKE 'uazapi.%') AS watermark,
+  (SELECT max(processed_at) FROM outbox_events WHERE type NOT LIKE 'uazapi.%' AND processed_at IS NOT NULL) AS watermark,
   (SELECT count(*) FROM outbox_events WHERE type NOT LIKE 'uazapi.%' AND dispatch_state='FAILED')+(SELECT count(*) FROM webhook_events WHERE provider='asaas' AND processed_at IS NULL AND attempts>=10) AS failures`).first<Snapshot>())!;
 }
 export async function operationalAlert(env:OperationsEnv,key:string,title:string,body:string) {

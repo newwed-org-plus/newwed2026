@@ -258,3 +258,11 @@ Produção mantém orçamento conservador diário do plano gratuito (D1: 5 milh�
 Usuário escolheu manter o plano gratuito e e-mail desligado após ver preço e cobrança por uso. Não habilitar Email Sending nem alterar MX para contornar essa escolha. Pico medido em sete dias excede a capacidade gratuita para escrita/fila ao dobrar o volume; não ampliar importação nem prometer essa capacidade sem novo dimensionamento/orçamento.
 
 Usuário autorizou leitura automática das métricas: token temporário Account Analytics:Read, somente conta Newwed, até 25/11/2026 e exclusivamente no Worker comercial. Consultas reais D1/Queues verificadas. O plano gratuito determina lotes pequenos por execução e orçamento histórico remoto zero; retomada durável preserva as pendências.
+
+## D-054 — Login indisponível por cota e demonstração local
+
+Em 26/10/2026, a tentativa com a senha salva chegou à criação da sessão, mas o D1 recusou a operação por limite diário de leituras. A conta permanece Free, sem contratação autorizada. Não alterar senha, criar sessão fora do fluxo, copiar autenticação para outro banco ou contornar o limite. Informar a renovação da cota em meia-noite UTC pelo Retry-After e pela hora local na tela.
+
+O cron comercial fazia varreduras de mensagens e outbox mesmo sem pendências. A migration 0019 adiciona índices parciais para leases de mensagens/conversas e progresso comercial; o snapshot ignora timestamps nulos para usar o índice. Aplicar sequencialmente em homologação e produção após a cota permitir; não afirmar recuperação remota antes de confirmar o login normal.
+
+O usuário autorizou capturar as funcionalidades internas localmente e enviar o material ao contato Lucas Ximenes pelo próprio WhatsApp. Usar demonstração isolada com pessoas fictícias e preços publicados, sem mensagens de clientes, credenciais ou dados financeiros reais. Diferenciar resposta de prévia da IA, envio em fila e entrega real; não simular comprovante de entrega.
