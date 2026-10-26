@@ -60,8 +60,9 @@ export async function collectUsage(env:OperationsEnv,fetcher:typeof fetch=fetch)
  const now=new Date();const end=now.toISOString().slice(0,10);const start=env.D1_BUDGET_WINDOW==='month'?`${end.slice(0,7)}-01`:end;
  const query=`query Usage($accountTag:string!,$start:Date!,$end:Date!,$datetimeStart:Time!,$datetimeEnd:Time!){viewer{accounts(filter:{accountTag:$accountTag}){d1AnalyticsAdaptiveGroups(limit:10000,filter:{date_geq:$start,date_leq:$end}){sum{rowsRead rowsWritten}}queueMessageOperationsAdaptiveGroups(limit:10000,filter:{datetime_geq:$datetimeStart,datetime_leq:$datetimeEnd}){sum{billableOperations}}}}}`;
  const response=await fetcher('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers:{authorization:`Bearer ${env.CLOUDFLARE_ANALYTICS_TOKEN}`,'content-type':'application/json'},body:JSON.stringify({query,variables:{accountTag:env.CLOUDFLARE_ACCOUNT_ID,start,end,datetimeStart:`${start}T00:00:00.000Z`,datetimeEnd:now.toISOString()}}),signal:AbortSignal.timeout(10000),redirect:'error'});
- if(!response.ok)throw new Error('ANALYTICS_UNAVAILABLE');
- const result=analyticsSchema.parse(await readJsonWithLimit(response,65536));if(result.errors?.length||!result.data)throw new Error('ANALYTICS_INVALID');
+ if(!response.ok)throw new Error(`ANALYTICS_HTTP_${response.status}`);
+ const parsed=analyticsSchema.safeParse(await readJsonWithLimit(response,65536));if(!parsed.success)throw new Error('ANALYTICS_SCHEMA');
+ const result=parsed.data;if(result.errors?.length||!result.data)throw new Error('ANALYTICS_REJECTED');
  const totals=result.data.viewer.accounts[0].d1AnalyticsAdaptiveGroups.reduce((sum,row)=>({read:sum.read+row.sum.rowsRead,write:sum.write+row.sum.rowsWritten}),{read:0,write:0});
  const queueOperations=result.data.viewer.accounts[0].queueMessageOperationsAdaptiveGroups.reduce((total,row)=>total+row.sum.billableOperations,0);
  for(const [resource,used,configured] of [['queues.operations',queueOperations,env.QUEUE_BUDGET],['d1.rowsRead',totals.read,env.D1_READ_BUDGET],['d1.rowsWritten',totals.write,env.D1_WRITE_BUDGET]] as const) {

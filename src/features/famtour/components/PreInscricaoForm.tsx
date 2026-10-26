@@ -37,7 +37,7 @@ function formatTelefone(value: string): string {
 
 function normalizeTelefone(value: string): string {
   const d = value.replace(/\D/g, "");
-  return d.startsWith("55") ? d : `55${d}`;
+  return `55${d}`;
 }
 
 const labelStyle: React.CSSProperties = {
