@@ -1,6 +1,6 @@
 # Validação local
 
-Execute no checkout da onda 27. O banco e os consumidores são locais. A UAZAPI é externa; para receber eventos em localhost é necessário um túnel HTTPS. Redirecionar uma linha exige autorização do titular. A linha atendimento foi explicitamente autorizada nesta sessão (D-047).
+Execute no checkout da onda atual. O banco e os consumidores são locais. A UAZAPI é externa; para receber eventos em localhost é necessário um túnel HTTPS. Redirecionar uma linha exige autorização do titular. A linha atendimento foi explicitamente autorizada nesta sessão (D-047).
 
 ```bash
 npm ci
@@ -35,14 +35,14 @@ Workers executa D1/Queue/Durable Objects locais e intercepta providers: inscriç
 
 O teste de capacidade concorrente usa 28 mensagens ao vivo, dois logins e orçamento histórico de 100 por cron; a retomada chega a 148 mensagens únicas sem saída automática. Testes de interface usam fixtures autenticadas e três viewports. Backup/restauração são exercitados em bancos temporários separados e limpos ao terminar.
 
-Para validação comercial externa ainda são necessários Asaas sandbox, e-mail verificado, Turnstile e linha de teste própria em homologação, além da janela/destinatários aprovados. Os testes simulados não aprovam produção nem substituem o piloto de 24 horas.
+Para validação comercial externa ainda são necessários os testes financeiros no Sandbox já configurado, e-mail verificado, Turnstile e linha de teste própria em homologação, além da janela/destinatários aprovados. Os testes simulados não aprovam produção nem substituem o piloto de 24 horas.
 
 ## Receber e responder pela UAZAPI no localhost
 
 1. Guardar `UAZAPI_INSTANCES`, `UAZAPI_WEBHOOK_BASE_URL` e, se utilizado, `OPENROUTER_API_KEY` somente em `.dev.vars` ignorado. Configurar `LOCAL_TEST_MODE=true`; `dev:local` gera `LOCAL_CRON_TOKEN` privado.
 2. Para iniciar o túnel autorizado automaticamente: definir `LOCAL_UAZAPI_CALLBACK=true` e `LOCAL_UAZAPI_LINE=atendimento` nesse arquivo e executar `npm run local:tunnel:install` uma vez. O instalador suporta macOS e verifica o digest do release oficial do cloudflared.
 3. Executar `npm run dev:local`. Este comando inicia aplicação em 127.0.0.1:4173, receptor, consumidor comercial e cron a cada 15 segundos com o mesmo D1 e filas locais. O receptor não recebe chaves de envio ou IA. Não iniciar outra instância do túnel simultaneamente.
-4. Aguardar a confirmação de callback local no terminal. A ponte publica exclusivamente `/api/webhooks/uazapi/<linha>`; `/admin`, arquivos e depuração não ficam públicos. Não é necessário deploy, reconectar a linha ou gerar QR.
+4. Aguardar a confirmação de callback local no terminal. A ponte publica `/api/webhooks/uazapi/<linha>` e, com a função própria habilitada, somente POST em `/api/webhooks/asaas`; `/admin`, arquivos e depuração não ficam públicos. Não é necessário deploy, reconectar a linha ou gerar QR.
 5. Manter o processo e o computador disponíveis durante o teste. Ao encerrar normalmente, o launcher restaura o callback anterior antes de parar os serviços, somente se a URL ainda pertencer ao túnel atual. Sem rede, a restauração fica pendente e o processo mantém os serviços ativos para outra tentativa.
 
 O controle manual exige `ENABLE_MANUAL_SEND=true`. A exceção `LOCAL_ALLOW_MANUAL_SEND_ANY=true` permite exclusivamente a resposta escolhida pelo operador autenticado e responsável pela conversa. IA e outros envios automáticos continuam limitados por `LOCAL_WHATSAPP_ALLOWED_RECIPIENTS`; lista vazia bloqueia automação real. Não reenviar operações com resultado incerto. Checkout, confirmação e e-mail ficam desligados neste perfil até a preparação própria.
@@ -73,3 +73,21 @@ Depois da migration 0016, habilitar `ENABLE_FREE_AI_RETRY=true` no perfil privad
 Aplicar migrations até 0017. Em **Atendentes**, abrir **Ver conhecimento dos produtos**: conferir quatro produtos, valores publicados e campos sob consulta. O fingerprint identifica o conteúdo compartilhado com o site. Não duplicar tabela de preços no contexto editável.
 
 Para testar continuidade, enviar pelo próprio WhatsApp do contato autorizado um produto/destino e depois uma pergunta curta, como “e o valor?”. Não fabricar mensagens em nome do contato. A memória de assunto é isolada por conversa e persiste no D1, enquanto valores vêm da fonte publicada. Pode-se corrigir a escolha, mudar de projeto ou pedir para esquecer o destino. Se o snapshot precisar de reconstrução longa, a resposta aguarda progresso persistido. Nada disso autoriza reserva, cobrança, envio a outro contato ou deploy. Rollback preserva a tabela aditiva; desabilitar agente até haver consumidor compatível com a revisão selecionada.
+
+
+## Asaas Sandbox no localhost
+
+Preparação autorizada em D-051: conta Sandbox vinculada, chave **Newwed Local Sandbox** (expira em 24/11/2026) e token de webhook independente, somente no arquivo privado `.dev.vars` com permissão 0600. Configurações necessárias:
+
+- `ASAAS_API_URL=https://api-sandbox.asaas.com/v3` e `ASAAS_API_KEY` da própria conta Sandbox; o perfil local bloqueia produção e pares de chave/host incompatíveis.
+- `ASAAS_WEBHOOK_TOKEN` aleatório, 32–255 caracteres sem espaços. Nunca reutilizar a chave da API como token de webhook.
+- `LOCAL_ASAAS_WEBHOOK=true` junto do túnel autorizado da stack. O e-mail operacional fica somente em `.local-runtime/asaas-profile.json`, campo `email`; não versionar dados do titular.
+- `ENABLE_CHECKOUT=false`, `ENABLE_CONFIRMATION=false` e `ENABLE_EMAIL=false` até janela/edição/destinatários próprios. Configurar credenciais não libera operações antigas nem envia links ao cliente.
+
+`npm run dev:local` registra ou atualiza o webhook **Newwed Local Sandbox** no novo túnel, com eventos de pagamento e entrega sequencial. O consumidor recebe a chave; o receptor UAZAPI continua sem credenciais Asaas. Metadados e intenção de cadastro ficam em `.local-runtime/asaas-webhook.json`, sem chave/token. Resposta de criação incerta é conciliada pela intenção antes de um novo POST; webhook homônimo desconhecido ou URL alterada por outro operador impedem sobrescrita. Fila interrompida exige revisão explícita.
+
+Validação de transporte sem cobrança: POST público sem token retorna 401; POST com token válido e `{}` retorna 422, sem persistir evento financeiro; `/admin` retorna 404. API de situação cadastral e consulta do webhook devem retornar 200. Nunca registrar headers ou valor de credenciais em logs. Isso comprova configuração/autenticação, não aprova Pix/cartão nem pagamento ponta a ponta.
+
+No encerramento normal, o launcher pausa seu webhook Asaas e verifica a pausa antes de restaurar a UAZAPI e fechar o túnel. Se o cadastro tiver resposta incerta, o encerramento busca pela intenção salva e pausa o cadastro correspondente. Falha de pausa mantém a stack disponível para nova tentativa. Se outro operador alterou a URL/nome, não sobrescrever. Em encerramento forçado ou perda de rede, pausar manualmente **Newwed Local Sandbox** no painel Sandbox antes de fechar o transporte, conferir a UAZAPI e preservar os arquivos privados para recuperação. Não reativar fila com pendências sem conciliar os eventos.
+
+A conta de produção, sua chave antiga desabilitada e os webhooks de produção permanecem inalterados. Testes de Pix/cartão, parcelas, vencimento, cancelamento/estorno e confirmação ao cliente ainda precisam ser executados em janela autorizada.
