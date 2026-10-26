@@ -8,6 +8,10 @@ afterEach(()=>paths.splice(0).forEach(path=>rmSync(path,{recursive:true,force:tr
 function run(change:(files:Record<string,Record<string,unknown>>)=>void=()=>{}) {
   const directory=mkdtempSync(join(tmpdir(),"newwed-preflight-")); paths.push(directory);
   const files=Object.fromEntries(["wrangler.jsonc","wrangler.events.jsonc","wrangler.uazapi.jsonc"].map(file=>[file,JSON.parse(readFileSync(file,"utf8"))]));
+  for(const config of Object.values(files)) {
+    const vars=(config.env?.production??config).vars as Record<string,string>;
+    for(const name of Object.keys(vars))if(name.startsWith('ENABLE_'))vars[name]='false';
+  }
   change(files);
   for(const [name,value] of Object.entries(files))writeFileSync(join(directory,name),JSON.stringify(value));
   return spawnSync(process.execPath,["scripts/preflight-launch.mjs","production",`--config-dir=${directory}`],{encoding:"utf8"});
