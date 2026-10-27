@@ -270,3 +270,9 @@ O usuário autorizou capturar as funcionalidades internas localmente e enviar o 
 ## D-055 — Evidências históricas fora das consultas comerciais
 
 Na retomada autorizada de 26/10 às 21h05, a medição remota após 0019 encontrou 11.563 eventos UAZAPI antigos PENDING que ainda eram percorridos pelo cron comercial. A migration aditiva 0020 cria índice parcial de estado, horário e tipo somente para eventos comerciais. Não apagar, concluir artificialmente, republicar ou liberar os registros históricos para reduzir consumo. A regressão deve conservar milhares de eventos UAZAPI PENDING publicados, sem Queue ou efeitos externos, e medir o cron inteiro. Aplicar staging antes de produção e manter flags, callbacks, autenticação e operações HELD.
+
+## D-056 — Limpeza de conversas expressamente autorizada
+
+Em 26/10/2026, após esclarecer o alcance da exclusão, o usuário confirmou **Todas as conversas de produção** e pediu retirar seu contato de teste. Essa autorização substitui a preservação dos registros de conversa de D-054/D-055 somente para esta limpeza; não autoriza apagar usuários, credenciais, linhas, atendentes ou dados financeiros.
+
+Preservar backup cifrado com recuperação verificada antes da operação. Apagar mensagens, conversas, memórias e operações assíncronas correspondentes, inclusive as antigas retidas, sem executá-las. Remover o conteúdo dos webhooks e manter somente marcadores de deduplicação já processados para evitar que uma repetição restaure o histórico. Preservar alertas operacionais e suas retenções, autenticação, configurações e dados financeiros. Não apagar o histórico do aplicativo WhatsApp ou o Sandbox local, reimportar dados antigos, desconectar a linha da equipe ou enviar novo WhatsApp por conta dessa limpeza.

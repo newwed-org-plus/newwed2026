@@ -145,3 +145,9 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Cron completo com 3 mil mensagens e 3 mil evidências UAZAPI PENDING publicadas: menos de 100 leituras, zero Queue e todos os registros preservados. Antes de 0020 a regressão lia 9.023; índice parcial precisa cobrir também tipo para evitar o plano anterior. Lease antigo vira SEND_UNKNOWN, sem alterar envio recente ou já entregue.
 - Remoto autorizado: migrations sequenciais staging/produção, EXPLAIN e rows_read reais; três consultas comerciais caem de 34.698 para nove leituras. Login normal com credencial salva, Inbox com duas páginas/100 conversas e sessão preservada após a publicação. Sem redefinição de senha, sessão artificial ou novo WhatsApp.
 - Gate final: 190 unitários, 91 Workers, 73 visuais, D1/recuperação, tipos/lint/build e auditoria zero, com CI da PR e de main aprovados. Checkout real continua bloqueado no SMS Asaas; e-mail e importação desligados.
+
+## Onda 36 — Operação de limpeza
+
+- Ensaio local com schema completo, volumes equivalentes, lote transacional e FKs; backup cifrado com recuperação verificada antes do único lote remoto autorizado.
+- Pós-condições reais: Inbox sem conversas/mensagens/memórias, conteúdo dos webhooks removido e deduplicação preservada; usuários, sessões, linhas, atendentes e dados financeiros preservados. UI autenticada sem filtro confirma lista vazia após recarregar.
+- Nenhum código ou schema alterado; gate da versão implantada continua sendo o de CP-35. Probe de autenticação do webhook 200/ignored/queued=0 não substitui mensagem real; destino/horário/tipo do relato aguardam esclarecimento.

@@ -10,6 +10,7 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Asaas produção exige SMS indisponível; checkout remoto fica desligado.
 - Não contratar capacidade paga sem orçamento aprovado; não liberar mensagens, cobranças ou e-mails antigos ao ativar consumidor.
 - O usuário autorizou usar `atendimento` no localhost e importar o histórico UAZAPI desta linha. D-047 autorizou o callback local; D-053 autoriza a publicação e a devolução do callback para produção.
+- Em 26/10 o usuário autorizou zerar todas as conversas de produção: limpeza concluída em CP-36/D-056, com backup cifrado. Diagnóstico de mensagem não recebida aguarda destino/horário; não repetir a limpeza ou fabricar recebimento.
 
 ## Base preservada
 
@@ -20,7 +21,6 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 
 ## Onda 21 concluída
 
-- Branch `codex/wave-21-security-staging`, base `ecbe6e5`.
 - Zod 4.6.7, Vite 8.3.5 e transitivas corrigidas; auditoria de produção sem alertas.
 - Preflight por capacidades: R2/Access opcionais, segurança e isolamento verificados. Funções externas desligadas por padrão.
 - D1 staging `d67175d9-52b6-47f7-b7a0-4a75a05af32d`, migrations 0000–0008 aplicadas e quatro filas staging criadas; nenhum consumidor comercial ativado.
@@ -29,36 +29,29 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 
 ## Onda 22 concluída
 
-- Onda 22, `codex/wave-22-capacity-login`. Migration local 0009 e Durable Object AdminIpLimiter.
 - Cursor de histórico, orçamento 100/tick, lock por linha e login sem bucket D1 por IP.
 - Gate completo aprovado: 96 unitários, 37 Workers, 53 visuais, D1, build, lint/tipos e auditoria sem alertas. CP-22.
 
 ## Onda 23 concluída
 
-- Onda 23, `codex/wave-23-inbox-pagination`, migration local 0010.
 - Paginação estável, erros globais, polling serial e ambiente visível.
 - Gate aprovado: 96 unitários, 39 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-23.
 
 ## Onda 24 concluída
 
-- Onda 24, `codex/wave-24-safe-commercial-processing`, migration local 0011.
 - Outbox com retenção/lease/conclusão, flags independentes e intake separado de respostas.
 - Envios incertos não são repetidos; revisão e reconciliação auditadas.
 - Gate aprovado: 96 unitários, 46 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-24.
 
 ## Onda 25 concluída
 
-- Onda 25, `codex/wave-25-uazapi-checkout`, migration local 0012.
 - Checkout e confirmação na mesma conversa/linha UAZAPI, conciliação de envio incerto e estorno concluído terminal.
 - Formulário/Turnstile e vínculo de checkout corrigidos; legado Meta preservado.
 - Gate aprovado: 97 unitários, 49 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-25.
-- PRs 7–10 com CI aprovado; sem merge/deploy automático durante validação local.
 
 ## Onda 26 concluída localmente
 
-- 26, `codex/wave-26-operations-local-pilot`, migration local 0013.
 - Métricas/alertas, revisão de retenções e e-mails, backup/restauração, fixtures e roteiro local implementados. CP-26.
-- Focados: 55 Workers e cinco visuais novos aprovados; ensaio de backup/restauração aprovado.
 - Gate completo aprovado: 97 unitários, 55 Workers, 62 visuais, D1, backup/restauração, build, lint/tipos, auditoria zero e preflights. Assets do cliente sem secrets.
 - Banco local preparado com fixture sem provider. Não houve merge, deploy, envio real ou contratação.
 - Correção de corrida no CTA da PR 11: `fe2180b` (incorporada nesta branch como `fb62826`); CI aprovado. PRs 7–12 aprovadas no CI, sem merge/deploy.
@@ -143,6 +136,11 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Branch codex/wave-35-commercial-read-budget, base 9590340. CP-35/D-055, migration aditiva 0020.
 - Índice parcial aplicado staging → produção: três consultas passaram de 34.698 para nove leituras; eventos históricos/HELD preservados. Gate completo aprovado: 190 unitários, 91 Workers, 73 visuais e auditoria zero.
 - PR 22/CI de main aprovados, merge 32faae1; web `4af762f7-ab5a-4d69-8543-d71a7883c6e7`. Login normal, sessão após publicação e Inbox paginada aprovados. Retomada concluída, sem WhatsApp adicional ou contratação.
+
+## Onda 36 — Limpeza operacional autorizada
+
+- Branch codex/wave-36-inbox-cleanup, sem código, migration ou deploy. Removidas 359 conversas, 14.911 mensagens e a memória; payloads de webhooks apagados, marcadores deduplicadores preservados.
+- Inbox vazia confirmada pela UI/API, autenticação e atendentes preservados. Backup cifrado/recuperação verificados, ensaio local e FKs aprovados. Recebimento autenticado 200; último envio manual estava entregue. Destino/horário do relato pendentes.
 
 ## Bloqueios externos
 
