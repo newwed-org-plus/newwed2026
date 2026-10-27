@@ -177,6 +177,7 @@ export const conversations = sqliteTable("conversations", {
   uniqueIndex("conversation_external_uidx").on(table.channel, table.externalId),
   index("conversations_mode_updated_idx").on(table.mode, table.updatedAt),
   index("conversations_claimed_by_idx").on(table.claimedBy),
+  index("conversations_agent_lease_idx").on(table.agentProcessingStartedAt).where(sql`${table.agentProcessingToken} IS NOT NULL`),
 ]);
 
 export const messages = sqliteTable("messages", {
@@ -205,6 +206,7 @@ export const messages = sqliteTable("messages", {
   index("messages_conversation_page_idx").on(table.conversationId,sql`${table.createdAt} DESC`,sql`${table.id} DESC`),
   index("messages_checkout_idx").on(table.checkoutId),
   index("messages_delivery_poll_idx").on(table.statusCheckedAt,table.createdAt).where(sql`${table.direction}='OUT' AND ${table.status} IN ('ACCEPTED','SENT','DELIVERED','SEND_UNKNOWN')`),
+  index("messages_sending_lease_idx").on(sql`coalesce(${table.sendStartedAt},${table.createdAt})`).where(sql`${table.status}='SENDING'`),
 ]);
 
 export const checkouts = sqliteTable("checkouts", {
@@ -394,7 +396,7 @@ export const outboxEvents = sqliteTable("outbox_events", {
   lastError: text("last_error"),
   requestId: text("request_id"),
   createdAt: text("created_at").notNull(),
-}, (table) => [index("outbox_pending_idx").on(table.publishedAt, table.nextAttemptAt, table.createdAt),index("outbox_operations_idx").on(table.dispatchState,table.type,table.createdAt),index("outbox_completed_idx").on(table.processedAt).where(sql`${table.processedAt} IS NOT NULL`)]);
+}, (table) => [index("outbox_pending_idx").on(table.publishedAt, table.nextAttemptAt, table.createdAt),index("outbox_operations_idx").on(table.dispatchState,table.type,table.createdAt),index("outbox_completed_idx").on(table.processedAt).where(sql`${table.processedAt} IS NOT NULL`),index("outbox_commercial_watermark_idx").on(table.processedAt).where(sql`${table.type} NOT LIKE 'uazapi.%' AND ${table.processedAt} IS NOT NULL`)]);
 
 export const rateLimitBuckets = sqliteTable("rate_limit_buckets", {
   key: text("key").primaryKey(),
