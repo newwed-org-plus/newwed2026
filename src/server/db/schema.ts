@@ -396,7 +396,7 @@ export const outboxEvents = sqliteTable("outbox_events", {
   lastError: text("last_error"),
   requestId: text("request_id"),
   createdAt: text("created_at").notNull(),
-}, (table) => [index("outbox_pending_idx").on(table.publishedAt, table.nextAttemptAt, table.createdAt),index("outbox_operations_idx").on(table.dispatchState,table.type,table.createdAt),index("outbox_completed_idx").on(table.processedAt).where(sql`${table.processedAt} IS NOT NULL`),index("outbox_commercial_watermark_idx").on(table.processedAt).where(sql`${table.type} NOT LIKE 'uazapi.%' AND ${table.processedAt} IS NOT NULL`)]);
+}, (table) => [index("outbox_pending_idx").on(table.publishedAt, table.nextAttemptAt, table.createdAt),index("outbox_operations_idx").on(table.dispatchState,table.type,table.createdAt),index("outbox_completed_idx").on(table.processedAt).where(sql`${table.processedAt} IS NOT NULL`),index("outbox_commercial_watermark_idx").on(table.processedAt).where(sql`${table.type} NOT LIKE 'uazapi.%' AND ${table.processedAt} IS NOT NULL`),index("outbox_commercial_dispatch_idx").on(table.dispatchState,table.createdAt,table.type).where(sql`${table.type} NOT LIKE 'uazapi.%'`)]);
 
 export const rateLimitBuckets = sqliteTable("rate_limit_buckets", {
   key: text("key").primaryKey(),

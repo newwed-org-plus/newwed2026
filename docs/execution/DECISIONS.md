@@ -266,3 +266,7 @@ Em 26/10/2026, a tentativa com a senha salva chegou à criação da sessão, mas
 O cron comercial fazia varreduras de mensagens e outbox mesmo sem pendências. A migration 0019 adiciona índices parciais para leases de mensagens/conversas e progresso comercial; o snapshot ignora timestamps nulos para usar o índice. Aplicar sequencialmente em homologação e produção após a cota permitir; não afirmar recuperação remota antes de confirmar o login normal.
 
 O usuário autorizou capturar as funcionalidades internas localmente e enviar o material ao contato Lucas Ximenes pelo próprio WhatsApp. Usar demonstração isolada com pessoas fictícias e preços publicados, sem mensagens de clientes, credenciais ou dados financeiros reais. Diferenciar resposta de prévia da IA, envio em fila e entrega real; não simular comprovante de entrega.
+
+## D-055 — Evidências históricas fora das consultas comerciais
+
+Na retomada autorizada de 26/10 às 21h05, a medição remota após 0019 encontrou 11.563 eventos UAZAPI antigos PENDING que ainda eram percorridos pelo cron comercial. A migration aditiva 0020 cria índice parcial de estado, horário e tipo somente para eventos comerciais. Não apagar, concluir artificialmente, republicar ou liberar os registros históricos para reduzir consumo. A regressão deve conservar milhares de eventos UAZAPI PENDING publicados, sem Queue ou efeitos externos, e medir o cron inteiro. Aplicar staging antes de produção e manter flags, callbacks, autenticação e operações HELD.
