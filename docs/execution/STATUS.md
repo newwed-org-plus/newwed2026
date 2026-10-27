@@ -15,7 +15,7 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 
 - Ondas 0–16: funcionalidades e publicações em CP-00 a CP-16.
 - Ondas 17–20: parser de conexão, renovação explícita de QR, fim do polling conectado e recuperação de histórico; CP-17 a CP-20.
-- Migrations remotas até 0019; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
+- Migrations remotas até 0020; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
 - Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`, perfil Wrangler `newwed-production`.
 
 ## Onda 21 concluída
@@ -62,7 +62,6 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Gate completo aprovado: 97 unitários, 55 Workers, 62 visuais, D1, backup/restauração, build, lint/tipos, auditoria zero e preflights. Assets do cliente sem secrets.
 - Banco local preparado com fixture sem provider. Não houve merge, deploy, envio real ou contratação.
 - Correção de corrida no CTA da PR 11: `fe2180b` (incorporada nesta branch como `fb62826`); CI aprovado. PRs 7–12 aprovadas no CI, sem merge/deploy.
-
 
 ## Onda 27 — UAZAPI inteiramente operada pelo ambiente local
 
@@ -132,17 +131,18 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 ## Onda 34 — Login de produção recuperado
 
 - Branch codex/wave-34-production-login, base 388a0a4. CP-34 e D-054.
-- Login real retorna 503 por cota diária D1, inclusive na criação da sessão; senha e autenticação preservadas. Plano Free mantido.
+- Cota diária D1 impedia criar a sessão; login normal recuperado, senha/autenticação preservadas e plano Free mantido.
 - Migration 0019: índices parciais eliminam varreduras ociosas; cron sintético com 3 mil mensagens e eventos usa menos de 100 leituras.
 - Erro de cota informa motivo e renovação, preservando DATABASE_UNAVAILABLE e 503; falha transitória continua distinta.
 - Gate aprovado: 190 unitários, 91 Workers, 73 visuais e auditoria zero; CI da PR 21/main aprovado. Migration 0019 aplicada staging → produção após renovação autorizada.
 - Web `ae14f7d9-3e1c-4a36-ae78-3577eaba08ea` e comercial `bf22461a-8804-44dd-a1b6-a79d1f1eacd1`. Login normal e Inbox com 100 conversas validados; 16 prints já enviados ao Lucas, sem repetição.
-- Cron recuperado, dados e retenções preservados. Medição adicional exige CP-35: eventos UAZAPI PENDING ainda oneravam as consultas comerciais.
+- Cron recuperado, dados e retenções preservados. Custo adicional dos eventos históricos corrigido em CP-35.
 
 ## Onda 35 — Isolamento do orçamento comercial
 
 - Branch codex/wave-35-commercial-read-budget, base 9590340. CP-35/D-055, migration aditiva 0020.
-- Índice parcial cobre somente eventos comerciais; regressão conserva milhares de UAZAPI PENDING sem republicar. Gate e aplicação remota em andamento.
+- Índice parcial aplicado staging → produção: três consultas passaram de 34.698 para nove leituras; eventos históricos/HELD preservados. Gate completo aprovado: 190 unitários, 91 Workers, 73 visuais e auditoria zero.
+- PR 22/CI de main aprovados, merge 32faae1; web `4af762f7-ab5a-4d69-8543-d71a7883c6e7`. Login normal, sessão após publicação e Inbox paginada aprovados. Retomada concluída, sem WhatsApp adicional ou contratação.
 
 ## Bloqueios externos
 

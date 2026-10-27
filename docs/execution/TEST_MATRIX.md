@@ -138,3 +138,10 @@ Resultados completos de cada execução pertencem ao checkpoint da onda. Falhas 
 - Webhook real com `installmentNumber`, datas e outros opcionais nulos: normalizar ausência, preservar campos obrigatórios e rejeitar ID vazio, status nulo e valor inválido. Evento PENDING após PAID não regride, duplica vaga, notificação ou confirmação.
 - Painel mobile/tablet/desktop atualiza pagamento e confirmação sem POST de envio; falha mantém PAID e último estado conhecido. A consulta distingue pagamento, entrega do link e leitura da confirmação.
 - Externo autorizado: um Pix Sandbox da fixture de R$ 1.200,00 criado pelo painel, link READ; confirmação simulada pela API oficial, PAID/PAGO e confirmação READ. Eventos reais recebidos com HTTP 200 após corrigir 422; replay exato e criação idempotente sem efeitos adicionais. Uma cobrança, confirmação, notificação e venda. E-mail retido, sem deploy. Evidências e IDs somente em `.local-runtime` privado.
+
+## Ondas 34–35 — Login e leitura ociosa
+
+- Erro D1 diário mantém 503/DATABASE_UNAVAILABLE, reason DAILY_QUOTA, Retry-After e renovação UTC exibida no horário do navegador; indisponibilidade transitória continua distinta e sem detalhes internos.
+- Cron completo com 3 mil mensagens e 3 mil evidências UAZAPI PENDING publicadas: menos de 100 leituras, zero Queue e todos os registros preservados. Antes de 0020 a regressão lia 9.023; índice parcial precisa cobrir também tipo para evitar o plano anterior. Lease antigo vira SEND_UNKNOWN, sem alterar envio recente ou já entregue.
+- Remoto autorizado: migrations sequenciais staging/produção, EXPLAIN e rows_read reais; três consultas comerciais caem de 34.698 para nove leituras. Login normal com credencial salva, Inbox com duas páginas/100 conversas e sessão preservada após a publicação. Sem redefinição de senha, sessão artificial ou novo WhatsApp.
+- Gate final: 190 unitários, 91 Workers, 73 visuais, D1/recuperação, tipos/lint/build e auditoria zero, com CI da PR e de main aprovados. Checkout real continua bloqueado no SMS Asaas; e-mail e importação desligados.
