@@ -4,17 +4,17 @@ import commercial from '../../workers/events';
 import {operationalSnapshot} from '@/server/operations';
 
 describe('orçamento de leitura da manutenção ociosa',()=>{
- it('mantém o cron barato com milhares de mensagens e eventos já concluídos',async()=>{
+ it('mantém o cron barato preservando milhares de eventos UAZAPI antigos ainda PENDING',async()=>{
   const now=new Date().toISOString();
   await env.DB.prepare("INSERT INTO conversations(id,channel,external_id,created_at,updated_at) VALUES('budget-conversation','meta','synthetic-budget',?,?)").bind(now,now).run();
   await env.DB.prepare(`WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<3000)
     INSERT INTO messages(id,conversation_id,direction,type,status,created_at) SELECT 'budget-message-'||i,'budget-conversation','IN','text','READ',? FROM n`).bind(now).run();
   await env.DB.prepare(`WITH RECURSIVE n(i) AS (VALUES(1) UNION ALL SELECT i+1 FROM n WHERE i<3000)
     INSERT INTO outbox_events(id,type,aggregate_id,payload_json,dispatch_state,published_at,processed_at,created_at)
-    SELECT 'budget-event-'||i,'uazapi.incoming','synthetic','{}','DONE',?,?,? FROM n`).bind(now,now,now).run();
+    SELECT 'budget-event-'||i,'uazapi.incoming','synthetic','{}','PENDING',?,NULL,? FROM n`).bind(now,now).run();
   await env.DB.prepare("INSERT INTO outbox_events(id,type,aggregate_id,payload_json,dispatch_state,published_at,processed_at,created_at) VALUES('budget-done','lead.submitted','synthetic','{}','DONE',?,?,?)").bind(now,now,now).run();
   // Confirm the fixture exposes the original full-table scan.
-  const original=await env.DB.prepare("SELECT max(processed_at) FROM outbox_events WHERE type NOT LIKE 'uazapi.%'").all();
+  const original=await env.DB.prepare("SELECT max(processed_at) FROM outbox_events NOT INDEXED WHERE type NOT LIKE 'uazapi.%'").all();
   expect(original.meta.rows_read).toBeGreaterThanOrEqual(3000);
   let reads=0;
   const record=<T,>(result:D1Result<T>)=>{reads+=result.meta.rows_read;return result;};
@@ -36,6 +36,7 @@ describe('orçamento de leitura da manutenção ociosa',()=>{
   expect(queue).not.toHaveBeenCalled();
   expect((await operationalSnapshot(env,'commercial')).watermark).toBe(now);
   expect(await env.DB.prepare('SELECT count(*) AS n FROM messages').first()).toEqual({n:3000});
+  expect(await env.DB.prepare("SELECT count(*) AS n FROM outbox_events WHERE type='uazapi.incoming' AND dispatch_state='PENDING'").first()).toEqual({n:3000});
  });
 
  it('recupera somente envios antigos sem alterar os já entregues ou os leases recentes',async()=>{
