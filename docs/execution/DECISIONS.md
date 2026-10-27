@@ -276,3 +276,10 @@ Na retomada autorizada de 26/10 às 21h05, a medição remota após 0019 encontr
 Em 26/10/2026, após esclarecer o alcance da exclusão, o usuário confirmou **Todas as conversas de produção** e pediu retirar seu contato de teste. Essa autorização substitui a preservação dos registros de conversa de D-054/D-055 somente para esta limpeza; não autoriza apagar usuários, credenciais, linhas, atendentes ou dados financeiros.
 
 Preservar backup cifrado com recuperação verificada antes da operação. Apagar mensagens, conversas, memórias e operações assíncronas correspondentes, inclusive as antigas retidas, sem executá-las. Remover o conteúdo dos webhooks e manter somente marcadores de deduplicação já processados para evitar que uma repetição restaure o histórico. Preservar alertas operacionais e suas retenções, autenticação, configurações e dados financeiros. Não apagar o histórico do aplicativo WhatsApp ou o Sandbox local, reimportar dados antigos, desconectar a linha da equipe ou enviar novo WhatsApp por conta dessa limpeza.
+
+
+## D-057 — Credencial de produção Asaas concluída
+
+Em 27/10/2026, o usuário concluiu a autenticação no Asaas, gerou a chave de produção e pediu armazenamento sem passar pelo chat. A pendência de SMS/chave de D-053 está resolvida. A credencial foi transferida por FIFO privado para stdin do Wrangler, sem arquivo de texto, saída de terminal, argumento de processo ou conteúdo no chat, e guardada exclusivamente como `ASAAS_API_KEY` no Worker comercial de produção. Consulta autenticada somente de leitura retornou HTTP 200.
+
+A atualização do secret preservou o código já implantado e todas as flags. Checkout, confirmação e e-mail continuam desligados; não houve cliente ou cobrança de validação real. Webhook de produção e aceite comercial permanecem pendentes antes da liberação progressiva. Não copiar a chave para o ambiente local, Sandbox ou receptor de mensagens.

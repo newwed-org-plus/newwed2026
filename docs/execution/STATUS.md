@@ -1,13 +1,13 @@
 # Status de execução
 
-Atualizado em: 2026-10-26.
+Atualizado em: 2026-10-27.
 
 ## Objetivo ativo
 
 Implementar as ondas 21–26: site → inscrição → lead → atendimento → qualificação humana → checkout → pagamento → confirmação pela mesma linha UAZAPI.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
-- Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Asaas produção exige SMS indisponível; checkout remoto fica desligado.
+- Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
 - Não contratar capacidade paga sem orçamento aprovado; não liberar mensagens, cobranças ou e-mails antigos ao ativar consumidor.
 - O usuário autorizou usar `atendimento` no localhost e importar o histórico UAZAPI desta linha. D-047 autorizou o callback local; D-053 autoriza a publicação e a devolução do callback para produção.
 - Em 26/10 o usuário autorizou zerar todas as conversas de produção: limpeza concluída em CP-36/D-056, com backup cifrado. Diagnóstico de mensagem não recebida aguarda destino/horário; não repetir a limpeza ou fabricar recebimento.
@@ -118,7 +118,7 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Dados fiscais do checkout protegidos; gate aprovado: 189 unitários, 89 Workers, 72 visuais, D1/recuperação, tipos/lint/build e auditoria zero.
 - Revalidação local: Marina Costa, Famtour Alagoas/R$ 7.697,00, uma cobrança Pix Sandbox PAID, lead PAGO e link/confirmação entregues. Nenhuma cobrança real.
 - Web, receptor e consumidor publicados; recebimento, envio manual e IA gratuitos habilitados. Callback atendimento em produção e conectado; histórico remoto pausado e operações antigas HELD.
-- Consumo real D1/filas coletado pelo cron; falha de transporte resolvida com redirect manual. Plano gratuito/e-mail desligado por decisão do usuário. Checkout/confirmação aguardam SMS Asaas.
+- Consumo real D1/filas coletado pelo cron; falha de transporte resolvida com redirect manual. Plano gratuito/e-mail desligado por decisão do usuário. Checkout/confirmação aguardavam SMS Asaas; chave validada posteriormente em CP-37.
 - Local revalidado: Pix e cartão em 12 parcelas com nomes comuns, cobrança/notificação/confirmação únicas. Login autenticado remoto e teste de token real do formulário dependem do usuário.
 
 ## Onda 34 — Login de produção recuperado
@@ -142,9 +142,13 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Branch codex/wave-36-inbox-cleanup, sem código, migration ou deploy. Removidas 359 conversas, 14.911 mensagens e a memória; payloads de webhooks apagados, marcadores deduplicadores preservados.
 - Inbox vazia confirmada pela UI/API, autenticação e atendentes preservados. Backup cifrado/recuperação verificados, ensaio local e FKs aprovados. Recebimento autenticado 200; último envio manual estava entregue. Destino/horário do relato pendentes.
 
+## Onda 37 — Chave Asaas de produção
+
+- Chave gerada pelo usuário, guardada exclusivamente no secret comercial ASAAS_API_KEY e validada por consulta de leitura HTTP 200. CP-37/D-057. Sem cobrança real ou alteração de flags.
+
 ## Bloqueios externos
 
-- Asaas produção: titular sem acesso ao SMS necessário para criar a chave; não há chave de produção nem checkout remoto habilitado. Cartão/parcelas/estorno externos e domínio de e-mail pendentes.
+- Asaas produção: chave validada em CP-37; webhook e aceite financeiro remoto pendentes. Checkout/confirmação/e-mail desligados; domínio de e-mail pendente.
 - Sem linha de teste separada configurada em homologação; nunca usar a linha ativa para fixtures.
 - Vídeo final não fornecido; imagem atual preservada.
 - Piloto real e observação por 24h ainda pendentes.
