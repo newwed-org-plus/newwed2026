@@ -48,7 +48,7 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
       {/* ── Painel esquerdo — branco ── */}
       <div className="absolute inset-x-0 top-0 z-[4] flex flex-col items-start px-5 pt-5 md:relative md:items-center md:justify-center md:bg-white md:px-8 md:py-16">
         <div
-          className="w-full max-w-[230px] bg-white/95 px-4 py-3 shadow-[0_12px_36px_rgba(25,16,16,0.12)] md:max-w-[360px] md:bg-transparent md:p-0 md:shadow-none"
+          className="w-full max-w-[230px] px-4 py-3 md:max-w-[360px] md:p-0"
           style={{
             display: "flex",
             flexDirection: "column",
@@ -61,7 +61,7 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
             alt="Newed Destinos"
             width={225}
             height={225}
-            className="w-full max-w-[150px] md:max-w-[225px]"
+            className="w-full max-w-[125px] brightness-0 invert md:max-w-[225px] md:filter-none"
             style={{
               display: "block",
               height: "auto",
@@ -69,12 +69,11 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
             }}
           />
           <div
-            className="mt-1.5 text-[0.54rem] md:mt-5 md:text-[clamp(0.62rem,1.2vw,0.78rem)]"
+            className="mt-1.5 text-[0.54rem] text-white md:mt-5 md:text-[clamp(0.62rem,1.2vw,0.78rem)] md:text-[#2E8E8E]"
             style={{
               fontFamily: "'Fedra Sans Std', sans-serif",
               fontWeight: 350,
               letterSpacing: "0.12em",
-              color: "#2E8E8E",
               lineHeight: 1.6,
               textTransform: "uppercase",
             }}
@@ -82,7 +81,7 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
             RIO GRANDE DO NORTE • ALAGOAS • FERNANDO DE NORONHA • CEARÁ
           </div>
           <div
-            className="mt-2 text-[0.56rem] md:mt-8 md:text-[0.7rem]"
+            className="hidden md:mt-8 md:block md:text-[0.7rem]"
             style={{
               fontFamily: "'Fedra Sans Std', sans-serif",
               fontWeight: 350,
@@ -132,7 +131,7 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
 
         {/* Conteúdo textual — acima de tudo */}
         <div
-          className="relative z-[3] flex min-h-[calc(100svh-4rem)] flex-col items-start justify-end px-6 pb-20 pt-52 sm:px-8 md:min-h-[90vh] md:justify-center md:px-16 md:py-20"
+          className="relative z-[3] flex min-h-[calc(100svh-4rem)] flex-col items-start justify-start px-6 pb-20 pt-48 sm:px-8 md:min-h-[90vh] md:justify-center md:px-16 md:py-20"
         >
           <div className="max-w-xl">
             <div
@@ -148,7 +147,7 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
                 fontFamily: "'BlockGothicRR', sans-serif",
                 fontWeight: 500,
                 textTransform: "uppercase",
-                fontSize: "clamp(3rem, 14vw, 5rem)",
+                fontSize: "clamp(2.5rem, 12vw, 5rem)",
                 color: "#FFFFFF",
                 lineHeight: 1.15,
                 margin: 0,

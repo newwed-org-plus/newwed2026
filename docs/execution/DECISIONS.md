@@ -270,3 +270,20 @@ O usuário autorizou capturar as funcionalidades internas localmente e enviar o 
 ## D-055 — Evidências históricas fora das consultas comerciais
 
 Na retomada autorizada de 26/10 às 21h05, a medição remota após 0019 encontrou 11.563 eventos UAZAPI antigos PENDING que ainda eram percorridos pelo cron comercial. A migration aditiva 0020 cria índice parcial de estado, horário e tipo somente para eventos comerciais. Não apagar, concluir artificialmente, republicar ou liberar os registros históricos para reduzir consumo. A regressão deve conservar milhares de eventos UAZAPI PENDING publicados, sem Queue ou efeitos externos, e medir o cron inteiro. Aplicar staging antes de produção e manter flags, callbacks, autenticação e operações HELD.
+
+## D-056 — Limpeza de conversas expressamente autorizada
+
+Em 26/10/2026, após esclarecer o alcance da exclusão, o usuário confirmou **Todas as conversas de produção** e pediu retirar seu contato de teste. Essa autorização substitui a preservação dos registros de conversa de D-054/D-055 somente para esta limpeza; não autoriza apagar usuários, credenciais, linhas, atendentes ou dados financeiros.
+
+Preservar backup cifrado com recuperação verificada antes da operação. Apagar mensagens, conversas, memórias e operações assíncronas correspondentes, inclusive as antigas retidas, sem executá-las. Remover o conteúdo dos webhooks e manter somente marcadores de deduplicação já processados para evitar que uma repetição restaure o histórico. Preservar alertas operacionais e suas retenções, autenticação, configurações e dados financeiros. Não apagar o histórico do aplicativo WhatsApp ou o Sandbox local, reimportar dados antigos, desconectar a linha da equipe ou enviar novo WhatsApp por conta dessa limpeza.
+
+
+## D-057 — Credencial de produção Asaas concluída
+
+Em 27/10/2026, o usuário concluiu a autenticação no Asaas, gerou a chave de produção e pediu armazenamento sem passar pelo chat. A pendência de SMS/chave de D-053 está resolvida. A credencial foi transferida por FIFO privado para stdin do Wrangler, sem arquivo de texto, saída de terminal, argumento de processo ou conteúdo no chat, e guardada exclusivamente como `ASAAS_API_KEY` no Worker comercial de produção. Consulta autenticada somente de leitura retornou HTTP 200.
+
+A atualização do secret preservou o código já implantado e todas as flags. Checkout, confirmação e e-mail continuam desligados; não houve cliente ou cobrança de validação real. Webhook de produção e aceite comercial permanecem pendentes antes da liberação progressiva. Não copiar a chave para o ambiente local, Sandbox ou receptor de mensagens.
+
+## D-058 — Hero FAMTOUR compacto e transparente no mobile
+
+Em 30/10/2026, o usuário pediu corrigir o Newwed a partir do relato do contato indicado e autorizou a comunicação direta. O print e o áudio esclarecem o escopo: remover o cartão branco atrás da marca Destinos, retirar a pequena repetição de FAMTOUR/edição e subir o título e o CTA no mobile. O PNG oficial já possui alpha; a causa é o fundo CSS do cartão. Preservar o arquivo original e apresentar a marca e os destinos em branco sobre a foto somente abaixo de 768px. Compactar o título e o espaçamento para que o CTA caiba inclusive em 320×568. Desktop mantém painel branco, cores oficiais e tipografia de 80px. Nenhuma mudança comercial, de autenticação, schema ou configuração de provedores faz parte desta correção.

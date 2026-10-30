@@ -1,68 +1,37 @@
 # Status de execução
 
-Atualizado em: 2026-10-26.
+Atualizado em: 2026-10-30.
 
 ## Objetivo ativo
 
-Implementar as ondas 21–26: site → inscrição → lead → atendimento → qualificação humana → checkout → pagamento → confirmação pela mesma linha UAZAPI.
+Concluir a onda 38: corrigir o hero mobile da FAMTOUR conforme relato do contato indicado, validar e publicar pelo fluxo existente. Operação comercial permanece conforme CP-33 a CP-37.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
-- Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Asaas produção exige SMS indisponível; checkout remoto fica desligado.
+- Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
 - Não contratar capacidade paga sem orçamento aprovado; não liberar mensagens, cobranças ou e-mails antigos ao ativar consumidor.
 - O usuário autorizou usar `atendimento` no localhost e importar o histórico UAZAPI desta linha. D-047 autorizou o callback local; D-053 autoriza a publicação e a devolução do callback para produção.
+- Em 26/10 o usuário autorizou zerar todas as conversas de produção: limpeza concluída em CP-36/D-056, com backup cifrado. Diagnóstico de mensagem não recebida aguarda destino/horário; não repetir a limpeza ou fabricar recebimento.
 
 ## Base preservada
 
 - Ondas 0–16: funcionalidades e publicações em CP-00 a CP-16.
 - Ondas 17–20: parser de conexão, renovação explícita de QR, fim do polling conectado e recuperação de histórico; CP-17 a CP-20.
-- Migrations remotas até 0019; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
+- Migrations remotas até 0020; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
 - Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`, perfil Wrangler `newwed-production`.
 
-## Onda 21 concluída
+## Ondas 21–25 concluídas
 
-- Branch `codex/wave-21-security-staging`, base `ecbe6e5`.
-- Zod 4.6.7, Vite 8.3.5 e transitivas corrigidas; auditoria de produção sem alertas.
-- Preflight por capacidades: R2/Access opcionais, segurança e isolamento verificados. Funções externas desligadas por padrão.
-- D1 staging `d67175d9-52b6-47f7-b7a0-4a75a05af32d`, migrations 0000–0008 aplicadas e quatro filas staging criadas; nenhum consumidor comercial ativado.
-- Recuperação de produção confirmada por contagens em 25/10: 358 conversas e 14.908 mensagens; zero históricos/lotes pendentes. Nenhum conteúdo de mensagem foi lido.
-- Tipos, lint, TypeScript, 95 unitários, 34 Workers, invariantes D1 e build aprovados; 53 cenários visuais aprovados (52 na suíte e um na repetição focada). Detalhes no CP-21.
-
-## Onda 22 concluída
-
-- Onda 22, `codex/wave-22-capacity-login`. Migration local 0009 e Durable Object AdminIpLimiter.
-- Cursor de histórico, orçamento 100/tick, lock por linha e login sem bucket D1 por IP.
-- Gate completo aprovado: 96 unitários, 37 Workers, 53 visuais, D1, build, lint/tipos e auditoria sem alertas. CP-22.
-
-## Onda 23 concluída
-
-- Onda 23, `codex/wave-23-inbox-pagination`, migration local 0010.
-- Paginação estável, erros globais, polling serial e ambiente visível.
-- Gate aprovado: 96 unitários, 39 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-23.
-
-## Onda 24 concluída
-
-- Onda 24, `codex/wave-24-safe-commercial-processing`, migration local 0011.
-- Outbox com retenção/lease/conclusão, flags independentes e intake separado de respostas.
-- Envios incertos não são repetidos; revisão e reconciliação auditadas.
-- Gate aprovado: 96 unitários, 46 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-24.
-
-## Onda 25 concluída
-
-- Onda 25, `codex/wave-25-uazapi-checkout`, migration local 0012.
-- Checkout e confirmação na mesma conversa/linha UAZAPI, conciliação de envio incerto e estorno concluído terminal.
-- Formulário/Turnstile e vínculo de checkout corrigidos; legado Meta preservado.
-- Gate aprovado: 97 unitários, 49 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-25.
-- PRs 7–10 com CI aprovado; sem merge/deploy automático durante validação local.
+- Dependências, preflight por capacidades, staging isolado e recuperação de produção verificados em CP-21.
+- Histórico limitado/retomável, paginação estável, erros globais e polling serial em CP-22/CP-23.
+- Retenção/lease da outbox, flags independentes, revisão de envio incerto e checkout/confirmação UAZAPI em CP-24/CP-25; legado Meta preservado.
+- Gates aprovados por onda; CP-25: 97 unitários, 49 Workers, 57 visuais, D1/recuperação, tipos/lint/build/auditoria.
 
 ## Onda 26 concluída localmente
 
-- 26, `codex/wave-26-operations-local-pilot`, migration local 0013.
 - Métricas/alertas, revisão de retenções e e-mails, backup/restauração, fixtures e roteiro local implementados. CP-26.
-- Focados: 55 Workers e cinco visuais novos aprovados; ensaio de backup/restauração aprovado.
 - Gate completo aprovado: 97 unitários, 55 Workers, 62 visuais, D1, backup/restauração, build, lint/tipos, auditoria zero e preflights. Assets do cliente sem secrets.
 - Banco local preparado com fixture sem provider. Não houve merge, deploy, envio real ou contratação.
 - Correção de corrida no CTA da PR 11: `fe2180b` (incorporada nesta branch como `fb62826`); CI aprovado. PRs 7–12 aprovadas no CI, sem merge/deploy.
-
 
 ## Onda 27 — UAZAPI inteiramente operada pelo ambiente local
 
@@ -126,27 +95,43 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Dados fiscais do checkout protegidos; gate aprovado: 189 unitários, 89 Workers, 72 visuais, D1/recuperação, tipos/lint/build e auditoria zero.
 - Revalidação local: Marina Costa, Famtour Alagoas/R$ 7.697,00, uma cobrança Pix Sandbox PAID, lead PAGO e link/confirmação entregues. Nenhuma cobrança real.
 - Web, receptor e consumidor publicados; recebimento, envio manual e IA gratuitos habilitados. Callback atendimento em produção e conectado; histórico remoto pausado e operações antigas HELD.
-- Consumo real D1/filas coletado pelo cron; falha de transporte resolvida com redirect manual. Plano gratuito/e-mail desligado por decisão do usuário. Checkout/confirmação aguardam SMS Asaas.
+- Consumo real D1/filas coletado pelo cron; falha de transporte resolvida com redirect manual. Plano gratuito/e-mail desligado por decisão do usuário. Checkout/confirmação aguardavam SMS Asaas; chave validada posteriormente em CP-37.
 - Local revalidado: Pix e cartão em 12 parcelas com nomes comuns, cobrança/notificação/confirmação únicas. Login autenticado remoto e teste de token real do formulário dependem do usuário.
 
 ## Onda 34 — Login de produção recuperado
 
 - Branch codex/wave-34-production-login, base 388a0a4. CP-34 e D-054.
-- Login real retorna 503 por cota diária D1, inclusive na criação da sessão; senha e autenticação preservadas. Plano Free mantido.
+- Cota diária D1 impedia criar a sessão; login normal recuperado, senha/autenticação preservadas e plano Free mantido.
 - Migration 0019: índices parciais eliminam varreduras ociosas; cron sintético com 3 mil mensagens e eventos usa menos de 100 leituras.
 - Erro de cota informa motivo e renovação, preservando DATABASE_UNAVAILABLE e 503; falha transitória continua distinta.
 - Gate aprovado: 190 unitários, 91 Workers, 73 visuais e auditoria zero; CI da PR 21/main aprovado. Migration 0019 aplicada staging → produção após renovação autorizada.
 - Web `ae14f7d9-3e1c-4a36-ae78-3577eaba08ea` e comercial `bf22461a-8804-44dd-a1b6-a79d1f1eacd1`. Login normal e Inbox com 100 conversas validados; 16 prints já enviados ao Lucas, sem repetição.
-- Cron recuperado, dados e retenções preservados. Medição adicional exige CP-35: eventos UAZAPI PENDING ainda oneravam as consultas comerciais.
+- Cron recuperado, dados e retenções preservados. Custo adicional dos eventos históricos corrigido em CP-35.
 
 ## Onda 35 — Isolamento do orçamento comercial
 
 - Branch codex/wave-35-commercial-read-budget, base 9590340. CP-35/D-055, migration aditiva 0020.
-- Índice parcial cobre somente eventos comerciais; regressão conserva milhares de UAZAPI PENDING sem republicar. Gate e aplicação remota em andamento.
+- Índice parcial aplicado staging → produção: três consultas passaram de 34.698 para nove leituras; eventos históricos/HELD preservados. Gate completo aprovado: 190 unitários, 91 Workers, 73 visuais e auditoria zero.
+- PR 22/CI de main aprovados, merge 32faae1; web `4af762f7-ab5a-4d69-8543-d71a7883c6e7`. Login normal, sessão após publicação e Inbox paginada aprovados. Retomada concluída, sem WhatsApp adicional ou contratação.
+
+## Onda 36 — Limpeza operacional autorizada
+
+- Branch codex/wave-36-inbox-cleanup, sem código, migration ou deploy. Removidas 359 conversas, 14.911 mensagens e a memória; payloads de webhooks apagados, marcadores deduplicadores preservados.
+- Inbox vazia confirmada pela UI/API, autenticação e atendentes preservados. Backup cifrado/recuperação verificados, ensaio local e FKs aprovados. Recebimento autenticado 200; último envio manual estava entregue. Destino/horário do relato pendentes.
+
+## Onda 37 — Chave Asaas de produção
+
+- Chave gerada pelo usuário, guardada exclusivamente no secret comercial ASAAS_API_KEY e validada por consulta de leitura HTTP 200. CP-37/D-057. Sem cobrança real ou alteração de flags.
+
+## Onda 38 — Hero FAMTOUR mobile
+
+- Correção solicitada pelo usuário e detalhada pelo contato indicado: retirar cartão branco da marca, ocultar subtítulo repetido e subir conteúdo/botão no mobile. CP-38/D-058.
+- PNG original com transparência preservado; marca e destinos brancos sobre a foto no mobile, desktop preservado. CTA integralmente visível em 320×568 e 390×844; sem overflow lateral.
+- Tipos/lint/TypeScript, 190 unitários, build final e 73 cenários visuais verificados (72 + repetição mobile após nova referência). Auditoria: três avisos moderados em dependências existentes, zero alto/crítico. Publicação em andamento, sem mudança de schema, flags ou integrações comerciais.
 
 ## Bloqueios externos
 
-- Asaas produção: titular sem acesso ao SMS necessário para criar a chave; não há chave de produção nem checkout remoto habilitado. Cartão/parcelas/estorno externos e domínio de e-mail pendentes.
+- Asaas produção: chave validada em CP-37; webhook e aceite financeiro remoto pendentes. Checkout/confirmação/e-mail desligados; domínio de e-mail pendente.
 - Sem linha de teste separada configurada em homologação; nunca usar a linha ativa para fixtures.
 - Vídeo final não fornecido; imagem atual preservada.
 - Piloto real e observação por 24h ainda pendentes.
