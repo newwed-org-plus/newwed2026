@@ -1,10 +1,10 @@
 # Status de execução
 
-Atualizado em: 2026-10-27.
+Atualizado em: 2026-10-30.
 
 ## Objetivo ativo
 
-Implementar as ondas 21–26: site → inscrição → lead → atendimento → qualificação humana → checkout → pagamento → confirmação pela mesma linha UAZAPI.
+Concluir a onda 38: corrigir o hero mobile da FAMTOUR conforme relato do contato indicado, validar e publicar pelo fluxo existente. Operação comercial permanece conforme CP-33 a CP-37.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
@@ -19,35 +19,12 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 - Migrations remotas até 0020; produção usa D1 `2263d378-59c9-4e5a-8d9b-a6e0140767dd`.
 - Conta Cloudflare New Wed: `41245f76790f4922487ec395c9e3bcec`, perfil Wrangler `newwed-production`.
 
-## Onda 21 concluída
+## Ondas 21–25 concluídas
 
-- Zod 4.6.7, Vite 8.3.5 e transitivas corrigidas; auditoria de produção sem alertas.
-- Preflight por capacidades: R2/Access opcionais, segurança e isolamento verificados. Funções externas desligadas por padrão.
-- D1 staging `d67175d9-52b6-47f7-b7a0-4a75a05af32d`, migrations 0000–0008 aplicadas e quatro filas staging criadas; nenhum consumidor comercial ativado.
-- Recuperação de produção confirmada por contagens em 25/10: 358 conversas e 14.908 mensagens; zero históricos/lotes pendentes. Nenhum conteúdo de mensagem foi lido.
-- Tipos, lint, TypeScript, 95 unitários, 34 Workers, invariantes D1 e build aprovados; 53 cenários visuais aprovados (52 na suíte e um na repetição focada). Detalhes no CP-21.
-
-## Onda 22 concluída
-
-- Cursor de histórico, orçamento 100/tick, lock por linha e login sem bucket D1 por IP.
-- Gate completo aprovado: 96 unitários, 37 Workers, 53 visuais, D1, build, lint/tipos e auditoria sem alertas. CP-22.
-
-## Onda 23 concluída
-
-- Paginação estável, erros globais, polling serial e ambiente visível.
-- Gate aprovado: 96 unitários, 39 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-23.
-
-## Onda 24 concluída
-
-- Outbox com retenção/lease/conclusão, flags independentes e intake separado de respostas.
-- Envios incertos não são repetidos; revisão e reconciliação auditadas.
-- Gate aprovado: 96 unitários, 46 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-24.
-
-## Onda 25 concluída
-
-- Checkout e confirmação na mesma conversa/linha UAZAPI, conciliação de envio incerto e estorno concluído terminal.
-- Formulário/Turnstile e vínculo de checkout corrigidos; legado Meta preservado.
-- Gate aprovado: 97 unitários, 49 Workers, 57 visuais, D1/build/lint/tipos/auditoria. CP-25.
+- Dependências, preflight por capacidades, staging isolado e recuperação de produção verificados em CP-21.
+- Histórico limitado/retomável, paginação estável, erros globais e polling serial em CP-22/CP-23.
+- Retenção/lease da outbox, flags independentes, revisão de envio incerto e checkout/confirmação UAZAPI em CP-24/CP-25; legado Meta preservado.
+- Gates aprovados por onda; CP-25: 97 unitários, 49 Workers, 57 visuais, D1/recuperação, tipos/lint/build/auditoria.
 
 ## Onda 26 concluída localmente
 
@@ -145,6 +122,12 @@ Implementar as ondas 21–26: site → inscrição → lead → atendimento → 
 ## Onda 37 — Chave Asaas de produção
 
 - Chave gerada pelo usuário, guardada exclusivamente no secret comercial ASAAS_API_KEY e validada por consulta de leitura HTTP 200. CP-37/D-057. Sem cobrança real ou alteração de flags.
+
+## Onda 38 — Hero FAMTOUR mobile
+
+- Correção solicitada pelo usuário e detalhada pelo contato indicado: retirar cartão branco da marca, ocultar subtítulo repetido e subir conteúdo/botão no mobile. CP-38/D-058.
+- PNG original com transparência preservado; marca e destinos brancos sobre a foto no mobile, desktop preservado. CTA integralmente visível em 320×568 e 390×844; sem overflow lateral.
+- Tipos/lint/TypeScript, 190 unitários, build final e 73 cenários visuais verificados (72 + repetição mobile após nova referência). Auditoria: três avisos moderados em dependências existentes, zero alto/crítico. Publicação em andamento, sem mudança de schema, flags ou integrações comerciais.
 
 ## Bloqueios externos
 
