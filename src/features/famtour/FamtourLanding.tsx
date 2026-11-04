@@ -74,12 +74,12 @@ export function FamtourLanding() {
   },[edicao,scrollTo]);
 
   const handleRequestInformation = (slug: string) => {
-    router.push(`/famtour?edicao=${encodeURIComponent(slug)}#form`,{scroll:false});
+    router.push(`/destinos?edicao=${encodeURIComponent(slug)}#form`,{scroll:false});
     scrollTo("form");
   };
 
   const handleViewEdition = (slug: string) => {
-    router.push(`/famtour/inscricao/${encodeURIComponent(slug)}`);
+    router.push(`/destinos/inscricao/${encodeURIComponent(slug)}`);
   };
 
   return (

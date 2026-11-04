@@ -170,10 +170,8 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
             <button
               type="button"
               onClick={onCta}
-              className="w-full max-w-[290px] md:w-auto"
+              className="w-full max-w-[290px] bg-[#176a96] text-white transition-colors hover:bg-[#125579] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white md:w-auto"
               style={{
-                background: "#FFFFFF",
-                color: "#7A2535",
                 padding: "1rem 2rem",
                 borderRadius: 0,
                 fontFamily: "'Fedra Sans Std', sans-serif",

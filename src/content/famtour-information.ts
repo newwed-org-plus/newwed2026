@@ -4,7 +4,7 @@ export const famtourInformation={
  landingDescription:'O Famtour New Wed é uma experiência fechada e curada para assessores e profissionais de casamentos que querem entrar no mercado de Destination Wedding com autoridade, guiada por quem tem autoridade no Nordeste.',
  airfareAnswer:'Sim. Esta edição está cadastrada com aéreo incluso.',
  registration:{
-  interestUrl:'/famtour#form',
+  interestUrl:'/destinos#form',
   interest:'O formulário da landing é uma pré-inscrição de interesse. A equipe retorna pelo WhatsApp; não confirma vaga nem pagamento.',
   detailPage:'A página de cada edição apresenta informações e uma prévia do formulário, sem enviar dados nem realizar cobrança.',
   detailPageAnswer:'Ainda não. Esta página apresenta a estrutura da inscrição, mas não envia dados e não realiza cobrança nesta etapa.',

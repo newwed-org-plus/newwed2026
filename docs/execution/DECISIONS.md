@@ -287,3 +287,10 @@ A atualização do secret preservou o código já implantado e todas as flags. C
 ## D-058 — Hero FAMTOUR compacto e transparente no mobile
 
 Em 30/10/2026, o usuário pediu corrigir o Newwed a partir do relato do contato indicado e autorizou a comunicação direta. O print e o áudio esclarecem o escopo: remover o cartão branco atrás da marca Destinos, retirar a pequena repetição de FAMTOUR/edição e subir o título e o CTA no mobile. O PNG oficial já possui alpha; a causa é o fundo CSS do cartão. Preservar o arquivo original e apresentar a marca e os destinos em branco sobre a foto somente abaixo de 768px. Compactar o título e o espaçamento para que o CTA caiba inclusive em 320×568. Desktop mantém painel branco, cores oficiais e tipografia de 80px. Nenhuma mudança comercial, de autenticação, schema ou configuração de provedores faz parte desta correção.
+
+
+## D-059 — Destinos como endereço principal e identidade do hero
+
+Em 04/11/2026, o usuário pediu aplicar os ajustes encaminhados pelo contato indicado, priorizar Destinos e responder ao contato. `/destinos` passa a hospedar a landing e suas páginas de edição/inscrição; `/famtour` e seus caminhos antigos redirecionam permanentemente, preservando query strings e fragmentos do navegador. Links institucionais, retornos e URLs da fonte pública de conhecimento usam o endereço novo; nomes comerciais, slugs, preços e dados existentes não mudam.
+
+O cabeçalho da landing usa a marca oficial branca e transparente, com navegação mais legível e alinhada. O CTA principal fica azul com texto branco e foco visível. Preservar a composição desktop e o hero mobile compacto aprovado em D-058, inclusive o botão visível em 320×568. Não há mudança de schema, flags, callbacks, credenciais, consumidor comercial ou mensagens automáticas. A resposta autorizada ao contato resume somente o estado efetivamente validado.

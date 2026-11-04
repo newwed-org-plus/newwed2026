@@ -17,7 +17,7 @@ export function InscricaoPage({ edition }: PageProps) {
       <header className="border-b border-white/10 bg-[#191010] px-5 py-4 text-white md:px-10">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
           <a
-            href="/famtour"
+            href="/destinos"
             className="whitespace-nowrap font-serif text-xl uppercase tracking-[0.18em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
             New Wed
@@ -27,7 +27,7 @@ export function InscricaoPage({ edition }: PageProps) {
             <a href="/#projetos" className="hover:text-white">Projetos</a>
           </nav>
           <a
-            href="/famtour#famtours"
+            href="/destinos#famtours"
             className="font-sans text-[0.68rem] uppercase tracking-[0.14em] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
             Voltar para edições abertas
@@ -192,7 +192,7 @@ export function EditionNotFound() {
           Confira as edições 2027 cadastradas na página principal.
         </p>
         <a
-          href="/famtour#famtours"
+          href="/destinos#famtours"
           className="mt-9 inline-flex min-h-12 items-center justify-center border border-white bg-white px-7 py-3 font-sans text-xs font-semibold uppercase tracking-[0.12em] text-[#7A2535] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
         >
           VOLTAR PARA EDIÇÕES ABERTAS

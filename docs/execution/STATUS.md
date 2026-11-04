@@ -1,10 +1,10 @@
 # Status de execução
 
-Atualizado em: 2026-10-30.
+Atualizado em: 2026-11-04.
 
 ## Objetivo ativo
 
-Onda 38 concluída, publicada e validada: hero mobile da FAMTOUR conforme relato do contato indicado; CI de main aprovado. Operação comercial permanece conforme CP-33 a CP-37.
+Onda 39 em validação: página Destinos como endereço principal, marca branca no cabeçalho e CTA azul conforme áudio/vídeo encaminhados. Operação comercial permanece conforme CP-33 a CP-37.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
@@ -129,6 +129,13 @@ Onda 38 concluída, publicada e validada: hero mobile da FAMTOUR conforme relato
 - PNG original com transparência preservado; marca e destinos brancos sobre a foto no mobile, desktop preservado. CTA integralmente visível em 320×568 e 390×844; sem overflow lateral.
 - Tipos/lint/TypeScript, 190 unitários, build final e 73 cenários visuais verificados (72 + repetição mobile após nova referência). CI da PR 23 aprovado no Linux; auditoria: três avisos moderados preexistentes, zero alto/crítico.
 - Merge `6bc9c3b` publicado; web `2d54d1d0-5cf6-4337-b980-2985c1fe0cca`. Mobile/CTA, HTTP público 200 e API sem sessão 401 aprovados. Contato avisado e mensagem lida. Flags preservadas; CI de main `41117338586` aprovado.
+
+## Onda 39 — Prioridade para Destinos
+
+- Branch `codex/wave-39-destinos-page`, base `6bc9c3b`; contexto final de CP-38 incorporado. D-059/CP-39. Sem migration.
+- Landing/edições/inscrição em `/destinos`; `/famtour/:path*` redireciona 308, preservando parâmetros. Links e fonte pública de conhecimento atualizados.
+- Cabeçalho com marca branca transparente e navegação mais legível; CTA principal azul com texto branco/foco visível. Hero compacto mobile preservado.
+- Tipos Cloudflare, lint, TypeScript, 190 unitários e build aprovados; testes visuais e compatibilidade em andamento. Nenhum envio ao contato ou deploy desta onda realizado ainda.
 
 ## Bloqueios externos
 

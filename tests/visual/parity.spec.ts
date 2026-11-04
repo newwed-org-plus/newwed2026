@@ -43,9 +43,9 @@ function blockMeanAbsoluteError(expected: PNG, received: PNG, blockSize = 4) {
 const cases = [
   ["institucional-home","http://127.0.0.1:5174/","/"],
   ["institucional-404","http://127.0.0.1:5174/rota-inexistente","/rota-inexistente"],
-  ["famtour-home","http://127.0.0.1:5173/","/famtour"],
-  ["famtour-edicao","http://127.0.0.1:5173/edicoes/fernando-de-noronha-2026","/famtour/edicoes/fernando-de-noronha-2026"],
-  ["famtour-inscricao","http://127.0.0.1:5173/inscricao/famtour-rn-abril-2027","/famtour/inscricao/famtour-rn-abril-2027"],
+  ["famtour-home","http://127.0.0.1:5173/","/destinos"],
+  ["famtour-edicao","http://127.0.0.1:5173/edicoes/fernando-de-noronha-2026","/destinos/edicoes/fernando-de-noronha-2026"],
+  ["famtour-inscricao","http://127.0.0.1:5173/inscricao/famtour-rn-abril-2027","/destinos/inscricao/famtour-rn-abril-2027"],
 ] as const;
 const viewports = [
   ["mobile",390,844],
@@ -67,6 +67,41 @@ async function settle(page: import("@playwright/test").Page) {
   });
   await page.waitForTimeout(250);
 }
+
+test("URLs antigas da FAMTOUR preservam edição, campanha e seção", async ({ page, request }) => {
+  const query = "edicao=famtour-rn-abril-2027&utm_source=validacao&utm_source=link";
+  for (const suffix of ["", "/edicoes/fernando-de-noronha-2026", "/inscricao/famtour-rn-abril-2027"]) {
+    const response = await request.get(`${siteOrigin}/famtour${suffix}?${query}`, { maxRedirects: 0 });
+    expect(response.status()).toBe(308);
+    expect(new URL(response.headers().location, siteOrigin).href).toBe(`${siteOrigin}/destinos${suffix}?${query}`);
+  }
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`${siteOrigin}/famtour?${query}#famtours`);
+  await expect(page).toHaveURL(`${siteOrigin}/destinos?${query}#famtours`);
+  await expect(page.locator("#famtours")).toBeInViewport();
+});
+
+test("Destinos mantém logo branca e CTA azul na primeira tela mobile", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const [width, height] of [[320, 568], [390, 844], [1440, 900]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto(`${siteOrigin}/destinos`);
+    await settle(page);
+    const logo = page.getByRole("link", { name: "New Wed, página inicial", exact: true });
+    await expect(logo).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(logo.locator("img")).toHaveCSS("filter", "brightness(0) invert(1)");
+    const cta = page.getByRole("button", { name: "Ver edições abertas", exact: true });
+    await expect(cta).toHaveCSS("background-color", "rgb(23, 106, 150)");
+    const box = await cta.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.y + box!.height).toBeLessThanOrEqual(height);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await mkdir(resolve("test-results/visual/destinos"), { recursive: true });
+    await page.screenshot({ path: resolve(`test-results/visual/destinos/hero-${width}.png`), animations: "disabled" });
+    await cta.click();
+    await expect(page.locator("#famtours")).toBeInViewport();
+  }
+});
 
 for (const [viewportName,width,height] of viewports) {
   test(`${viewportName} · institucional-home estrutura`,async ({ page }) => {
@@ -95,7 +130,7 @@ for (const [viewportName,width,height] of viewports) {
   test(`${viewportName} · projetos abrem páginas próprias pelos cards e menus`, async ({ page }) => {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    for (const [id, route] of [["feira", "/feira"], ["destinos", "/famtour"], ["guia", "/guia"], ["workshop", "/workshop"]]) {
+    for (const [id, route] of [["feira", "/feira"], ["destinos", "/destinos"], ["guia", "/guia"], ["workshop", "/workshop"]]) {
       await page.goto(`${siteOrigin}/`);
       await page.locator(`#${id}`).getByRole("link").click();
       await expect(page).toHaveURL(`${siteOrigin}${route}`);
@@ -149,7 +184,7 @@ for (const [viewportName,width,height] of viewports) {
       await expect(page).toHaveURL(`${siteOrigin}/#projetos`);
       await expect(page.locator("#projetos")).toBeInViewport();
     }
-    for (const section of ["sobre", "contato", "destinos"]) {
+    for (const section of ["sobre", "contato"]) {
       await page.goto(`${siteOrigin}/${section}`);
       await expect(page).toHaveURL(`${siteOrigin}/#${section}`);
     }
@@ -158,19 +193,19 @@ for (const [viewportName,width,height] of viewports) {
   test(`${viewportName} · navegação pelas seções da FAMTOUR`, async ({ page }) => {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto(`${siteOrigin}/famtour?edicao=famtour-rn-abril-2027`);
+    await page.goto(`${siteOrigin}/destinos?edicao=famtour-rn-abril-2027`);
     await page.waitForLoadState("networkidle");
     for (const section of ["experiencia", "edicoes-anteriores", "famtours", "parceiros", "form"]) {
       if (width < 1024) await page.getByRole("button", { name: "Abrir menu" }).click();
       await page.getByRole("navigation", { name: "Navegação FAMTOUR" }).locator(`a[href="#${section}"]:visible`).click();
-      await expect(page).toHaveURL(`${siteOrigin}/famtour?edicao=famtour-rn-abril-2027#${section}`);
+      await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=famtour-rn-abril-2027#${section}`);
       await expect(page.locator(`.famtour-landing #${section}`)).toBeInViewport();
       if (width < 1024) await expect(page.getByRole("button", { name: "Abrir menu" })).toHaveAttribute("aria-expanded", "false");
       await expect.poll(() => page.locator(`#${section}`).evaluate(element => element.getBoundingClientRect().top)).toBeGreaterThanOrEqual(64);
     }
     for (const section of ["experiencia", "edicoes-anteriores", "famtours", "parceiros", "inicio", "form"]) {
       await page.getByRole("contentinfo").locator(`a[href="#${section}"]`).first().click();
-      await expect(page).toHaveURL(`${siteOrigin}/famtour?edicao=famtour-rn-abril-2027#${section}`);
+      await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=famtour-rn-abril-2027#${section}`);
       await expect(page.locator(`.famtour-landing #${section}`)).toBeInViewport();
     }
     await expect(page.locator('#parceiros img')).toHaveCount(4);
@@ -188,7 +223,7 @@ for (const [viewportName,width,height] of viewports) {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion: "reduce" });
     for (const route of ["edicoes/fernando-de-noronha-2026", "inscricao/famtour-rn-abril-2027"]) {
-      await page.goto(`${siteOrigin}/famtour/${route}`);
+      await page.goto(`${siteOrigin}/destinos/${route}`);
       await page.waitForLoadState("networkidle");
       if (route.startsWith("edicoes/")) {
         if (width < 1024) await page.getByRole("button", { name: "Abrir menu" }).click();
@@ -196,7 +231,7 @@ for (const [viewportName,width,height] of viewports) {
       } else {
         await page.getByRole("banner").getByRole("link", { name: "Voltar para edições abertas" }).click();
       }
-      await expect(page).toHaveURL(`${siteOrigin}/famtour#famtours`);
+      await expect(page).toHaveURL(`${siteOrigin}/destinos#famtours`);
       await expect(page.locator(".famtour-landing #famtours")).toBeInViewport();
     }
   });
@@ -207,7 +242,7 @@ for (const [viewportName,width,height] of viewports) {
     page.on("request", request => {
       if (/fonts\.(googleapis|gstatic)\.com/.test(request.url())) remoteFonts.push(request.url());
     });
-    for (const route of ["/", "/famtour"]) {
+    for (const route of ["/", "/destinos"]) {
       await page.goto(`${siteOrigin}${route}`);
       const typography = await page.evaluate(async () => {
         for (const weight of [300, 350, 700]) await document.fonts.load(`${weight} 16px "Fedra Sans Std"`);
@@ -230,13 +265,13 @@ for (const [viewportName,width,height] of viewports) {
     await page.emulateMedia({ reducedMotion: "reduce" });
     const slugs = ["famtour-alagoas-fevereiro-2027", "famtour-rn-abril-2027", "famtour-noronha-maio-2027", "famtour-ceara-agosto-2027"];
     for (const [index, slug] of slugs.entries()) {
-      await page.goto(`${siteOrigin}/famtour#famtours`);
+      await page.goto(`${siteOrigin}/destinos#famtours`);
       await page.waitForLoadState("networkidle");
       await page.locator("#famtours").getByRole("button", { name: "Solicitar informações", exact: true }).nth(index).click();
-      await expect(page).toHaveURL(`${siteOrigin}/famtour?edicao=${slug}#form`);
+      await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=${slug}#form`);
       await expect(page.locator("#form")).toBeInViewport();
       await page.locator("#famtours").getByRole("button", { name: "Ver informações da edição", exact: true }).nth(index).click();
-      await expect(page).toHaveURL(`${siteOrigin}/famtour/inscricao/${slug}`);
+      await expect(page).toHaveURL(`${siteOrigin}/destinos/inscricao/${slug}`);
       await expect(page.getByText("Nenhuma cobrança será realizada nesta etapa. O ambiente de inscrição online será disponibilizado posteriormente.", { exact: true })).toBeVisible();
       await expect(page.getByText("Ainda não. Esta página apresenta a estrutura da inscrição", { exact: false })).toBeVisible();
     }
@@ -245,7 +280,7 @@ for (const [viewportName,width,height] of viewports) {
   test(`${viewportName} · retorno explícito ao grupo e aos projetos`, async ({ page }) => {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    for (const route of ["/famtour", "/famtour/edicoes/fernando-de-noronha-2026", "/famtour/inscricao/famtour-rn-abril-2027"]) {
+    for (const route of ["/destinos", "/destinos/edicoes/fernando-de-noronha-2026", "/destinos/inscricao/famtour-rn-abril-2027"]) {
       await page.goto(`${siteOrigin}${route}`);
       await page.waitForLoadState("networkidle");
       const header = page.getByRole("navigation", { name: route.includes("inscricao") ? "Retorno ao institucional" : "Navegação FAMTOUR" });

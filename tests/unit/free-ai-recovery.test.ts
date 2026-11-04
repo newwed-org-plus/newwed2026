@@ -54,7 +54,7 @@ describe('recuperação de disponibilidade gratuita',()=>{
 });
 describe('conhecimento compartilhado com site e LP',()=>{
  it('cobre os quatro projetos e todas as edições publicadas sem inventar estoque',()=>{
-  expect(siteKnowledge.projects.map(p=>p.href)).toEqual(['/feira','/famtour','/guia','/workshop']);
+  expect(siteKnowledge.projects.map(p=>p.href)).toEqual(['/feira','/destinos','/guia','/workshop']);
   expect(siteKnowledge.publishedEditions).toHaveLength(4);
   for(const e of publishedFamtourEditions)expect(siteKnowledge.publishedEditions.find(x=>x.slug===e.slug)).toMatchObject({startsAt:e.dataInicio,endsAt:e.dataFim,publishedCashCents:e.valorAVistaCentavos,publishedInstallments:e.parcelaQuantidade,publishedCapacity:e.vagas,included:e.inclusos});
   expect(JSON.stringify(siteKnowledge)).not.toContain('750000');

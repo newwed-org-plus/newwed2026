@@ -10,16 +10,16 @@ export function Nav() {
   const href = (id: string) => famtourSectionHref(pathname, id);
   return (
     <nav aria-label="Navegação FAMTOUR" className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-dark/80 border-b border-cream/10">
-      <div className="flex items-center justify-between px-6 md:px-12 py-4">
+      <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-6 py-4 md:px-12">
         <a
           href="/"
           aria-label="New Wed, página inicial"
           onClick={() => setOpen(false)}
-          className="shrink-0 bg-[#fffaf5] px-2 py-1"
+          className="shrink-0"
         >
-          <img src="/assets/brand/new-wed-marsala.png" width={1167} height={927} alt="New Wed" className="block h-10 w-auto md:h-12" />
+          <img src="/assets/brand/new-wed-marsala.png" width={1167} height={927} alt="New Wed" className="block h-10 w-auto brightness-0 invert md:h-12" />
         </a>
-        <div className="hidden lg:flex gap-5 text-[10px] uppercase tracking-[0.2em] text-smoke font-light">
+        <div className="hidden lg:flex gap-5 text-[10px] uppercase tracking-[0.2em] text-cream/85 font-light">
           {FAMTOUR_NAVIGATION.map((l) => (
             <a
               key={l.id}
@@ -51,7 +51,7 @@ export function Nav() {
         </div>
       </div>
       {open && (
-        <div id="famtour-mobile-menu" className="lg:hidden border-t border-cream/10 bg-dark/95 px-6 py-6 flex flex-col gap-5 text-[11px] uppercase tracking-[0.2em] text-smoke font-light">
+        <div id="famtour-mobile-menu" className="lg:hidden border-t border-cream/10 bg-dark/95 px-6 py-6 flex flex-col gap-5 text-[11px] uppercase tracking-[0.2em] text-cream/85 font-light">
           {FAMTOUR_NAVIGATION.map((l) => (
             <a
               key={l.id}
