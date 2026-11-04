@@ -34,7 +34,7 @@ export function EditionGallery({ edition }: { edition: PreviousEdition }) {
 
         <section className="mx-auto max-w-7xl px-6 py-14 md:px-10 md:py-20">
           <div className="mb-10 max-w-2xl">
-            <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-[#2E8E8E]">
+            <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-[var(--color-destinos-turquoise)]">
               Galeria da edição
             </p>
             <h2 className="mt-4 font-serif text-[clamp(2.5rem,5vw,4rem)] font-light leading-none">
@@ -89,7 +89,7 @@ export function EditionNotFound() {
           </h1>
           <a
             href="/destinos#edicoes-anteriores"
-            className="mt-8 inline-flex min-h-12 items-center justify-center border border-white bg-white px-7 py-3 font-sans text-xs font-semibold uppercase tracking-[0.12em] text-[#7A2535] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A2B28]"
+            className="mt-8 inline-flex min-h-12 items-center justify-center border border-white bg-white px-7 py-3 font-sans text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-destinos-marsala)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A2B28]"
           >
             Voltar para edições anteriores
           </a>

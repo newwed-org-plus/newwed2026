@@ -69,7 +69,7 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
             }}
           />
           <div
-            className="mt-1.5 text-[0.54rem] text-white md:mt-5 md:text-[clamp(0.62rem,1.2vw,0.78rem)] md:text-[#2E8E8E]"
+            className="mt-1.5 text-[0.54rem] text-white md:mt-5 md:text-[clamp(0.62rem,1.2vw,0.78rem)] md:text-[var(--color-destinos-turquoise)]"
             style={{
               fontFamily: "'Fedra Sans Std', sans-serif",
               fontWeight: 350,
@@ -87,7 +87,7 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
               fontWeight: 350,
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              color: "#2E8E8E",
+              color: "var(--color-destinos-turquoise)",
             }}
           >
             FAMTOUR • EDIÇÃO 2027
@@ -170,7 +170,7 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
             <button
               type="button"
               onClick={onCta}
-              className="w-full max-w-[290px] bg-[#176a96] text-white transition-colors hover:bg-[#125579] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white md:w-auto"
+              className="w-full max-w-[290px] bg-destinos-turquoise text-destinos-ink transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white md:w-auto"
               style={{
                 padding: "1rem 2rem",
                 borderRadius: 0,

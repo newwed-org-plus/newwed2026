@@ -83,7 +83,7 @@ export function InscricaoPage({ edition }: PageProps) {
         <section className="mx-auto max-w-7xl px-6 py-14 md:px-10 md:py-20">
           <div className="max-w-4xl">
             <div>
-              <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-[#2E8E8E]">
+              <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-[var(--color-destinos-turquoise)]">
                 Resumo da experiência
               </p>
               <h2 className="mt-4 max-w-3xl font-serif text-[clamp(2.4rem,5vw,4rem)] font-light leading-[1.02]">
@@ -109,7 +109,7 @@ export function InscricaoPage({ edition }: PageProps) {
           </div>
         </section>
 
-        <section className="bg-[#7A2535] px-6 py-12 text-white md:px-10 md:py-16">
+        <section className="bg-[var(--color-destinos-marsala)] px-6 py-12 text-white md:px-10 md:py-16">
           <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-7 md:flex-row md:items-end">
             <div>
               <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-white/65">
@@ -133,7 +133,7 @@ export function InscricaoPage({ edition }: PageProps) {
         <section className="mx-auto max-w-7xl px-6 py-14 md:px-10 md:py-20">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
             <div>
-              <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-[#2E8E8E]">
+              <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-[var(--color-destinos-turquoise)]">
                 Formulário de inscrição
               </p>
               <h2 className="mb-10 mt-4 font-serif text-[clamp(2.4rem,5vw,4rem)] font-light leading-none">
@@ -147,7 +147,7 @@ export function InscricaoPage({ edition }: PageProps) {
 
         <section className="border-t border-black/10 bg-[#F7F4EE] px-6 py-14 md:px-10 md:py-16">
           <div className="mx-auto max-w-4xl">
-            <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-[#2E8E8E]">
+            <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-[var(--color-destinos-turquoise)]">
               Perguntas frequentes
             </p>
             <h2 className="mt-4 font-serif text-4xl font-light">
@@ -155,7 +155,7 @@ export function InscricaoPage({ edition }: PageProps) {
             </h2>
             <dl className="mt-8 divide-y divide-black/10 border-y border-black/10">
               <div className="py-6">
-                <dt className="font-sans text-sm font-semibold uppercase tracking-[0.08em] text-[#7A2535]">
+                <dt className="font-sans text-sm font-semibold uppercase tracking-[0.08em] text-[var(--color-destinos-marsala)]">
                   O aéreo está incluso?
                 </dt>
                 <dd className="mt-3 font-sans text-sm leading-relaxed text-black/65">
@@ -163,7 +163,7 @@ export function InscricaoPage({ edition }: PageProps) {
                 </dd>
               </div>
               <div className="py-6">
-                <dt className="font-sans text-sm font-semibold uppercase tracking-[0.08em] text-[#7A2535]">
+                <dt className="font-sans text-sm font-semibold uppercase tracking-[0.08em] text-[var(--color-destinos-marsala)]">
                   A inscrição já pode ser enviada?
                 </dt>
                 <dd className="mt-3 font-sans text-sm leading-relaxed text-black/65">
@@ -193,7 +193,7 @@ export function EditionNotFound() {
         </p>
         <a
           href="/destinos#famtours"
-          className="mt-9 inline-flex min-h-12 items-center justify-center border border-white bg-white px-7 py-3 font-sans text-xs font-semibold uppercase tracking-[0.12em] text-[#7A2535] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+          className="mt-9 inline-flex min-h-12 items-center justify-center border border-white bg-white px-7 py-3 font-sans text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-destinos-marsala)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
         >
           VOLTAR PARA EDIÇÕES ABERTAS
         </a>

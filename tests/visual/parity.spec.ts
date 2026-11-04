@@ -81,7 +81,7 @@ test("URLs antigas da FAMTOUR preservam edição, campanha e seção", async ({ 
   await expect(page.locator("#famtours")).toBeInViewport();
 });
 
-test("Destinos mantém logo branca e CTA azul na primeira tela mobile", async ({ page }) => {
+test("Destinos mantém logo branca e turquesa oficial na primeira tela mobile", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   for (const [width, height] of [[320, 568], [390, 844], [1440, 900]]) {
     await page.setViewportSize({ width, height });
@@ -91,7 +91,8 @@ test("Destinos mantém logo branca e CTA azul na primeira tela mobile", async ({
     await expect(logo).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     await expect(logo.locator("img")).toHaveCSS("filter", "brightness(0) invert(1)");
     const cta = page.getByRole("button", { name: "Ver edições abertas", exact: true });
-    await expect(cta).toHaveCSS("background-color", "rgb(23, 106, 150)");
+    await expect(cta).toHaveCSS("background-color", "rgb(91, 153, 152)");
+    await expect(cta).toHaveCSS("color", "rgb(67, 16, 33)");
     const box = await cta.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.y + box!.height).toBeLessThanOrEqual(height);
@@ -208,13 +209,17 @@ for (const [viewportName,width,height] of viewports) {
       await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=famtour-rn-abril-2027#${section}`);
       await expect(page.locator(`.famtour-landing #${section}`)).toBeInViewport();
     }
-    await expect(page.locator('#parceiros img')).toHaveCount(4);
+    await expect(page.locator('#parceiros img')).toHaveCount(2);
+    expect(await page.locator('#parceiros img').evaluateAll(images => images.map(image => image.getAttribute('alt')))).toEqual(['Azul', 'Empetur']);
+    for (const partner of await page.locator('#parceiros li').all()) await expect(partner).toHaveCSS('background-color', 'rgb(91, 153, 152)');
     const partners = await page.locator('#parceiros ul').evaluate(element => {
       const boxes = Array.from(element.children).map(child => child.getBoundingClientRect());
-      return { columns:getComputedStyle(element).gridTemplateColumns.split(' ').length, sameRow:boxes[0].top === boxes[3].top };
+      return { columns:getComputedStyle(element).gridTemplateColumns.split(' ').length, sameRow:boxes[0].top === boxes[1].top };
     });
-    expect(partners.columns).toBe(width < 768 ? 2 : 4);
-    expect(partners.sameRow).toBe(width >= 768);
+    expect(partners.columns).toBe(2);
+    expect(partners.sameRow).toBe(true);
+    await mkdir(resolve("test-results/visual/destinos"), { recursive: true });
+    await page.locator('#parceiros').screenshot({ path: resolve(`test-results/visual/destinos/partners-${viewportName}.png`), animations: 'disabled' });
     await page.getByRole('link', { name:'New Wed, página inicial', exact:true }).click();
     await expect(page).toHaveURL(`${siteOrigin}/`);
   });

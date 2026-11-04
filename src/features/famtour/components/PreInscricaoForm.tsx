@@ -47,7 +47,7 @@ const labelStyle: React.CSSProperties = {
   fontSize: "0.7rem",
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: "#2E8E8E",
+  color: "var(--color-destinos-turquoise)",
   marginBottom: "0.5rem",
 };
 
@@ -68,7 +68,7 @@ const inputBaseStyle: React.CSSProperties = {
 const errorStyle: React.CSSProperties = {
   fontFamily: "'Fedra Sans Std', sans-serif",
   fontSize: "0.75rem",
-  color: "#7A2535",
+  color: "var(--color-destinos-marsala)",
   marginTop: "0.4rem",
 };
 
@@ -82,7 +82,7 @@ function SubDivisor({ children }: { children: React.ReactNode }) {
           fontSize: "0.6rem",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: "#2E8E8E",
+          color: "var(--color-destinos-turquoise)",
           paddingBottom: "0.5rem",
           borderBottom: "1px solid rgba(25,16,16,0.1)",
         }}
@@ -294,7 +294,7 @@ export function PreInscricaoForm({
       {showResumeBanner && (
         <div
           style={{
-            border: "1.5px solid #2E8E8E",
+            border: "1.5px solid var(--color-destinos-turquoise)",
             background: "#F7F4EE",
             padding: "1rem 1.25rem",
             marginBottom: "2rem",
@@ -319,7 +319,7 @@ export function PreInscricaoForm({
               type="button"
               onClick={resumeDraft}
               style={{
-                background: "#7A2535",
+                background: "var(--color-destinos-marsala)",
                 color: "#FFFFFF",
                 border: "none",
                 padding: "0.5rem 1rem",
@@ -359,7 +359,7 @@ export function PreInscricaoForm({
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         <div data-field="nome">
           <label htmlFor="nome" style={labelStyle}>
-            Nome completo <span style={{ color: "#7A2535" }}>*</span>
+            Nome completo <span style={{ color: "var(--color-destinos-marsala)" }}>*</span>
           </label>
           <input
             id="nome"
@@ -376,7 +376,7 @@ export function PreInscricaoForm({
 
         <div data-field="email">
           <label htmlFor="email" style={labelStyle}>
-            E-mail <span style={{ color: "#7A2535" }}>*</span>
+            E-mail <span style={{ color: "var(--color-destinos-marsala)" }}>*</span>
           </label>
           <input
             id="email"
@@ -393,7 +393,7 @@ export function PreInscricaoForm({
 
         <div data-field="telefone">
           <label htmlFor="telefone" style={labelStyle}>
-            WhatsApp com DDD <span style={{ color: "#7A2535" }}>*</span>
+            WhatsApp com DDD <span style={{ color: "var(--color-destinos-marsala)" }}>*</span>
           </label>
           <Controller
             control={control}
@@ -444,7 +444,7 @@ export function PreInscricaoForm({
         <div data-field="empresa">
           <label htmlFor="empresa" style={labelStyle}>
             Nome da empresa ou assessoria{" "}
-            <span style={{ color: "#7A2535" }}>*</span>
+            <span style={{ color: "var(--color-destinos-marsala)" }}>*</span>
           </label>
           <input
             id="empresa"
@@ -461,7 +461,7 @@ export function PreInscricaoForm({
 
         <div data-field="cidade_estado">
           <label htmlFor="cidade_estado" style={labelStyle}>
-            Estado / Cidade <span style={{ color: "#7A2535" }}>*</span>
+            Estado / Cidade <span style={{ color: "var(--color-destinos-marsala)" }}>*</span>
           </label>
           <input
             id="cidade_estado"
@@ -480,7 +480,7 @@ export function PreInscricaoForm({
         <div data-field="respostas_brutas">
           <label style={labelStyle}>
             Você já trabalha com Destination Wedding ou tem interesse em
-            começar? <span style={{ color: "#7A2535" }}>*</span>
+            começar? <span style={{ color: "var(--color-destinos-marsala)" }}>*</span>
           </label>
           <div
             className="grid grid-cols-1 md:grid-cols-2"
@@ -562,7 +562,7 @@ export function PreInscricaoForm({
         <div>
           <label style={labelStyle}>
             Já tem algum casal ou noivo com data marcada no Nordeste?{" "}
-            <span style={{ color: "#7A2535" }}>*</span>
+            <span style={{ color: "var(--color-destinos-marsala)" }}>*</span>
           </label>
           <div
             className="grid grid-cols-1 md:grid-cols-2"
@@ -609,7 +609,7 @@ export function PreInscricaoForm({
           <div data-field="famtour_id">
             <label style={labelStyle}>
               Qual edição você gostaria de participar?{" "}
-              <span style={{ color: "#7A2535" }}>*</span>
+              <span style={{ color: "var(--color-destinos-marsala)" }}>*</span>
             </label>
             <div
               className="grid grid-cols-1 md:grid-cols-2"
@@ -635,7 +635,7 @@ export function PreInscricaoForm({
         <div data-field="respostas_brutas.destino_interesse">
           <label htmlFor="destino_interesse" style={labelStyle}>
             Qual outro destino você tem interesse?{" "}
-            <span style={{ color: "#7A2535" }}>*</span>
+            <span style={{ color: "var(--color-destinos-marsala)" }}>*</span>
           </label>
           <input
             id="destino_interesse"
@@ -655,7 +655,7 @@ export function PreInscricaoForm({
         <div data-field="respostas_brutas.expectativa">
           <label htmlFor="expectativa" style={labelStyle}>
             Qual a sua expectativa ao participar do Famtour?{" "}
-            <span style={{ color: "#7A2535" }}>*</span>
+            <span style={{ color: "var(--color-destinos-marsala)" }}>*</span>
           </label>
           <textarea
             id="expectativa"
@@ -735,9 +735,9 @@ export function PreInscricaoForm({
             height: 18,
             flexShrink: 0,
             border: lgpd
-              ? "1.5px solid #7A2535"
+              ? "1.5px solid var(--color-destinos-marsala)"
               : "1.5px solid rgba(25,16,16,0.3)",
-            background: lgpd ? "#7A2535" : "#FFFFFF",
+            background: lgpd ? "var(--color-destinos-marsala)" : "#FFFFFF",
             borderRadius: 0,
             marginTop: 2,
           }}
@@ -798,7 +798,7 @@ export function PreInscricaoForm({
           type="submit"
           disabled={submitting}
           style={{
-            background: "#7A2535",
+            background: "var(--color-destinos-marsala)",
             color: "#FFFFFF",
             border: "none",
             padding: "1.2rem",

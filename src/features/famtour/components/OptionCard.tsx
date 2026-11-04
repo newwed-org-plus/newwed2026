@@ -15,13 +15,13 @@ export function OptionCard({ label, value, selected, onSelect, name }: Props) {
     <label
       className="relative block cursor-pointer transition-colors"
       style={{
-        border: `1.5px solid ${selected ? "#7A2535" : "rgba(25,16,16,0.15)"}`,
+        border: `1.5px solid ${selected ? "var(--color-destinos-marsala)" : "rgba(25,16,16,0.15)"}`,
         background: selected ? "#F7F4EE" : "#FFFFFF",
         padding: "1.25rem 1.5rem",
         borderRadius: 0,
       }}
       onMouseEnter={(e) => {
-        if (!selected) e.currentTarget.style.borderColor = "#2E8E8E";
+        if (!selected) e.currentTarget.style.borderColor = "var(--color-destinos-turquoise)";
       }}
       onMouseLeave={(e) => {
         if (!selected)
@@ -49,7 +49,7 @@ export function OptionCard({ label, value, selected, onSelect, name }: Props) {
       {selected && (
         <Check
           size={18}
-          color="#2E8E8E"
+          color="var(--color-destinos-turquoise)"
           strokeWidth={2.5}
           className="absolute right-4 top-1/2 -translate-y-1/2"
         />

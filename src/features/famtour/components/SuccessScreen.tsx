@@ -72,7 +72,7 @@ export function SuccessScreen({ nome, telefoneFormatado: _telefoneFormatado, fam
             alignItems: "center",
             justifyContent: "center",
             gap: "0.75rem",
-            background: "#7A2535",
+            background: "var(--color-destinos-marsala)",
             color: "#FFFFFF",
             padding: "1.2rem 2.5rem",
             fontFamily: "'Fedra Sans Std', sans-serif",

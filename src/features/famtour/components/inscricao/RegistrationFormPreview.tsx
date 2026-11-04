@@ -21,7 +21,7 @@ function Field({
 }: FieldProps) {
   return (
     <label className="block" htmlFor={id}>
-      <span className="font-sans text-[0.68rem] font-medium uppercase tracking-[0.13em] text-[#2E8E8E]">
+      <span className="font-sans text-[0.68rem] font-medium uppercase tracking-[0.13em] text-[var(--color-destinos-turquoise)]">
         {label}
         {optional ? " (opcional)" : " *"}
       </span>
@@ -32,7 +32,7 @@ function Field({
         autoComplete={autoComplete}
         inputMode={inputMode}
         required={!optional}
-        className="mt-2 min-h-12 w-full rounded-none border-0 border-b border-black/25 bg-transparent px-0 py-3 font-sans text-base text-[#191010] outline-none transition-colors focus:border-[#7A2535] focus-visible:ring-0"
+        className="mt-2 min-h-12 w-full rounded-none border-0 border-b border-black/25 bg-transparent px-0 py-3 font-sans text-base text-[#191010] outline-none transition-colors focus:border-[var(--color-destinos-marsala)] focus-visible:ring-0"
       />
     </label>
   );
@@ -137,9 +137,9 @@ export function RegistrationFormPreview() {
 
       <div
         role="status"
-        className="mt-12 border border-[#7A2535]/25 bg-[#F7F4EE] px-6 py-6 text-center"
+        className="mt-12 border border-[var(--color-destinos-marsala)]/25 bg-[#F7F4EE] px-6 py-6 text-center"
       >
-        <strong className="font-sans text-sm uppercase tracking-[0.14em] text-[#7A2535]">
+        <strong className="font-sans text-sm uppercase tracking-[0.14em] text-[var(--color-destinos-marsala)]">
           INSCRIÇÃO ONLINE EM BREVE
         </strong>
         <p className="mx-auto mt-3 max-w-xl font-sans text-sm leading-relaxed text-black/65">

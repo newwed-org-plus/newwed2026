@@ -36,7 +36,7 @@ function Divisor({ children }: { children: React.ReactNode }) {
           fontSize: "0.65rem",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: "#2E8E8E",
+          color: "var(--color-destinos-turquoise)",
           whiteSpace: "nowrap",
         }}
       >
@@ -137,9 +137,9 @@ export function FamtourLanding() {
                 onClick={() => scrollTo("edicoes-anteriores")}
                 style={{
                   marginTop: "2rem",
-                  background: "#7A2535",
+                  background: "var(--color-destinos-marsala)",
                   color: "#FFFFFF",
-                  border: "1px solid #7A2535",
+                  border: "1px solid var(--color-destinos-marsala)",
                   padding: "1rem 1.75rem",
                   fontFamily: "'Fedra Sans Std', sans-serif",
                   fontWeight: 350,

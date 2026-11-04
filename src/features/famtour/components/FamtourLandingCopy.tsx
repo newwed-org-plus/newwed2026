@@ -11,7 +11,7 @@ function EditorialDivider({ children }: DividerProps) {
       aria-label={children}
     >
       <span className="h-px flex-1 bg-black/10" />
-      <span className="whitespace-nowrap font-sans text-[0.65rem] uppercase tracking-[0.22em] text-[#2E8E8E]">
+      <span className="whitespace-nowrap font-sans text-[0.65rem] uppercase tracking-[0.22em] text-[var(--color-destinos-turquoise)]">
         {children}
       </span>
       <span className="h-px flex-1 bg-black/10" />
