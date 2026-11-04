@@ -4,7 +4,7 @@ Atualizado em: 2026-11-04.
 
 ## Objetivo ativo
 
-Onda 39 em validação: página Destinos como endereço principal, marca branca no cabeçalho e CTA azul conforme áudio/vídeo encaminhados. Operação comercial permanece conforme CP-33 a CP-37.
+Onda 39 publicada e validada: `/destinos` como endereço principal, marca branca no cabeçalho e CTA azul conforme áudio/vídeo encaminhados. Contato avisado com entrega confirmada. Operação comercial permanece conforme CP-33 a CP-37.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
@@ -135,7 +135,8 @@ Onda 39 em validação: página Destinos como endereço principal, marca branca 
 - Branch `codex/wave-39-destinos-page`, base `6bc9c3b`; contexto final de CP-38 incorporado. D-059/CP-39. Sem migration.
 - Landing/edições/inscrição em `/destinos`; `/famtour/:path*` redireciona 308, preservando parâmetros. Links e fonte pública de conhecimento atualizados.
 - Cabeçalho com marca branca transparente e navegação mais legível; CTA principal azul com texto branco/foco visível. Hero compacto mobile preservado.
-- Gates locais e 75 cenários visuais verificados; primeiro CI aprovou código/D1/Workers e 73 visuais, exigindo atualizar duas referências nativas Linux. PR 24 em revalidação. Contato informado do andamento e mensagem lida; sem deploy desta onda ainda.
+- PR 24/head `c28559e`: logs do CI confirmam 190 unitários, 91 Workers e 75 visuais aprovados. Metadados do GitHub ficaram atrasados; resultado conferido nos logs finais e artefato do job. Referências nativas Linux revisadas; critérios preservados.
+- Merge `4234bb3`, web `c4de0d38-1c49-4a25-b5ce-690a04df4198` em 04/11 às 13h10 de Recife; nove flags preservadas. Cinco smokes públicos/navegação aprovados. Contato informado às 13h13 com entrega confirmada. Detalhes em CP-39.
 
 ## Bloqueios externos
 
