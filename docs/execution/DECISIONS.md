@@ -294,3 +294,10 @@ Em 30/10/2026, o usuário pediu corrigir o Newwed a partir do relato do contato 
 Em 04/11/2026, o usuário pediu aplicar os ajustes encaminhados pelo contato indicado, priorizar Destinos e responder ao contato. `/destinos` passa a hospedar a landing e suas páginas de edição/inscrição; `/famtour` e seus caminhos antigos redirecionam permanentemente, preservando query strings e fragmentos do navegador. Links institucionais, retornos e URLs da fonte pública de conhecimento usam o endereço novo; nomes comerciais, slugs, preços e dados existentes não mudam.
 
 O cabeçalho da landing usa a marca oficial branca e transparente, com navegação mais legível e alinhada. O CTA principal fica azul com texto branco e foco visível. Preservar a composição desktop e o hero mobile compacto aprovado em D-058, inclusive o botão visível em 320×568. Não há mudança de schema, flags, callbacks, credenciais, consumidor comercial ou mensagens automáticas. A resposta autorizada ao contato resume somente o estado efetivamente validado.
+
+
+## D-060 — Paleta oficial de Destinos e parceiros atuais
+
+Em 04/11/2026, após receber dois prints, quatro áudios e o manual oficial de marca encaminhados pelo contato indicado, o usuário pediu resolver os pontos e avisar ao contato. Esta orientação substitui o azul aproximado de D-059 e a grade de quatro parceiros de D-034. Botão principal e superfícies das marcas parceiras usam o turquesa Destinos `#5B9998`; manter somente Azul e Empetur. Os acentos e o marsala da feature Destinos passam a usar `#5B9998` e `#7C2341` através de tokens centralizados, com taupe `#A29585` e marsala profundo `#431021` como apoios oficiais.
+
+O manual original é preservado em `docs/brand/Manual_Grupo_New_Wed_2026.pdf`, com guia de uso/proveniência em `docs/brand/README.md`, para evitar perder a referência. Não recolorir ou redesenhar as artes oficiais. Fontes solicitadas em D-030, navegação, hero compacto mobile, slugs, dados e configurações comerciais são preservados. A resposta autorizada ao contato deve descrever somente o resultado efetivamente publicado e validado.

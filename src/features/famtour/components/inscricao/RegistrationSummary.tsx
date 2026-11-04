@@ -13,7 +13,7 @@ export function RegistrationSummary({ edition }: Props) {
       aria-label={`Resumo da inscrição para ${edition.destino}`}
       className="border border-black/10 bg-[#F7F4EE] p-6 lg:sticky lg:top-24"
     >
-      <p className="font-sans text-[0.65rem] uppercase tracking-[0.18em] text-[#2E8E8E]">
+      <p className="font-sans text-[0.65rem] uppercase tracking-[0.18em] text-[var(--color-destinos-turquoise)]">
         Resumo da edição
       </p>
       <h2 className="mt-3 font-serif text-3xl font-normal leading-none text-[#191010]">
@@ -24,17 +24,17 @@ export function RegistrationSummary({ edition }: Props) {
       </p>
 
       <div className="mt-5 flex flex-wrap gap-2">
-        <span className="border border-[#7A2535]/30 px-3 py-2 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[#7A2535]">
+        <span className="border border-[var(--color-destinos-marsala)]/30 px-3 py-2 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-destinos-marsala)]">
           {edition.vagas} VAGAS
         </span>
-        <span className="inline-flex items-center gap-2 border border-[#2E8E8E]/30 px-3 py-2 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[#2E8E8E]">
+        <span className="inline-flex items-center gap-2 border border-[var(--color-destinos-turquoise)]/30 px-3 py-2 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-destinos-turquoise)]">
           <Plane aria-hidden="true" size={15} strokeWidth={1.8} />
           AÉREO INCLUSO
         </span>
       </div>
 
       <div className="my-6 border-y border-black/10 py-6">
-        <p className="font-serif text-[2.25rem] leading-none text-[#7A2535]">
+        <p className="font-serif text-[2.25rem] leading-none text-[var(--color-destinos-marsala)]">
           {edition.parcelaQuantidade}x de{" "}
           {formatCurrency(edition.parcelaCentavos)}
         </p>
@@ -53,7 +53,7 @@ export function RegistrationSummary({ edition }: Props) {
               aria-hidden="true"
               size={16}
               strokeWidth={2}
-              className="mt-1 shrink-0 text-[#2E8E8E]"
+              className="mt-1 shrink-0 text-[var(--color-destinos-turquoise)]"
             />
             <span>{item}</span>
           </li>

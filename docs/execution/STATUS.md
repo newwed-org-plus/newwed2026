@@ -4,7 +4,7 @@ Atualizado em: 2026-11-04.
 
 ## Objetivo ativo
 
-Onda 39 em validação: página Destinos como endereço principal, marca branca no cabeçalho e CTA azul conforme áudio/vídeo encaminhados. Operação comercial permanece conforme CP-33 a CP-37.
+Onda 40 validada localmente, aguardando publicação: paleta oficial de Destinos, fundos turquesa e somente Azul/Empetur nos parceiros. Manual de marca preservado no projeto. Operação comercial permanece conforme CP-33 a CP-37.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
@@ -132,10 +132,14 @@ Onda 39 em validação: página Destinos como endereço principal, marca branca 
 
 ## Onda 39 — Prioridade para Destinos
 
-- Branch `codex/wave-39-destinos-page`, base `6bc9c3b`; contexto final de CP-38 incorporado. D-059/CP-39. Sem migration.
-- Landing/edições/inscrição em `/destinos`; `/famtour/:path*` redireciona 308, preservando parâmetros. Links e fonte pública de conhecimento atualizados.
-- Cabeçalho com marca branca transparente e navegação mais legível; CTA principal azul com texto branco/foco visível. Hero compacto mobile preservado.
-- Gates locais e 75 cenários visuais verificados; primeiro CI aprovou código/D1/Workers e 73 visuais, exigindo atualizar duas referências nativas Linux. PR 24 em revalidação. Contato informado do andamento e mensagem lida; sem deploy desta onda ainda.
+- `/destinos` e páginas internas publicadas com redirects 308 e parâmetros preservados; cabeçalho branco e hero mobile compacto. D-059/CP-39.
+- PR 24/merge `4234bb3`, web `c4de0d38-1c49-4a25-b5ce-690a04df4198`: logs do CI aprovaram 190 unitários, 91 Workers e 75 visuais; cinco smokes públicos aprovados. Flags preservadas; contato avisado com entrega confirmada. Metadados do GitHub atrasaram; usar logs finais do job como evidência.
+
+## Onda 40 — Paleta oficial e parceiros
+
+- Branch `codex/wave-40-destinos-brand`, base `4234bb3`; D-060/CP-40. Sem migration.
+- Manual original/guia em `docs/brand/`; tokens oficiais centralizados e aplicados à feature Destinos. CTA e parceiros turquesa `#5B9998`; apenas Azul e Empetur.
+- Tipos/lint/TypeScript, 190 unitários, build e 75 visuais aprovados; referências nativas Mac/Linux. Auditoria sem altas/críticas; CI/publicação em andamento.
 
 ## Bloqueios externos
 

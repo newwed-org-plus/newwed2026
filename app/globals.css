@@ -49,6 +49,11 @@
   --font-weight-medium: 350;
   --font-weight-semibold: 700;
   --font-weight-bold: 700;
+  /* Manual Grupo New Wed, novembro/2026: docs/brand/Manual_Grupo_New_Wed_2026.pdf */
+  --color-destinos-turquoise: #5b9998;
+  --color-destinos-marsala: #7c2341;
+  --color-destinos-taupe: #a29585;
+  --color-destinos-ink: #431021;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-bord: var(--bord);

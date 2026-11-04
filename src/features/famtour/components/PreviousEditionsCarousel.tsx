@@ -25,7 +25,7 @@ export function PreviousEditionsCarousel() {
           type="button"
           aria-label="Edição anterior"
           onClick={() => scroll(-1)}
-          className="inline-flex size-11 items-center justify-center border border-black/15 bg-white text-[#7A2535] transition-colors hover:border-[#7A2535] hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E8E8E] focus-visible:ring-offset-2"
+          className="inline-flex size-11 items-center justify-center border border-black/15 bg-white text-[var(--color-destinos-marsala)] transition-colors hover:border-[var(--color-destinos-marsala)] hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-destinos-turquoise)] focus-visible:ring-offset-2"
         >
           <ChevronLeft aria-hidden="true" size={20} strokeWidth={1.6} />
         </button>
@@ -33,7 +33,7 @@ export function PreviousEditionsCarousel() {
           type="button"
           aria-label="Próxima edição"
           onClick={() => scroll(1)}
-          className="inline-flex size-11 items-center justify-center border border-black/15 bg-white text-[#7A2535] transition-colors hover:border-[#7A2535] hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E8E8E] focus-visible:ring-offset-2"
+          className="inline-flex size-11 items-center justify-center border border-black/15 bg-white text-[var(--color-destinos-marsala)] transition-colors hover:border-[var(--color-destinos-marsala)] hover:bg-[#F7F4EE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-destinos-turquoise)] focus-visible:ring-offset-2"
         >
           <ChevronRight aria-hidden="true" size={20} strokeWidth={1.6} />
         </button>
@@ -49,7 +49,7 @@ export function PreviousEditionsCarousel() {
             key={edicao.slug}
             href={`/destinos/edicoes/${edicao.slug}`}
             aria-label={`Ver galeria da edição ${edicao.destino} ${edicao.ano}`}
-            className="group relative block aspect-[4/5] min-w-0 flex-[0_0_86%] snap-start overflow-hidden bg-[#0A2B28] text-left shadow-[0_16px_36px_rgba(10,43,40,0.12)] sm:flex-[0_0_60%] lg:flex-[0_0_calc((100%_-_2.5rem)/3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E8E8E] focus-visible:ring-offset-2"
+            className="group relative block aspect-[4/5] min-w-0 flex-[0_0_86%] snap-start overflow-hidden bg-[#0A2B28] text-left shadow-[0_16px_36px_rgba(10,43,40,0.12)] sm:flex-[0_0_60%] lg:flex-[0_0_calc((100%_-_2.5rem)/3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-destinos-turquoise)] focus-visible:ring-offset-2"
           >
             <img
               src={edicao.capa}
