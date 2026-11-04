@@ -4,7 +4,7 @@ Atualizado em: 2026-11-04.
 
 ## Objetivo ativo
 
-Onda 40 validada localmente, aguardando publicação: paleta oficial de Destinos, fundos turquesa e somente Azul/Empetur nos parceiros. Manual de marca preservado no projeto. Operação comercial permanece conforme CP-33 a CP-37.
+Onda 40 publicada e validada: paleta oficial de Destinos, fundos turquesa e somente Azul/Empetur nos parceiros. Manual de marca preservado no projeto. Operação comercial permanece conforme CP-33 a CP-37.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
@@ -139,7 +139,7 @@ Onda 40 validada localmente, aguardando publicação: paleta oficial de Destinos
 
 - Branch `codex/wave-40-destinos-brand`, base `4234bb3`; D-060/CP-40. Sem migration.
 - Manual original/guia em `docs/brand/`; tokens oficiais centralizados e aplicados à feature Destinos. CTA e parceiros turquesa `#5B9998`; apenas Azul e Empetur.
-- Tipos/lint/TypeScript, 190 unitários, build e 75 visuais aprovados; referências nativas Mac/Linux. Auditoria sem altas/críticas; CI/publicação em andamento.
+- PR 25/merge `085efd5`, web `3fb8f8eb-33b9-459c-be8e-e22a326a1e5a`; CI da PR aprovado pelos logs finais: 190 unitários, 91 Workers e 75 visuais. Seis testes públicos aprovados; flags preservadas; confirmação enviada às 14:49 e entregue ao contato.
 
 ## Bloqueios externos
 
