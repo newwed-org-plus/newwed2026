@@ -135,7 +135,7 @@ Onda 39 em validação: página Destinos como endereço principal, marca branca 
 - Branch `codex/wave-39-destinos-page`, base `6bc9c3b`; contexto final de CP-38 incorporado. D-059/CP-39. Sem migration.
 - Landing/edições/inscrição em `/destinos`; `/famtour/:path*` redireciona 308, preservando parâmetros. Links e fonte pública de conhecimento atualizados.
 - Cabeçalho com marca branca transparente e navegação mais legível; CTA principal azul com texto branco/foco visível. Hero compacto mobile preservado.
-- Tipos Cloudflare, lint, TypeScript, 190 unitários e build aprovados; testes visuais e compatibilidade em andamento. Nenhum envio ao contato ou deploy desta onda realizado ainda.
+- Gates locais e 75 cenários visuais verificados; primeiro CI aprovou código/D1/Workers e 73 visuais, exigindo atualizar duas referências nativas Linux. PR 24 em revalidação. Contato informado do andamento e mensagem lida; sem deploy desta onda ainda.
 
 ## Bloqueios externos
 
