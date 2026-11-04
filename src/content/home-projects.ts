@@ -8,7 +8,7 @@ export const homeProjects = [
   },
   {
     id: "destinos",
-    href: "/famtour",
+    href: "/destinos",
     name: "Destinos",
     description: "Famtours imersivos que apresentam destinos e criam conexões reais de negócios.",
     image: "/assets/brand/banner-destinos.webp",

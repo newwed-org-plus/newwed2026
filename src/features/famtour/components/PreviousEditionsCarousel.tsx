@@ -47,7 +47,7 @@ export function PreviousEditionsCarousel() {
         {PREVIOUS_EDITIONS.map((edicao) => (
           <Link
             key={edicao.slug}
-            href={`/famtour/edicoes/${edicao.slug}`}
+            href={`/destinos/edicoes/${edicao.slug}`}
             aria-label={`Ver galeria da edição ${edicao.destino} ${edicao.ano}`}
             className="group relative block aspect-[4/5] min-w-0 flex-[0_0_86%] snap-start overflow-hidden bg-[#0A2B28] text-left shadow-[0_16px_36px_rgba(10,43,40,0.12)] sm:flex-[0_0_60%] lg:flex-[0_0_calc((100%_-_2.5rem)/3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E8E8E] focus-visible:ring-offset-2"
           >

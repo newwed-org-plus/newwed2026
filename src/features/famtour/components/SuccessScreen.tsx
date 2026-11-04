@@ -91,7 +91,7 @@ export function SuccessScreen({ nome, telefoneFormatado: _telefoneFormatado, fam
         </a>
         <div style={{ marginTop: "1rem" }}>
           <Link
-            href="/famtour"
+            href="/destinos"
             style={{
               display: "inline-block",
               border: "1.5px solid #191010",

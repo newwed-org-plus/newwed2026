@@ -10,5 +10,5 @@ export default async function Page({
   for (const [key, value] of Object.entries(query)) {
     if (typeof value === "string") params.set(key, value);
   }
-  redirect(`/famtour${params.size ? `?${params.toString()}` : ""}#form`);
+  redirect(`/destinos${params.size ? `?${params.toString()}` : ""}#form`);
 }

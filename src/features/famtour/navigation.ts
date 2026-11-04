@@ -6,5 +6,5 @@ export const FAMTOUR_NAVIGATION = [
 ] as const;
 
 export function famtourSectionHref(pathname: string, id: string) {
-  return `${pathname === "/famtour" ? "" : "/famtour"}#${id}`;
+  return `${pathname === "/destinos" ? "" : "/destinos"}#${id}`;
 }

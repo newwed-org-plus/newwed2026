@@ -17,7 +17,7 @@ export function EditionGallery({ edition }: { edition: PreviousEdition }) {
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,43,40,0.94)_0%,rgba(10,43,40,0.46)_62%,rgba(10,43,40,0.2)_100%)]" />
           <div className="relative mx-auto flex min-h-[62vh] max-w-7xl flex-col justify-end px-6 py-14 md:px-10 md:py-20">
             <a
-              href="/famtour#edicoes-anteriores"
+              href="/destinos#edicoes-anteriores"
               className="mb-auto inline-flex w-fit items-center gap-2 font-sans text-xs uppercase tracking-[0.14em] text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <ArrowLeft aria-hidden="true" size={16} />
@@ -88,7 +88,7 @@ export function EditionNotFound() {
             Esta galeria ainda não está disponível.
           </h1>
           <a
-            href="/famtour#edicoes-anteriores"
+            href="/destinos#edicoes-anteriores"
             className="mt-8 inline-flex min-h-12 items-center justify-center border border-white bg-white px-7 py-3 font-sans text-xs font-semibold uppercase tracking-[0.12em] text-[#7A2535] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A2B28]"
           >
             Voltar para edições anteriores

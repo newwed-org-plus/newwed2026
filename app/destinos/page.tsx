@@ -1,5 +1,6 @@
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { FamtourLanding } from "@/features/famtour/FamtourLanding";
 
 export default function Page() {
-  redirect("/#destinos");
+  return <Suspense><FamtourLanding /></Suspense>;
 }
