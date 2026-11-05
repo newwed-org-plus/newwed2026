@@ -3,8 +3,11 @@ const origin=process.env.VISUAL_BASE_URL??'http://localhost:4173';
 
 for(const [width,height] of [[320,568],[390,844],[430,932],[768,1024],[1440,900]]) {
   test(`popup de Destinos acessível em ${width}px`,async({page})=>{
+    // Isola o acionamento manual: no domínio remoto, imagens podem carregar por mais de 12s.
+    // A abertura automática é validada separadamente no cenário com relógio controlado.
+    await page.addInitScript(() => sessionStorage.setItem('newwed:ebook:noronha-alem-do-cenario','seen'));
     await page.setViewportSize({width,height});
-    await page.goto(`${origin}/destinos`);
+    await page.goto(`${origin}/destinos`,{waitUntil:'domcontentloaded'});
     await page.getByRole('button',{name:'E-book gratuito',exact:true}).click();
     const popup=page.getByRole('dialog',{name:'Noronha além do cenário'});
     await expect(popup).toBeVisible();
@@ -20,6 +23,7 @@ for(const [width,height] of [[320,568],[390,844],[430,932],[768,1024],[1440,900]
 }
 
 test('pedido só confirma após resposta e falha permite tentar novamente',async({page})=>{
+  await page.addInitScript(() => sessionStorage.setItem('newwed:ebook:noronha-alem-do-cenario','seen'));
   let attempts=0;
   await page.route('**/api/public/config',route=>route.fulfill({json:{leadSubmissionEnabled:true,turnstileSiteKey:''}}));
   await page.route('**/api/public/ebook',route=>{
@@ -27,7 +31,7 @@ test('pedido só confirma após resposta e falha permite tentar novamente',async
     expect(route.request().postDataJSON()).toMatchObject({nome:'VALIDACAO Pessoa',empresa:'Empresa sintética',consent:{accepted:true}});
     return route.fulfill({status:attempts===1?503:200,json:attempts===1?{message:'Tente novamente.'}:{accepted:true,downloadUrl:null}});
   });
-  await page.goto(`${origin}/destinos`);
+  await page.goto(`${origin}/destinos`,{waitUntil:'domcontentloaded'});
   await page.getByRole('button',{name:'E-book gratuito',exact:true}).click();
   const popup=page.getByRole('dialog');
   await popup.getByLabel('Nome completo',{exact:true}).fill('VALIDACAO Pessoa');
@@ -46,15 +50,15 @@ test('pedido só confirma após resposta e falha permite tentar novamente',async
 
 test('abre uma vez por sessão e não aparece fora de Destinos',async({page})=>{
   await page.clock.install();
-  await page.goto(`${origin}/destinos`);
+  await page.goto(`${origin}/destinos`,{waitUntil:'domcontentloaded'});
   await expect(page.getByRole('button',{name:'E-book gratuito',exact:true})).toBeEnabled();
   await page.clock.fastForward(12500);
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('button',{name:'Fechar popup',exact:true}).click();
-  await page.reload();
+  await page.reload({waitUntil:'domcontentloaded'});
   await expect(page.getByRole('button',{name:'E-book gratuito',exact:true})).toBeEnabled();
   await page.clock.fastForward(12500);
   await expect(page.getByRole('dialog')).not.toBeVisible();
-  await page.goto(`${origin}/`);
+  await page.goto(`${origin}/`,{waitUntil:'domcontentloaded'});
   await expect(page.getByRole('button',{name:'E-book gratuito',exact:true})).toHaveCount(0);
 });
