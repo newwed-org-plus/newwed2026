@@ -13,11 +13,9 @@ function HomeContent() {
 
         <div className="nw-hero-content">
           <h1 id="nw-hero-title">
-            Conectamos<br />
-            pessoas, destinos<br />
-            e experiências
+            O maior ecossistema de conexões para o mercado de casamentos do Nordeste.
           </h1>
-          <p>para celebrar o amor</p>
+          <p>FamTours · Feira · Workshop · Guia</p>
           <a className="nw-button nw-button-dark" href="#projetos">Conheça nossos projetos</a>
         </div>
       </section>
@@ -25,7 +23,7 @@ function HomeContent() {
       <section className="nw-projects" id="projetos" aria-labelledby="nw-projects-title">
         <div className="nw-section-heading">
           <h2 id="nw-projects-title">Nosso ecossistema</h2>
-          <p>Soluções completas para o mercado de casamentos</p>
+          <p>Quatro plataformas. Um propósito: conectar, fortalecer e impulsionar o mercado de casamentos.</p>
         </div>
         <div className="nw-project-grid">
           {projects.map((project) => (
@@ -55,29 +53,32 @@ function HomeContent() {
       </section>
 
       <section id="sobre" className="nw-story" aria-labelledby="nw-story-title">
-        <div className="nw-story-image">
-          <img src="/assets/brand/cindy-noel.webp" width={1600} height={900} alt="Cindy Noel, idealizadora do Grupo New Wed" loading="lazy" />
-        </div>
+        <picture className="nw-story-image">
+          <source media="(max-width: 700px)" srcSet="/assets/brand/cindy-vertical.webp" />
+          <img src="/assets/brand/cindy-horizontal.webp" width={1920} height={1080} alt="Cindy Noel, empresária e fundadora do Grupo New Wed" loading="lazy" />
+        </picture>
         <div className="nw-story-copy">
           <div>
-            <h2 id="nw-story-title">Por trás do New Wed</h2>
-            <p>Idealizado por Cindy Noel, o Grupo New Wed une visão criativa, experiência em live marketing, atuação estratégica no mercado de casamentos, eventos e turismo no Nordeste.</p>
-            <a href="#contato" className="nw-button nw-button-dark">Fale com nossa equipe</a>
+            <h2 id="nw-story-title">A visão por trás do Grupo New Wed</h2>
+            <p className="nw-story-role">Cindy Noel | Empresária e estrategista de conexões</p>
+            <p>Com mais de 20 anos de experiência em eventos, comunicação e live marketing, Cindy Noel construiu uma trajetória marcada pela criatividade, inovação e visão estratégica.</p>
+            <p>Empresária e fundadora da Agência Yule e do Grupo New Wed, atua nos mercados corporativo, de turismo e casamentos, conectando marcas, pessoas e oportunidades.</p>
+            <p>Desde 2014, contribui para o fortalecimento do mercado de casamentos no Nordeste, idealizando projetos que valorizam destinos, aproximam profissionais e impulsionam negócios.</p>
           </div>
         </div>
       </section>
 
       <section id="contato" className="nw-closing" aria-labelledby="nw-closing-title">
-        <span className="nw-quote-mark" aria-hidden="true">“</span>
         <div className="nw-closing-copy">
-          <h2 id="nw-closing-title">Seja como for,<br />quem faz a festa é o amor.</h2>
+          <h2 id="nw-closing-title">“Conectamos pessoas, empresas e destinos. Criamos experiências, aproximamos mercados e impulsionamos negócios.”</h2>
+          <p className="nw-quote-author">— Cindy Noel</p>
           <a href={WHATSAPP_URL} className="nw-button nw-button-light-outline" target="_blank" rel="noopener noreferrer">Fale conosco</a>
         </div>
         <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="nw-social" aria-label="Instagram do Grupo New Wed"><Instagram size={23} strokeWidth={1.5} /></a>
       </section>
       <footer className="nw-footer">
         <span>© 2026 Grupo New Wed</span>
-        <span>Recife · Pernambuco</span>
+        <span>Pernambuco · Alagoas · Rio Grande do Norte</span>
       </footer>
     </main>
   );

@@ -78,7 +78,7 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
               textTransform: "uppercase",
             }}
           >
-            RIO GRANDE DO NORTE • ALAGOAS • FERNANDO DE NORONHA • CEARÁ
+            <span className="inline-block">Rio Grande do Norte</span>{" • "}<span className="inline-block">Alagoas</span>{" • "}<span className="inline-block">Fernando de Noronha</span>{" • "}<span className="inline-block">Ceará</span>
           </div>
           <div
             className="hidden md:mt-8 md:block md:text-[0.7rem]"

@@ -17,10 +17,11 @@ export function InscricaoPage({ edition }: PageProps) {
       <header className="border-b border-white/10 bg-[#191010] px-5 py-4 text-white md:px-10">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
           <a
-            href="/destinos"
+            href="/"
+            aria-label="New Wed, página inicial"
             className="whitespace-nowrap font-serif text-xl uppercase tracking-[0.18em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
-            New Wed
+            <img src="/assets/brand/new-wed-marsala.png" width={1167} height={927} alt="New Wed" className="h-12 w-auto brightness-0 invert" />
           </a>
           <nav aria-label="Retorno ao institucional" className="flex gap-4 font-sans text-xs text-white/75">
             <a href="/" className="underline underline-offset-4 hover:text-white">Grupo New Wed</a>

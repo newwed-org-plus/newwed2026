@@ -1,10 +1,10 @@
 # Status de execução
 
-Atualizado em: 2026-11-04.
+Atualizado em: 2026-11-05.
 
 ## Objetivo ativo
 
-Onda 40 publicada e validada: paleta oficial de Destinos, fundos turquesa e somente Azul/Empetur nos parceiros. Manual de marca preservado no projeto. Operação comercial permanece conforme CP-33 a CP-37.
+Onda 41 em validação: copy final nas cinco páginas, fotos aprovadas da fundadora, identidade por produto e histórico da Feira recuperado do arquivo público. CP-41/D-061. Produção continua na onda 40; materiais e condições comerciais foram solicitados ao contato autorizado. Não declarar entrega integral enquanto essas pendências existirem.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
@@ -26,22 +26,10 @@ Onda 40 publicada e validada: paleta oficial de Destinos, fundos turquesa e some
 - Retenção/lease da outbox, flags independentes, revisão de envio incerto e checkout/confirmação UAZAPI em CP-24/CP-25; legado Meta preservado.
 - Gates aprovados por onda; CP-25: 97 unitários, 49 Workers, 57 visuais, D1/recuperação, tipos/lint/build/auditoria.
 
-## Onda 26 concluída localmente
+## Ondas 26–27 — Operação e stack locais
 
-- Métricas/alertas, revisão de retenções e e-mails, backup/restauração, fixtures e roteiro local implementados. CP-26.
-- Gate completo aprovado: 97 unitários, 55 Workers, 62 visuais, D1, backup/restauração, build, lint/tipos, auditoria zero e preflights. Assets do cliente sem secrets.
-- Banco local preparado com fixture sem provider. Não houve merge, deploy, envio real ou contratação.
-- Correção de corrida no CTA da PR 11: `fe2180b` (incorporada nesta branch como `fb62826`); CI aprovado. PRs 7–12 aprovadas no CI, sem merge/deploy.
-
-## Onda 27 — UAZAPI inteiramente operada pelo ambiente local
-
-- Branch `codex/wave-27-local-uazapi-stack`, base `453ba29`; CP-27. App, receptor, consumidor comercial, D1, filas, DO e cron locais. UAZAPI continua sendo serviço externo.
-- Migration 0014 somente local: progresso e exclusão de importação nativa. Importação limitada, retomável e sem resposta automática.
-- Callback autorizado da linha atendimento aponta ao túnel que expõe somente seu webhook. O launcher restaura o callback anterior ao encerrar normalmente.
-- Importadas 161 conversas individuais e duas mensagens disponíveis no cache do provider na primeira consulta. Histórico completo do celular pendente; usuário sem acesso ao aparelho, helper pausado e progresso privado preservado.
-- Envios manuais escolhidos pelo operador permitidos localmente; automações continuam limitadas ao destinatário previamente autorizado. Não reenviar automaticamente a tentativa bloqueada.
-- Asaas, confirmação e e-mail permanecem desligados. Nenhum deploy, migration remota, cobrança ou envio de validação iniciado pelo agente.
-- Validação: 100 unitários, 61 Workers, D1/recuperação, build, tipos/lint e auditoria zero aprovados. Visuais: 62 na suíte + CTA tablet aprovado na repetição; 11 Inbox/WhatsApp aprovados novamente. CI remoto e commit consultáveis na [PR 13](https://github.com/newwed-org-plus/newwed2026/pull/13/checks).
+- CP-26: métricas, alertas, backup/restauração e fixtures; gates completos aprovados, sem deploy ou envio real.
+- CP-27: UAZAPI na stack local autorizada, histórico limitado sem resposta automática; dados/progresso privados preservados. Checkout/e-mail desligados. 100 unitários, 61 Workers e 63 visuais verificados; PR 13. Detalhes operacionais e de retomada nos checkpoints.
 
 ## Onda 28 — Recuperação local e estados de entrega
 
@@ -140,6 +128,12 @@ Onda 40 publicada e validada: paleta oficial de Destinos, fundos turquesa e some
 - Branch `codex/wave-40-destinos-brand`, base `4234bb3`; D-060/CP-40. Sem migration.
 - Manual original/guia em `docs/brand/`; tokens oficiais centralizados e aplicados à feature Destinos. CTA e parceiros turquesa `#5B9998`; apenas Azul e Empetur.
 - PR 25/merge `085efd5`, web `3fb8f8eb-33b9-459c-be8e-e22a326a1e5a`; CI da PR aprovado pelos logs finais: 190 unitários, 91 Workers e 75 visuais. Seis testes públicos aprovados; flags preservadas; confirmação enviada às 14:49 e entregue ao contato.
+
+## Onda 41 — Conteúdo final e recuperação do acervo
+
+- Branch `codex/wave-41-client-content`; textos/fotos aprovados, identidade por produto, navegação e origem aérea Congonhas. Histórico real 2016–2019 e vídeo oficial 2019 recuperados.
+- CP-41 registra validações e pendências: acervo completo, vídeos finais, fotos, Guia/Workshop, tabela e links de compra, cupons e arquivo do e-book. Contato autorizado consultado; não inventar conteúdo ou ativar cobrança.
+- 190 unitários, 91 Workers e 75 cenários visuais existentes verificados; conferência adicional de 320/390/430 px, tablet/desktop em andamento. Sem deploy ou migration.
 
 ## Bloqueios externos
 

@@ -113,7 +113,7 @@ export function FamtourLanding() {
                   margin: 0,
                 }}
               >
-                Não é viagem.
+                Não é uma viagem.
                 <br />
                 <em style={{ fontStyle: "italic", fontWeight: 300 }}>
                   É uma especialização no destino.

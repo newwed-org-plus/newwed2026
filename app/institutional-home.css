@@ -313,3 +313,71 @@
   .nw-detail-grid { grid-template-columns: 1fr; gap: 20px; }
   .nw-detail-contact { padding: 48px 24px; }
 }
+
+/* Conteúdo aprovado pela cliente em novembro de 2026. */
+.nw-home { --nw-marsala: #7C2341; --nw-marsala-hover: #431021; }
+.nw-hero h1 { font-size: clamp(34px, 3.5vw, 56px); line-height: 1.1; text-transform: none; }
+.nw-hero-content p { margin: 24px 0 30px; font-size: clamp(13px, 1.35vw, 19px); line-height: 1.5; font-style: normal; }
+.nw-section-heading p { max-width: 650px; margin: 12px auto 0; line-height: 1.65; }
+.nw-story { position: relative; display: block; min-height: 690px; background: #171915; color: white; }
+.nw-story-image { position: absolute; inset: 0; display: block; min-height: 0; }
+.nw-story-image img { height: 100%; max-height: none; object-position: left center; }
+.nw-story-copy { position: relative; margin-left: 43%; padding: 75px 6vw 75px 4vw; min-height: 690px; background: linear-gradient(90deg,transparent,rgba(0,0,0,.35)); }
+.nw-story-copy > div { max-width: 630px; }
+.nw-story-copy h2 { font-size: clamp(28px, 3vw, 46px); line-height: 1.14; }
+.nw-story-copy p { color: #fff; font-size: 15px; line-height: 1.85; margin-bottom: 20px; }
+.nw-story-copy .nw-story-role { color: #ecd9c6; font-size: 14px; margin-bottom: 28px; }
+.nw-closing { background: #7C2341; color: white; padding-block: 65px; }
+.nw-closing-copy { max-width: 900px; }
+.nw-closing h2 { font-size: clamp(24px, 2.8vw, 39px); line-height: 1.35; text-transform: none; }
+.nw-quote-author { margin: 0 0 28px; font-size: 14px; }
+.nw-closing .nw-button-light-outline { color: white; border-color: white; }
+.nw-closing .nw-button-light-outline:hover { background: white; color: #7C2341; }
+.nw-closing .nw-social { color: white; }
+.nw-footer { flex-wrap: wrap; line-height: 1.6; }
+.nw-project-feira { --nw-marsala: #7C2341; --nw-accent: #C64975; --nw-soft: #f9ecf0; }
+.nw-project-guia { --nw-marsala: #68405D; --nw-accent: #68405D; --nw-soft: #f3edf2; }
+.nw-project-workshop { --nw-marsala: #8C2B19; --nw-accent: #8C2B19; --nw-soft: #f8eee7; }
+.nw-project-page .nw-detail-hero { background: var(--nw-soft); }
+.nw-project-page .nw-detail-section > .nw-eyebrow { color: var(--nw-accent); }
+.nw-project-page .nw-detail-grid article { border-top-color: var(--nw-accent); }
+.nw-project-page .nw-detail-contact { background: var(--nw-soft); }
+.nw-detail-hero h1 { font-size: clamp(32px, 3.1vw, 52px); }
+.nw-detail-description { max-width: 650px; }
+@media (max-width: 900px) and (min-width: 701px) {
+  .nw-story-copy { margin-left: 41%; padding: 45px 4vw; }
+  .nw-story-copy p { font-size: 13px; }
+}
+@media (max-width: 700px) {
+  .nw-hero-content { margin-top: 48px; }
+  .nw-hero h1 { font-size: clamp(32px, 7.7vw, 46px); line-height: 1.12; }
+  .nw-hero-content p { font-size: 13px; }
+  .nw-story-image { position: relative; height: auto; aspect-ratio: 9 / 12; }
+  .nw-story-image img { object-position: center 28%; }
+  .nw-story-copy { margin: 0; padding: 40px 24px; min-height: 0; background: #171915; }
+  .nw-story-copy h2 { font-size: 30px; }
+  .nw-story-copy p { font-size: 14px; }
+  .nw-closing { flex-direction: column; padding: 45px 24px; }
+  .nw-closing .nw-social { border: 0; }
+}
+.nw-fair-history { background: #faf7f4; }
+.nw-history-intro { max-width: 680px; color: #4c4946; font-size: 15px; line-height: 1.8; margin-bottom: 35px; }
+.nw-fair-mosaic { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 18px; align-items: start; }
+.nw-fair-mosaic figure { margin: 0; min-width: 0; }
+.nw-fair-mosaic figure:nth-child(even) { padding-top: 45px; }
+.nw-fair-mosaic a { display: block; overflow: hidden; }
+.nw-fair-mosaic img { display: block; width: 100%; height: auto; }
+.nw-fair-mosaic figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 14px 0; color: #7C2341; font-size: 12px; }
+.nw-history-video { max-width: 1040px; aspect-ratio: 16 / 9; margin: 55px auto 0; background: #252322; }
+.nw-history-video iframe { border: 0; width: 100%; height: 100%; }
+.nw-video-caption { text-align: center; color: #686663; font-size: 12px; }
+@media (max-width: 700px) {
+  .nw-fair-mosaic { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+  .nw-fair-mosaic figure:nth-child(even) { padding-top: 24px; }
+  .nw-history-video { margin-top: 30px; }
+}
+@media (max-width: 700px) {
+  .nw-numbers-inner { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .nw-number { min-width: 0; padding-inline: 10px; }
+  .nw-number strong { font-size: clamp(22px,6vw,32px); }
+}
