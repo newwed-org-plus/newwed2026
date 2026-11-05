@@ -17,6 +17,7 @@ import { SuccessScreen } from "@/features/famtour/components/SuccessScreen";
 import { FAMTOUR_EDITIONS, toLegacyFamTour } from "@/features/famtour/lib/famtours";
 import type { PreInscricaoData } from "@/features/famtour/lib/schemas/preInscricao";
 import {famtourInformation} from '@/content/famtour-information';
+import {EbookPopup} from './components/EbookPopup';
 
 function Divisor({ children }: { children: React.ReactNode }) {
   return (
@@ -84,6 +85,7 @@ export function FamtourLanding() {
 
   return (
     <SiteShell>
+      <EbookPopup />
       <Toaster position="top-center" richColors />
       <main
         className="famtour-landing bg-white"
