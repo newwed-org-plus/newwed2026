@@ -15,7 +15,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Configure browser dependency downloads
+        run: |
+          sudo find /etc/apt -maxdepth 2 -type f \( -name '*.list' -o -name '*.sources' \) \
+            -exec sed -i 's|azure.archive.ubuntu.com|archive.ubuntu.com|g' {} +
+          printf '%s\n' 'Acquire::Retries "2";' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' \
+            | sudo tee /etc/apt/apt.conf.d/80-ci-downloads >/dev/null
       - run: npx playwright install --with-deps chromium-headless-shell
+        timeout-minutes: 10
       - run: npm run cf:types
       - run: npm run lint
       - run: npm run typecheck

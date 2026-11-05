@@ -4,7 +4,7 @@ Atualizado em: 2026-11-05.
 
 ## Objetivo ativo
 
-Onda 41 em validação: copy final nas cinco páginas, fotos aprovadas da fundadora, identidade por produto e histórico da Feira recuperado do arquivo público. CP-41/D-061. Produção continua na onda 40; materiais e condições comerciais foram solicitados ao contato autorizado. Não declarar entrega integral enquanto essas pendências existirem.
+Onda 42 em validação: popup de e-book em Destinos, com nome, empresa, e-mail e WhatsApp registrados no painel existente. CP-42/D-062. Ximenes confirmou que ainda não tem e-book/vídeo; captura de interesse informa essa condição. Sem migration, disparos ou mudanças comerciais. Cópia de trabalho em `/Users/victorcorreia/.codex/recovery/newwed41-20261105`. Onda 41 permanece publicada em `4c4c6a6`, PR 26.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
@@ -133,7 +133,7 @@ Onda 41 em validação: copy final nas cinco páginas, fotos aprovadas da fundad
 
 - Branch `codex/wave-41-client-content`; textos/fotos aprovados, identidade por produto, navegação e origem aérea Congonhas. Histórico real 2016–2019 e vídeo oficial 2019 recuperados.
 - CP-41 registra validações e pendências: acervo completo, vídeos finais, fotos, Guia/Workshop, tabela e links de compra, cupons e arquivo do e-book. Contato autorizado consultado; não inventar conteúdo ou ativar cobrança.
-- 190 unitários, 91 Workers e 75 cenários visuais existentes verificados; conferência adicional das cinco páginas em 320/390/430/768/1440 px aprovada. Primeiro CI aprovou código/D1/Workers e 66 visuais; nove referências Linux das páginas alteradas em atualização (PR 26). Sem deploy ou migration.
+- 190 unitários, 91 Workers e 75 cenários visuais existentes verificados; conferência adicional das cinco páginas em 320/390/430/768/1440 px aprovada. CI final aprovou 190 unitários, 91 Workers e 75 visuais após revisar nove referências Linux. Publicado pela PR 26; smoke remoto das cinco páginas/cinco larguras aprovado. Sem migration.
 
 ## Bloqueios externos
 
