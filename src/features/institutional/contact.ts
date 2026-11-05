@@ -13,3 +13,10 @@ export const mailtoLink = (subject: string, body?: string) =>
   `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}${
     body ? `&body=${encodeURIComponent(body)}` : ""
   }`;
+
+// Perfis dos projetos já utilizados pelo rodapé de Destinos.
+export const PROJECT_INSTAGRAM_URLS = {
+  feira: "https://www.instagram.com/new_wed_feira/",
+  guia: "https://www.instagram.com/new_wed_guianordeste/",
+  workshop: "https://www.instagram.com/new_wed_workshop/",
+} as const;

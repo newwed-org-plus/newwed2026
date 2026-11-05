@@ -32,7 +32,7 @@ export type LegacyFamTour = {
 };
 
 const INCLUSOS = [
-  "Aéreo incluso",
+  "Aéreo incluso com saída de Congonhas",
   "Hospedagem em pousada selecionada",
   "Visitas técnicas e experiências imersivas no destino",
   "Bastidores com fornecedores locais selecionados",

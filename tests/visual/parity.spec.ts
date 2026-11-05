@@ -109,7 +109,7 @@ for (const [viewportName,width,height] of viewports) {
     await page.setViewportSize({ width,height });
     await page.goto(`${siteOrigin}/`,{ waitUntil:"load" });
     await settle(page);
-    await expect(page.getByRole("heading",{ name:/conectamos pessoas, destinos e experiências/i })).toBeVisible();
+    await expect(page.getByRole("heading",{ name:/O maior ecossistema de conexões para o mercado de casamentos do Nordeste/i })).toBeVisible();
     await expect(page.locator(".nw-project-card")).toHaveCount(4);
     await expect(page.getByRole("heading",{ name:"Nosso ecossistema" })).toBeVisible();
     await expect(page.locator(".nw-logo img")).toBeVisible();
@@ -157,9 +157,9 @@ for (const [viewportName,width,height] of viewports) {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion: "reduce" });
     for (const [id, title] of [
-      ["feira", "A feira que move o mercado de casamentos do Nordeste."],
-      ["guia", "A publicação que posiciona destinos e histórias de amor."],
-      ["workshop", "Conexão e posicionamento para marcas do mercado premium."],
+      ["feira", "Muito mais que uma feira. Uma vitrine de tendências e inovação no mercado de casamentos."],
+      ["guia", "Muito mais que uma revista. Um guia para descobrir o mercado de casamentos do Nordeste."],
+      ["workshop", "Muito além das palestras. Uma nova forma de conectar o mercado."],
     ]) {
       const response = await page.goto(`${siteOrigin}/${id}`);
       expect(response?.status()).toBe(200);
@@ -176,8 +176,14 @@ for (const [viewportName,width,height] of viewports) {
         await page.locator('.nw-detail-actions a[href="#formatos"]').click();
         await expect(page.locator("#formatos")).toBeInViewport();
       }
-      await page.locator('.nw-detail-actions a[href="#contato"]').first().click();
-      await expect(page.locator("#contato")).toBeInViewport();
+      if (id === "guia") {
+        await page.locator('.nw-detail-actions a[href="#contato"]').click();
+        await expect(page.locator("#contato")).toBeInViewport();
+      } else {
+        const visitUrl = new URL((await page.locator('.nw-detail-actions a').first().getAttribute("href"))!);
+        expect(visitUrl.hostname).toBe("wa.me");
+        expect(visitUrl.searchParams.get("text")).toContain(id === "feira" ? "visitar" : "participar");
+      }
       const contactUrl = new URL((await page.locator('#contato a').getAttribute("href"))!);
       expect(contactUrl.hostname).toBe("wa.me");
       expect(contactUrl.searchParams.get("text")).toContain(`New Wed ${id === "feira" ? "Feira" : id === "guia" ? "Guia" : "Workshop"}`);

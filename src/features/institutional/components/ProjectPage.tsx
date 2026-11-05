@@ -1,12 +1,13 @@
 import Link from "next/link";
+import { FeiraHistory } from "./FeiraHistory";
 import { InstitutionalHeader } from "./InstitutionalHeader";
 import { institutionalProjects, type InstitutionalProjectId } from "../projects";
-import { waLink } from "../contact";
+import { PROJECT_INSTAGRAM_URLS, waLink } from "../contact";
 
 export function ProjectPage({ projectId }: { projectId: InstitutionalProjectId }) {
   const project = institutionalProjects[projectId];
   return (
-    <div className="nw-home nw-project-page">
+    <div className={`nw-home nw-project-page nw-project-${projectId}`}>
       <InstitutionalHeader currentProject={projectId} />
       <main>
         <section className="nw-detail-hero" aria-labelledby="project-title">
@@ -16,8 +17,8 @@ export function ProjectPage({ projectId }: { projectId: InstitutionalProjectId }
             <h1 id="project-title">{project.title}</h1>
             <p className="nw-detail-description">{project.description}</p>
             <div className="nw-detail-actions">
-              <a className="nw-button nw-button-dark" href="#contato">{project.primary}</a>
-              <a className="nw-button nw-button-light-outline" href={project.secondary.href}>{project.secondary.label}</a>
+              <a className="nw-button nw-button-dark" href={projectId === "guia" ? "#contato" : waLink(`Olá! Gostaria de informações para ${projectId === "feira" ? "visitar a New Wed Feira" : "participar do New Wed Workshop"}.`)}>{project.primary}</a>
+              {projectId !== "feira" && <a className="nw-button nw-button-light-outline" href={project.secondary.href}>{project.secondary.label}</a>}
             </div>
           </div>
           <img className="nw-detail-image" src={project.image} alt={project.imageAlt} />
@@ -44,6 +45,7 @@ export function ProjectPage({ projectId }: { projectId: InstitutionalProjectId }
             </div>
           </section>
         )}
+        {projectId === "feira" && <FeiraHistory />}
         {"formats" in project && (
           <section className="nw-detail-section nw-detail-formats" id="formatos" aria-labelledby="project-formats">
             <p className="nw-eyebrow">Formatos de participação</p>
@@ -56,16 +58,17 @@ export function ProjectPage({ projectId }: { projectId: InstitutionalProjectId }
           </section>
         )}
         <section className="nw-detail-contact" id="contato" aria-labelledby="project-contact">
-          <p className="nw-eyebrow">Fale com a equipe · {project.name}</p>
+          <p className="nw-eyebrow">{projectId === "guia" ? "Fale com a equipe" : "Faça parte do"} · {project.name}{projectId === "feira" ? " Tendência" : ""}</p>
           <h2 id="project-contact">{project.closing}</h2>
           <p>{project.closingDescription}</p>
-          <a className="nw-button nw-button-dark" href={waLink(`Olá! Gostaria de informações sobre ${project.name}.`)} target="_blank" rel="noopener noreferrer">{project.contact}</a>
+          <a className="nw-button nw-button-dark" href={waLink(`Olá! Gostaria de informações sobre ${project.name}${projectId === "feira" ? " para ser expositor" : ""}.`)} target="_blank" rel="noopener noreferrer">{project.contact}</a>
         </section>
       </main>
       <footer className="nw-footer">
         <span>© 2026 Grupo New Wed</span>
         <Link href="/#projetos">Todos os projetos</Link>
-        <span>Recife · Pernambuco</span>
+        <a href={PROJECT_INSTAGRAM_URLS[projectId]} target="_blank" rel="noopener noreferrer" aria-label={`Instagram ${project.name}`}>Instagram · {project.name}</a>
+        <span>Pernambuco · Alagoas · Rio Grande do Norte</span>
       </footer>
     </div>
   );
