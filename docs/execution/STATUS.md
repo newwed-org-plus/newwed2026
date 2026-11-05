@@ -133,7 +133,7 @@ Onda 41 em validação: copy final nas cinco páginas, fotos aprovadas da fundad
 
 - Branch `codex/wave-41-client-content`; textos/fotos aprovados, identidade por produto, navegação e origem aérea Congonhas. Histórico real 2016–2019 e vídeo oficial 2019 recuperados.
 - CP-41 registra validações e pendências: acervo completo, vídeos finais, fotos, Guia/Workshop, tabela e links de compra, cupons e arquivo do e-book. Contato autorizado consultado; não inventar conteúdo ou ativar cobrança.
-- 190 unitários, 91 Workers e 75 cenários visuais existentes verificados; conferência adicional de 320/390/430 px, tablet/desktop em andamento. Sem deploy ou migration.
+- 190 unitários, 91 Workers e 75 cenários visuais existentes verificados; conferência adicional das cinco páginas em 320/390/430/768/1440 px aprovada. Primeiro CI aprovou código/D1/Workers e 66 visuais; nove referências Linux das páginas alteradas em atualização (PR 26). Sem deploy ou migration.
 
 ## Bloqueios externos
 
