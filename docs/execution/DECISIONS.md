@@ -321,3 +321,7 @@ Abrir após 12 segundos, uma vez por sessão, sem interromper formulário em foc
 ## D-063 — Popup imediato ao entrar em Destinos
 
 Em 06/11/2026, o usuário determinou que o popup apareça imediatamente ao entrar na página e autorizou avisar o contato de que o assistente assumiria o ajuste enquanto ele corta o cabelo. Esta orientação substitui somente o comportamento de abertura de D-062: abrir assim que a landing estiver interativa, sem timer, clique prévio, bloqueio por sessão anterior ou exceções de edição/âncora. Recarregar ou entrar novamente na landing volta a apresentá-lo; fechar permanece válido durante a montagem atual, com reabertura manual disponível. Não montar nas demais páginas. Preservar formulário, consentimento, acessibilidade e a informação de arquivo ainda indisponível.
+
+## D-064 — Popup compacto no celular
+
+Em 06/11/2026, o usuário pediu retomar a conversa com o contato e destacou que o popup está grande no celular. Compactar somente a apresentação em telas estreitas ou celulares na horizontal: limitar a largura a 340px e a altura a 640px ou à área disponível, reduzir margens/espaçamentos e a tipografia de apoio. Preservar os quatro campos, consentimento, inputs de 16px, alvos de toque de pelo menos 44px para inputs/ação principal/X, rolagem interna e abertura imediata de D-063. Desktop e fluxo de cadastro permanecem iguais. Avisar o contato depois de validar a publicação.

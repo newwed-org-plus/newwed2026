@@ -4,7 +4,7 @@ Atualizado em: 2026-11-06.
 
 ## Objetivo ativo
 
-Onda 43: abertura imediata do popup em Destinos, conforme pedido direto do usuário (D-063/CP-43). Branch `codex/wave-43-ebook-immediate`, base `eef0d7e`; espera de 12s e bloqueio de sessão removidos. Tipos/lint/TypeScript, 190 unitários, build e 83 cenários visuais verificados; auditoria sem alta/crítica. PR 28 aguarda CI final. Lucas já leu o aviso às 11:26. Produção ainda na onda 42, web `5138723e-5c84-4346-80eb-3ffdfab6c787`. Cópia de trabalho em `/Users/victorcorreia/.codex/recovery/newwed41-20261105`.
+Onda 44: compactar o popup no celular (D-064/CP-44), conforme relato do contato e orientação do usuário. Branch `codex/wave-44-ebook-mobile`, base `38de100`; somente CSS mobile e testes de dimensão/horizontal. Nove cenários dedicados aprovados; gate completo em andamento. Contato avisado, mensagem lida às 12:39. Produção segue na onda 43/PR 28, web `1c0778f4-c58d-4e61-87e8-e8b2864be570`; abertura imediata preservada. Cópia de trabalho em `/Users/victorcorreia/.codex/recovery/newwed41-20261105`.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
