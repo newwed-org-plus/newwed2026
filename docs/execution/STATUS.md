@@ -4,7 +4,7 @@ Atualizado em: 2026-11-06.
 
 ## Objetivo ativo
 
-Onda 44: compactar o popup no celular (D-064/CP-44), conforme relato do contato e orientação do usuário. Branch `codex/wave-44-ebook-mobile`, base `38de100`; somente CSS mobile e testes de dimensão/horizontal. Nove cenários dedicados aprovados; gate completo em andamento. Contato avisado, mensagem lida às 12:39. Produção segue na onda 43/PR 28, web `1c0778f4-c58d-4e61-87e8-e8b2864be570`; abertura imediata preservada. Cópia de trabalho em `/Users/victorcorreia/.codex/recovery/newwed41-20261105`.
+Onda 44 publicada: popup compacto no celular (D-064/CP-44), abertura imediata preservada. PR 29/merge `4337af0`; CI da PR aprovado com 190 unitários, 96 Workers e 84 visuais. Web `2189657c-0f12-46bf-aaa6-124d3e93cad7`, 100%; nove cenários remotos/smokes e comparação das nove flags aprovados. Confirmação entregue ao contato às 12:56. CI automático da main: `42247169496`. Cópia de trabalho em `/Users/victorcorreia/.codex/recovery/newwed41-20261105`.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
