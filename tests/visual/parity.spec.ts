@@ -13,6 +13,14 @@ const pixelThreshold = portableComparison ? 0.12 : 0;
 const maxDiffPixelRatio = portableComparison ? 0.025 : 0;
 const maxBlockMeanError = portableComparison ? 0.008 : 0;
 
+// Estes cenários conferem a landing após dispensar o popup. A abertura automática
+// e o formulário são exercitados sem este handler em ebook.spec.ts.
+test.beforeEach(async ({page}) => {
+  await page.addLocatorHandler(page.getByRole('dialog',{name:'Noronha além do cenário'}), async popup => {
+    await popup.getByRole('button',{name:'Fechar popup',exact:true}).click();
+  });
+});
+
 function blockMeanAbsoluteError(expected: PNG, received: PNG, blockSize = 4) {
   let totalError = 0;
   let blockCount = 0;

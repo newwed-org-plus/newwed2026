@@ -1,10 +1,10 @@
 # Status de execução
 
-Atualizado em: 2026-11-05.
+Atualizado em: 2026-11-06.
 
 ## Objetivo ativo
 
-Onda 42 publicada: popup de e-book em Destinos, com nome, empresa, e-mail e WhatsApp registrados no painel existente. CP-42/D-062, PR 27, merge `eef0d7e`, web `5138723e-5c84-4346-80eb-3ffdfab6c787`. Ximenes confirmou que ainda não tem e-book/vídeo; captura de interesse informa essa condição. CI aprovou 190 unitários, 96 Workers e 82 visuais. Sem migration, disparos ou mudanças comerciais; nove flags preservadas. Contato avisado e entrega confirmada às 19:34. Cópia de trabalho em `/Users/victorcorreia/.codex/recovery/newwed41-20261105`.
+Onda 43: abertura imediata do popup em Destinos, conforme pedido direto do usuário (D-063/CP-43). Branch `codex/wave-43-ebook-immediate`, base `eef0d7e`; espera de 12s e bloqueio de sessão removidos. Tipos/lint/TypeScript, 190 unitários, build e oito cenários do popup aprovados; gate visual completo em andamento. Lucas já leu o aviso às 11:26. Produção ainda na onda 42, web `5138723e-5c84-4346-80eb-3ffdfab6c787`. Cópia de trabalho em `/Users/victorcorreia/.codex/recovery/newwed41-20261105`.
 
 - Texto e vendas completos; anexos, agenda, grupos e LID fora desta versão.
 - Usuário autorizou publicação de produção (D-053); revalidação local permanece Sandbox. Chave Asaas de produção armazenada e validada em CP-37; checkout remoto fica desligado até concluir webhook e aceite.
