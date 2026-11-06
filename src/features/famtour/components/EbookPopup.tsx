@@ -7,7 +7,6 @@ import {ebookLeadSchema} from '@/features/leads/ebook-schema';
 import {getTurnstileToken, removeTurnstile, resetTurnstile} from '../turnstile';
 import './ebook-popup.css';
 
-const sessionKey = `newwed:ebook:${destinosEbook.id}`;
 const subscribe = () => () => {};
 
 export function EbookPopup() {
@@ -16,7 +15,6 @@ export function EbookPopup() {
   const verification = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const busy = useRef(false);
-  const hasOpened = useRef(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<{downloadUrl: string | null} | null>(null);
@@ -25,23 +23,12 @@ export function EbookPopup() {
   const show = useCallback(() => {
     if (!dialog.current || dialog.current.open) return;
     dialog.current.showModal();
-    hasOpened.current = true;
     setOpen(true);
-    try { sessionStorage.setItem(sessionKey, 'seen'); } catch { /* O popup continua utilizável sem storage. */ }
   }, []);
 
   useEffect(() => {
-    try { if (sessionStorage.getItem(sessionKey)) return; } catch { /* Sem repetição durante esta montagem. */ }
-    // Não interromper quem chegou por um link de edição ou já está preenchendo outro formulário.
-    const timer = setTimeout(() => {
-      if (hasOpened.current) return;
-      try { if (sessionStorage.getItem(sessionKey)) return; } catch { /* Storage opcional. */ }
-      if (document.visibilityState !== 'visible' || window.location.hash || new URLSearchParams(window.location.search).has('edicao')) return;
-      if (document.activeElement?.matches('input, textarea, select, [contenteditable="true"]')) return;
-      show();
-    }, 12000);
-    return () => clearTimeout(timer);
-  }, [show]);
+    if (interactive) show();
+  }, [interactive, show]);
 
   useEffect(() => {
     if (!open) return;

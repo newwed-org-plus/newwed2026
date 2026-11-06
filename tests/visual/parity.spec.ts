@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import pixelmatch from "pixelmatch";
@@ -12,6 +12,21 @@ const baselineRoot = portableComparison ? "tests/visual/baselines-linux" : "test
 const pixelThreshold = portableComparison ? 0.12 : 0;
 const maxDiffPixelRatio = portableComparison ? 0.025 : 0;
 const maxBlockMeanError = portableComparison ? 0.008 : 0;
+
+// A paridade confere a landing após dispensar o popup pela UI.
+// ebook.spec.ts confere a abertura automática e o formulário.
+async function dismissPopup(page: Page) {
+  const popup = page.getByRole('dialog',{name:'Noronha além do cenário'});
+  await expect(popup).toBeVisible();
+  await popup.getByRole('button',{name:'Fechar popup',exact:true}).click();
+  await expect(popup).not.toBeVisible();
+}
+
+async function visit(page: Page, url: string, options?: Parameters<Page['goto']>[1]) {
+  const response = await page.goto(url, options);
+  if (new URL(page.url()).pathname === '/destinos') await dismissPopup(page);
+  return response;
+}
 
 function blockMeanAbsoluteError(expected: PNG, received: PNG, blockSize = 4) {
   let totalError = 0;
@@ -55,6 +70,11 @@ const viewports = [
 
 async function settle(page: import("@playwright/test").Page) {
   await page.waitForLoadState("networkidle");
+  // O fechamento devolve o foco ao acionador. A referência da landing representa
+  // o visitante lendo a página, sem o contorno de foco do botão de reabertura.
+  if (await page.getByRole('button',{name:'E-book gratuito',exact:true}).count()) {
+    await page.getByRole('heading',{level:1}).click();
+  }
   await page.waitForTimeout(250);
   await page.evaluate(async () => {
     for (const image of Array.from(document.images)) image.loading = "eager";
@@ -76,7 +96,7 @@ test("URLs antigas da FAMTOUR preservam edição, campanha e seção", async ({ 
     expect(new URL(response.headers().location, siteOrigin).href).toBe(`${siteOrigin}/destinos${suffix}?${query}`);
   }
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto(`${siteOrigin}/famtour?${query}#famtours`);
+  await visit(page,`${siteOrigin}/famtour?${query}#famtours`);
   await expect(page).toHaveURL(`${siteOrigin}/destinos?${query}#famtours`);
   await expect(page.locator("#famtours")).toBeInViewport();
 });
@@ -85,7 +105,7 @@ test("Destinos mantém logo branca e turquesa oficial na primeira tela mobile", 
   await page.emulateMedia({ reducedMotion: "reduce" });
   for (const [width, height] of [[320, 568], [390, 844], [1440, 900]]) {
     await page.setViewportSize({ width, height });
-    await page.goto(`${siteOrigin}/destinos`);
+    await visit(page,`${siteOrigin}/destinos`);
     await settle(page);
     const logo = page.getByRole("link", { name: "New Wed, página inicial", exact: true });
     await expect(logo).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
@@ -107,7 +127,7 @@ test("Destinos mantém logo branca e turquesa oficial na primeira tela mobile", 
 for (const [viewportName,width,height] of viewports) {
   test(`${viewportName} · institucional-home estrutura`,async ({ page }) => {
     await page.setViewportSize({ width,height });
-    await page.goto(`${siteOrigin}/`,{ waitUntil:"load" });
+    await visit(page,`${siteOrigin}/`,{ waitUntil:"load" });
     await settle(page);
     await expect(page.getByRole("heading",{ name:/O maior ecossistema de conexões para o mercado de casamentos do Nordeste/i })).toBeVisible();
     await expect(page.locator(".nw-project-card")).toHaveCount(4);
@@ -132,19 +152,21 @@ for (const [viewportName,width,height] of viewports) {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion: "reduce" });
     for (const [id, route] of [["feira", "/feira"], ["destinos", "/destinos"], ["guia", "/guia"], ["workshop", "/workshop"]]) {
-      await page.goto(`${siteOrigin}/`);
+      await visit(page,`${siteOrigin}/`);
       await page.locator(`#${id}`).getByRole("link").click();
       await expect(page).toHaveURL(`${siteOrigin}${route}`);
+      if (route === '/destinos') await dismissPopup(page);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-      await page.goto(`${siteOrigin}/`);
+      await visit(page,`${siteOrigin}/`);
       if (viewportName === "mobile") await page.locator(".nw-mobile-menu summary").click();
       const menu = page.getByRole("navigation", { name: viewportName === "mobile" ? "Navegação principal mobile" : "Navegação principal", exact: true });
       await menu.locator(`a[href="${route}"]`).click();
       await expect(page).toHaveURL(`${siteOrigin}${route}`);
+      if (route === '/destinos') await dismissPopup(page);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     }
     for (const section of ["sobre", "contato"]) {
-      await page.goto(`${siteOrigin}/`);
+      await visit(page,`${siteOrigin}/`);
       if (viewportName === "mobile") await page.locator(".nw-mobile-menu summary").click();
       const menu = page.getByRole("navigation", { name: viewportName === "mobile" ? "Navegação principal mobile" : "Navegação principal", exact: true });
       await menu.locator(`a[href="/#${section}"]`).click();
@@ -161,7 +183,7 @@ for (const [viewportName,width,height] of viewports) {
       ["guia", "Muito mais que uma revista. Um guia para descobrir o mercado de casamentos do Nordeste."],
       ["workshop", "Muito além das palestras. Uma nova forma de conectar o mercado."],
     ]) {
-      const response = await page.goto(`${siteOrigin}/${id}`);
+      const response = await visit(page,`${siteOrigin}/${id}`);
       expect(response?.status()).toBe(200);
       await expect(page).toHaveURL(`${siteOrigin}/${id}`);
       await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
@@ -192,7 +214,7 @@ for (const [viewportName,width,height] of viewports) {
       await expect(page.locator("#projetos")).toBeInViewport();
     }
     for (const section of ["sobre", "contato"]) {
-      await page.goto(`${siteOrigin}/${section}`);
+      await visit(page,`${siteOrigin}/${section}`);
       await expect(page).toHaveURL(`${siteOrigin}/#${section}`);
     }
   });
@@ -200,7 +222,7 @@ for (const [viewportName,width,height] of viewports) {
   test(`${viewportName} · navegação pelas seções da FAMTOUR`, async ({ page }) => {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto(`${siteOrigin}/destinos?edicao=famtour-rn-abril-2027`);
+    await visit(page,`${siteOrigin}/destinos?edicao=famtour-rn-abril-2027`);
     await page.waitForLoadState("networkidle");
     for (const section of ["experiencia", "edicoes-anteriores", "famtours", "parceiros", "form"]) {
       if (width < 1024) await page.getByRole("button", { name: "Abrir menu" }).click();
@@ -234,7 +256,7 @@ for (const [viewportName,width,height] of viewports) {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion: "reduce" });
     for (const route of ["edicoes/fernando-de-noronha-2026", "inscricao/famtour-rn-abril-2027"]) {
-      await page.goto(`${siteOrigin}/destinos/${route}`);
+      await visit(page,`${siteOrigin}/destinos/${route}`);
       await page.waitForLoadState("networkidle");
       if (route.startsWith("edicoes/")) {
         if (width < 1024) await page.getByRole("button", { name: "Abrir menu" }).click();
@@ -243,6 +265,7 @@ for (const [viewportName,width,height] of viewports) {
         await page.getByRole("banner").getByRole("link", { name: "Voltar para edições abertas" }).click();
       }
       await expect(page).toHaveURL(`${siteOrigin}/destinos#famtours`);
+      await dismissPopup(page);
       await expect(page.locator(".famtour-landing #famtours")).toBeInViewport();
     }
   });
@@ -254,7 +277,7 @@ for (const [viewportName,width,height] of viewports) {
       if (/fonts\.(googleapis|gstatic)\.com/.test(request.url())) remoteFonts.push(request.url());
     });
     for (const route of ["/", "/destinos"]) {
-      await page.goto(`${siteOrigin}${route}`);
+      await visit(page,`${siteOrigin}${route}`);
       const typography = await page.evaluate(async () => {
         for (const weight of [300, 350, 700]) await document.fonts.load(`${weight} 16px "Fedra Sans Std"`);
         await document.fonts.load('500 16px "BlockGothicRR"');
@@ -276,7 +299,7 @@ for (const [viewportName,width,height] of viewports) {
     await page.emulateMedia({ reducedMotion: "reduce" });
     const slugs = ["famtour-alagoas-fevereiro-2027", "famtour-rn-abril-2027", "famtour-noronha-maio-2027", "famtour-ceara-agosto-2027"];
     for (const [index, slug] of slugs.entries()) {
-      await page.goto(`${siteOrigin}/destinos#famtours`);
+      await visit(page,`${siteOrigin}/destinos#famtours`);
       await page.waitForLoadState("networkidle");
       await page.locator("#famtours").getByRole("button", { name: "Solicitar informações", exact: true }).nth(index).click();
       await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=${slug}#form`);
@@ -292,20 +315,20 @@ for (const [viewportName,width,height] of viewports) {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion: "reduce" });
     for (const route of ["/destinos", "/destinos/edicoes/fernando-de-noronha-2026", "/destinos/inscricao/famtour-rn-abril-2027"]) {
-      await page.goto(`${siteOrigin}${route}`);
+      await visit(page,`${siteOrigin}${route}`);
       await page.waitForLoadState("networkidle");
       const header = page.getByRole("navigation", { name: route.includes("inscricao") ? "Retorno ao institucional" : "Navegação FAMTOUR" });
       await header.getByRole("link", { name: "Grupo New Wed", exact: true }).click();
       await expect(page).toHaveURL(`${siteOrigin}/`);
       await expect(page.locator(".nw-home")).toBeVisible();
-      await page.goto(`${siteOrigin}${route}`);
+      await visit(page,`${siteOrigin}${route}`);
       await page.waitForLoadState("networkidle");
       if (!route.includes("inscricao") && width < 1024) await page.getByRole("button", { name: "Abrir menu" }).click();
       await header.getByRole("link", { name: /^Projetos/ }).click();
       await expect(page).toHaveURL(`${siteOrigin}/#projetos`);
       await expect(page.locator("#projetos")).toBeInViewport();
       if (!route.includes("inscricao")) {
-        await page.goto(`${siteOrigin}${route}`);
+        await visit(page,`${siteOrigin}${route}`);
         await page.getByRole("contentinfo").getByRole("link", { name: "Projetos do grupo" }).click();
         await expect(page).toHaveURL(`${siteOrigin}/#projetos`);
       }
@@ -317,7 +340,7 @@ for (const [viewportName,width,height] of viewports) {
       await page.setViewportSize({ width,height });
       await page.emulateMedia({ reducedMotion:"reduce" });
       const url = update && !captureTarget ? source : `${siteOrigin}${target}`;
-      await page.goto(url,{ waitUntil:"load" });
+      await visit(page,url,{ waitUntil:"load" });
       await settle(page);
       const actual = await page.screenshot({ fullPage:true,animations:"disabled" });
       const baselinePath = resolve(baselineRoot,viewportName,`${name}.png`);
