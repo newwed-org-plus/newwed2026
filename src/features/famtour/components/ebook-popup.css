@@ -18,4 +18,18 @@
 .ebook-error{margin:12px 0;padding:12px;border-radius:8px;background:#fce5e8;color:#7c2341;font-size:14px;line-height:1.5}
 .ebook-success{padding-top:8px}.ebook-success h3{margin:12px 0;font-size:22px}.ebook-success p{margin:12px 0 20px;font-size:16px;line-height:1.5;color:#64524f}
 .ebook-popup :focus-visible,.ebook-trigger:focus-visible{outline:3px solid #5b9998;outline-offset:3px}
-@media(max-width:540px){.ebook-popup-content{padding:32px 22px 22px}.ebook-fields{grid-template-columns:1fr;gap:12px}.ebook-trigger{bottom:20px;left:12px;padding:10px 14px;font-size:13px}.ebook-popup{border-radius:22px}.ebook-popup #ebook-description{margin-bottom:20px}}
+@media(max-width:540px),(max-height:500px) and (max-width:960px){
+  .ebook-popup{width:min(340px,calc(100% - 40px));max-height:min(640px,calc(100dvh - 48px));border-radius:20px}
+  .ebook-popup-content{padding:24px 18px 16px}
+  .ebook-close{top:6px;right:6px}
+  .ebook-eyebrow{margin-bottom:8px;font-size:11px}
+  .ebook-popup h2{margin-bottom:10px;font-size:24px;line-height:1.1}
+  .ebook-popup #ebook-description{margin-bottom:16px;font-size:13px;line-height:1.4}
+  .ebook-fields{grid-template-columns:1fr;gap:10px}
+  .ebook-fields label{gap:4px;font-size:13px;line-height:1.3}
+  .ebook-fields input{min-height:44px;padding:9px 10px}
+  .ebook-consent{gap:8px;margin:12px 0;font-size:12px;line-height:1.4}
+  .ebook-submit{min-height:44px;padding:11px 14px;font-size:14px}
+  .ebook-later{margin-top:8px}
+  .ebook-trigger{bottom:20px;left:12px;padding:10px 14px;font-size:13px}
+}

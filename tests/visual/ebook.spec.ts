@@ -1,7 +1,7 @@
 import {expect,test} from '@playwright/test';
 const origin=process.env.VISUAL_BASE_URL??'http://localhost:4173';
 
-for(const [width,height] of [[320,568],[390,844],[430,932],[768,1024],[1440,900]]) {
+for(const [width,height] of [[320,568],[390,844],[430,932],[844,390],[768,1024],[1440,900]]) {
   test(`popup de Destinos acessível em ${width}px`,async({page})=>{
     await page.setViewportSize({width,height});
     await page.goto(`${origin}/destinos`,{waitUntil:'domcontentloaded'});
@@ -9,6 +9,12 @@ for(const [width,height] of [[320,568],[390,844],[430,932],[768,1024],[1440,900]
     await expect(popup).toBeVisible();
     for(const field of ['Nome completo','Nome da empresa','E-mail','WhatsApp com DDD']) await expect(popup.getByLabel(field,{exact:true})).toBeVisible();
     expect(await popup.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+    await expect(popup.getByRole('button',{name:'Fechar popup',exact:true})).toBeInViewport();
+    if(width<=540 || height<=500) {
+      const box=await popup.boundingBox();
+      expect(box!.width).toBeLessThanOrEqual(340);
+      expect(box!.height).toBeLessThanOrEqual(Math.min(640,height-48));
+    }
     await page.screenshot({path:test.info().outputPath('popup.png'),animations:'disabled'});
     await popup.getByRole('button',{name:'Agora não',exact:true}).click();
     await expect(popup).not.toBeVisible();
