@@ -63,6 +63,12 @@ const viewports = [
 
 async function settle(page: import("@playwright/test").Page) {
   await page.waitForLoadState("networkidle");
+  const trigger = page.getByRole('button',{name:'E-book gratuito',exact:true});
+  if (await trigger.count()) {
+    await expect(trigger).toBeEnabled();
+    const popup = page.getByRole('dialog',{name:'Noronha além do cenário'});
+    if (await popup.isVisible()) await popup.getByRole('button',{name:'Fechar popup',exact:true}).click();
+  }
   await page.waitForTimeout(250);
   await page.evaluate(async () => {
     for (const image of Array.from(document.images)) image.loading = "eager";
