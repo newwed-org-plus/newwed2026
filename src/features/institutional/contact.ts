@@ -16,6 +16,7 @@ export const mailtoLink = (subject: string, body?: string) =>
 
 // Perfis dos projetos já utilizados pelo rodapé de Destinos.
 export const PROJECT_INSTAGRAM_URLS = {
+  destinos: INSTAGRAM_DESTINOS_URL,
   feira: "https://www.instagram.com/new_wed_feira/",
   guia: "https://www.instagram.com/new_wed_guianordeste/",
   workshop: "https://www.instagram.com/new_wed_workshop/",

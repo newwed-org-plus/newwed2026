@@ -1,84 +1,37 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { Instagram } from "lucide-react";
-import { INSTAGRAM_DESTINOS_URL } from "../contact";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { FAMTOUR_NAVIGATION, famtourSectionHref } from "@/features/famtour/navigation";
 
 export function Nav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const href = (id: string) => famtourSectionHref(pathname, id);
+  const links = [...FAMTOUR_NAVIGATION, { id: "form", label: "Falar com a equipe" }];
+
   return (
-    <nav aria-label="Navegação FAMTOUR" className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-dark/80 border-b border-cream/10">
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-6 py-4 md:px-12">
-        <a
-          href="/"
-          aria-label="New Wed, página inicial"
-          onClick={() => setOpen(false)}
-          className="shrink-0"
+    <nav aria-label="Navegação FAMTOUR" className="border-b border-[#7c2341]/15 bg-[#f5faf9] text-destinos-ink">
+      <div className="mx-auto max-w-[1440px] px-6 md:px-12">
+        <button
+          type="button"
+          aria-label="Abrir seções de Destinos"
+          aria-expanded={open}
+          aria-controls="famtour-section-menu"
+          onClick={() => setOpen(value => !value)}
+          className="min-h-11 font-sans text-xs font-semibold lg:hidden"
         >
-          <img src="/assets/brand/new-wed-marsala.png" width={1167} height={927} alt="New Wed" className="block h-10 w-auto brightness-0 invert md:h-12" />
-        </a>
-        <div className="hidden lg:flex gap-5 text-[10px] uppercase tracking-[0.2em] text-cream/85 font-light">
-          {FAMTOUR_NAVIGATION.map((l) => (
-            <a
-              key={l.id}
-              href={href(l.id)}
-              className="hover:text-cream transition-colors"
-            >
-              {l.label}
+          Seções de Destinos <span aria-hidden="true">{open ? "−" : "+"}</span>
+        </button>
+        <div id="famtour-section-menu" className={`${open ? "flex" : "hidden"} flex-wrap gap-x-6 gap-y-1 pb-3 lg:flex lg:justify-end lg:pb-0`}>
+          {links.map(link => (
+            <a key={link.id} href={href(link.id)} onClick={() => setOpen(false)} className="inline-flex min-h-11 items-center font-sans text-xs hover:underline focus-visible:outline-2 focus-visible:outline-offset-2">
+              {link.label}
             </a>
           ))}
-          <a href={href("form")} className="hover:text-cream transition-colors">Contato</a>
-        </div>
-        <div className="flex items-center gap-3">
-          <a href={INSTAGRAM_DESTINOS_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram New Wed Destinos" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-current text-cream hover:text-cream/75">
-            <Instagram size={23} aria-hidden="true" />
-          </a>
-          <a href="/" className="whitespace-nowrap text-[11px] text-cream underline underline-offset-4 hover:text-cream/75">
-            Grupo New Wed
-          </a>
-          <a href="/#projetos" className="hidden lg:inline-flex text-[11px] text-smoke hover:text-cream">
-            Projetos
-          </a>
-          <button
-            aria-label="Abrir menu"
-            aria-expanded={open}
-            aria-controls="famtour-mobile-menu"
-            onClick={() => setOpen((v) => !v)}
-            className="lg:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5 text-cream"
-          >
-            <span className={`block w-5 h-px bg-cream transition-transform ${open ? "translate-y-[3px] rotate-45" : ""}`} />
-            <span className={`block w-5 h-px bg-cream transition-transform ${open ? "-translate-y-[3px] -rotate-45" : ""}`} />
-          </button>
+          <a href="/#projetos" className="inline-flex min-h-11 items-center font-sans text-xs hover:underline focus-visible:outline-2 focus-visible:outline-offset-2">Projetos do grupo</a>
         </div>
       </div>
-      {open && (
-        <div id="famtour-mobile-menu" className="lg:hidden border-t border-cream/10 bg-dark/95 px-6 py-6 flex flex-col gap-5 text-[11px] uppercase tracking-[0.2em] text-cream/85 font-light">
-          {FAMTOUR_NAVIGATION.map((l) => (
-            <a
-              key={l.id}
-              href={href(l.id)}
-              onClick={() => setOpen(false)}
-              className="hover:text-cream transition-colors"
-            >
-              {l.label}
-            </a>
-          ))}
-          <a href="/#projetos" onClick={() => setOpen(false)} className="hover:text-cream transition-colors">
-            Projetos do grupo
-          </a>
-          <a
-            href={href("form")}
-            onClick={() => setOpen(false)}
-            className="btn btn-solid !py-2 !px-4 text-[9px] self-start"
-          >
-            Falar com a equipe
-          </a>
-        </div>
-      )}
     </nav>
   );
 }

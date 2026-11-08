@@ -93,12 +93,11 @@ export function FamtourLanding() {
         style={{
           color: "#191010",
           scrollBehavior: "smooth",
-          paddingTop: "64px", // offset for fixed nav
         }}
       >
         {!success ? (
           <>
-            <HeroSplit onCta={() => scrollTo("famtours")} />
+            <HeroSplit />
 
             {/* Parceiros e marcas apoiadoras */}
             <ParceirosLogos />

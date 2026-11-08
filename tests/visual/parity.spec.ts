@@ -101,16 +101,18 @@ test("URLs antigas da FAMTOUR preservam edição, campanha e seção", async ({ 
   await expect(page.locator("#famtours")).toBeInViewport();
 });
 
-test("Destinos mantém logo branca e turquesa oficial na primeira tela mobile", async ({ page }) => {
+test("Destinos usa o cabeçalho do grupo e mantém o CTA turquesa na primeira tela", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   for (const [width, height] of [[320, 568], [390, 844], [1440, 900]]) {
     await page.setViewportSize({ width, height });
     await visit(page,`${siteOrigin}/destinos`);
     await settle(page);
-    const logo = page.getByRole("link", { name: "New Wed, página inicial", exact: true });
+    const logo = page.getByRole("link", { name: "Grupo New Wed, página inicial", exact: true });
     await expect(logo).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-    await expect(logo.locator("img")).toHaveCSS("filter", "brightness(0) invert(1)");
-    const cta = page.getByRole("button", { name: "Ver edições abertas", exact: true });
+    await expect(logo.locator("img")).toHaveCSS("filter", "none");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("FAMTOUR Nordeste Edição 2027");
+    await expect(page.locator(".nw-destinos-hero")).toHaveCSS("background-color", "rgb(234, 244, 242)");
+    const cta = page.getByRole("link", { name: "Ver edições abertas", exact: true });
     await expect(cta).toHaveCSS("background-color", "rgb(91, 153, 152)");
     await expect(cta).toHaveCSS("color", "rgb(67, 16, 33)");
     const box = await cta.boundingBox();
@@ -225,11 +227,11 @@ for (const [viewportName,width,height] of viewports) {
     await visit(page,`${siteOrigin}/destinos?edicao=famtour-rn-abril-2027`);
     await page.waitForLoadState("networkidle");
     for (const section of ["experiencia", "edicoes-anteriores", "famtours", "parceiros", "form"]) {
-      if (width < 1024) await page.getByRole("button", { name: "Abrir menu" }).click();
+      if (width < 1024) await page.getByRole("button", { name: "Abrir seções de Destinos" }).click();
       await page.getByRole("navigation", { name: "Navegação FAMTOUR" }).locator(`a[href="#${section}"]:visible`).click();
       await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=famtour-rn-abril-2027#${section}`);
       await expect(page.locator(`.famtour-landing #${section}`)).toBeInViewport();
-      if (width < 1024) await expect(page.getByRole("button", { name: "Abrir menu" })).toHaveAttribute("aria-expanded", "false");
+      if (width < 1024) await expect(page.getByRole("button", { name: "Abrir seções de Destinos" })).toHaveAttribute("aria-expanded", "false");
       await expect.poll(() => page.locator(`#${section}`).evaluate(element => element.getBoundingClientRect().top)).toBeGreaterThanOrEqual(64);
     }
     for (const section of ["experiencia", "edicoes-anteriores", "famtours", "parceiros", "inicio", "form"]) {
@@ -248,7 +250,7 @@ for (const [viewportName,width,height] of viewports) {
     expect(partners.sameRow).toBe(true);
     await mkdir(resolve("test-results/visual/destinos"), { recursive: true });
     await page.locator('#parceiros').screenshot({ path: resolve(`test-results/visual/destinos/partners-${viewportName}.png`), animations: 'disabled' });
-    await page.getByRole('link', { name:'New Wed, página inicial', exact:true }).click();
+    await page.getByRole('link', { name:'Grupo New Wed, página inicial', exact:true }).click();
     await expect(page).toHaveURL(`${siteOrigin}/`);
   });
 
@@ -259,7 +261,7 @@ for (const [viewportName,width,height] of viewports) {
       await visit(page,`${siteOrigin}/destinos/${route}`);
       await page.waitForLoadState("networkidle");
       if (route.startsWith("edicoes/")) {
-        if (width < 1024) await page.getByRole("button", { name: "Abrir menu" }).click();
+        if (width < 1024) await page.getByRole("button", { name: "Abrir seções de Destinos" }).click();
         await page.getByRole("navigation", { name: "Navegação FAMTOUR" }).getByRole("link", { name: "Edições abertas" }).click();
       } else {
         await page.getByRole("banner").getByRole("link", { name: "Voltar para edições abertas" }).click();
@@ -337,12 +339,15 @@ for (const [viewportName,width,height] of viewports) {
       await visit(page,`${siteOrigin}${route}`);
       await page.waitForLoadState("networkidle");
       const header = page.getByRole("navigation", { name: route.includes("inscricao") ? "Retorno ao institucional" : "Navegação FAMTOUR" });
-      await header.getByRole("link", { name: "Grupo New Wed", exact: true }).click();
+      const homeLink = route.includes("inscricao")
+        ? header.getByRole("link", { name: "Grupo New Wed", exact: true })
+        : page.getByRole("link", { name: "Grupo New Wed, página inicial", exact: true });
+      await homeLink.click();
       await expect(page).toHaveURL(`${siteOrigin}/`);
       await expect(page.locator(".nw-home")).toBeVisible();
       await visit(page,`${siteOrigin}${route}`);
       await page.waitForLoadState("networkidle");
-      if (!route.includes("inscricao") && width < 1024) await page.getByRole("button", { name: "Abrir menu" }).click();
+      if (!route.includes("inscricao") && width < 1024) await page.getByRole("button", { name: "Abrir seções de Destinos" }).click();
       await header.getByRole("link", { name: /^Projetos/ }).click();
       await expect(page).toHaveURL(`${siteOrigin}/#projetos`);
       await expect(page.locator("#projetos")).toBeInViewport();

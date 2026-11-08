@@ -8,8 +8,8 @@ const editions = [
   { year: 2017, description: "Encontro de noivos e fornecedores na New Wed Feira de 2017", video: "rYg0TpnerAg" },
   { year: 2018, description: "Decoração e espaços dos expositores na New Wed Feira de 2018", video: "-g3D2RjbQWo" },
   { year: 2019, description: "Público e expositores na New Wed Feira de 2019", video: "xhentgAI9pU" },
-  { year: 2022, description: "Capa do vídeo oficial da New Wed Feira de 2022", video: "37FaAgAqHnM" },
-  { year: 2023, description: "Capa do vídeo oficial da New Wed Feira de 2023", video: "OqfXxlvGmyE" },
+  { year: 2022, description: "Vista dos estandes da New Wed Feira de 2022, com uma profissional em primeiro plano", video: "37FaAgAqHnM" },
+  { year: 2023, description: "Retrato em frente à entrada da New Wed Feira Tendência de 2023", video: "OqfXxlvGmyE" },
   { year: 2025, description: "Cindy Noel na New Wed Feira Tendência 2025", video: "L1gnu-51G1U" },
   { year: 2026, description: "Cindy Noel na New Wed Feira Tendência 2026", video: "juZ5xsOwPZs" },
 ] as const;

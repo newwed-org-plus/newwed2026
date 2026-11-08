@@ -6,7 +6,7 @@ import { HomeMobileMenu } from "./HomeMobileMenu";
 
 export function InstitutionalHeader({ currentProject }: { currentProject?: keyof typeof PROJECT_INSTAGRAM_URLS }) {
   const instagramUrl = currentProject ? PROJECT_INSTAGRAM_URLS[currentProject] : INSTAGRAM_URL;
-  const instagramLabel = currentProject === "feira" ? "Feira" : currentProject === "guia" ? "Guia Nordeste" : currentProject === "workshop" ? "Workshop" : "Grupo";
+  const instagramLabel = currentProject === "feira" ? "Feira" : currentProject === "guia" ? "Guia Nordeste" : currentProject === "workshop" ? "Workshop" : currentProject === "destinos" ? "Destinos" : "Grupo";
   return (
     <header className="nw-header">
       <Link href="/" className="nw-logo" aria-label="Grupo New Wed, página inicial">
@@ -25,4 +25,8 @@ export function InstitutionalHeader({ currentProject }: { currentProject?: keyof
       </div>
     </header>
   );
+}
+
+export function DestinosSiteHeader() {
+  return <div className="nw-home"><InstitutionalHeader currentProject="destinos" /></div>;
 }

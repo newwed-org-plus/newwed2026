@@ -17,7 +17,7 @@ const SLIDES = [
 /** Intervalo em ms entre cada slide */
 const INTERVAL_MS = 5000;
 
-export function HeroSplit({ onCta }: { onCta: () => void }) {
+export function HeroSplit() {
   const [current, setCurrent] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -41,190 +41,29 @@ export function HeroSplit({ onCta }: { onCta: () => void }) {
   }, []);
 
   return (
-    <section
-      id="inicio"
-      className="relative grid min-h-[calc(100svh-4rem)] grid-cols-1 overflow-hidden md:min-h-[90vh] md:grid-cols-[36%_64%]"
-    >
-      {/* ── Painel esquerdo — branco ── */}
-      <div className="absolute inset-x-0 top-0 z-[4] flex flex-col items-start px-5 pt-5 md:relative md:items-center md:justify-center md:bg-white md:px-8 md:py-16">
-        <div
-          className="w-full max-w-[230px] px-4 py-3 md:max-w-[360px] md:p-0"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-          }}
-        >
-          <img
-            src="/logo-newed-destinos-transparent.png"
-            alt="Newed Destinos"
-            width={225}
-            height={225}
-            className="w-full max-w-[125px] brightness-0 invert md:max-w-[225px] md:filter-none"
-            style={{
-              display: "block",
-              height: "auto",
-              objectFit: "contain",
-            }}
-          />
-          <div
-            className="mt-1.5 text-[0.54rem] text-white md:mt-5 md:text-[clamp(0.62rem,1.2vw,0.78rem)] md:text-[var(--color-destinos-turquoise)]"
-            style={{
-              fontFamily: "'Fedra Sans Std', sans-serif",
-              fontWeight: 350,
-              letterSpacing: "0.12em",
-              lineHeight: 1.6,
-              textTransform: "uppercase",
-            }}
-          >
-            <span className="inline-block">Rio Grande do Norte</span>{" • "}<span className="inline-block">Alagoas</span>{" • "}<span className="inline-block">Fernando de Noronha</span>{" • "}<span className="inline-block">Ceará</span>
-          </div>
-          <div
-            className="hidden md:mt-8 md:block md:text-[0.7rem]"
-            style={{
-              fontFamily: "'Fedra Sans Std', sans-serif",
-              fontWeight: 350,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--color-destinos-turquoise)",
-            }}
-          >
-            FAMTOUR • EDIÇÃO 2027
-          </div>
+    <section id="inicio" className="nw-home nw-detail-hero nw-destinos-hero" aria-labelledby="destinos-title">
+      <div className="nw-detail-copy">
+        <a className="nw-back-link" href="/#projetos">← Todos os projetos</a>
+        <img src="/logo-newed-destinos-transparent.png" width={95} height={95} alt="New Wed Destinos" className="nw-destinos-hero-brand" />
+        <p className="nw-eyebrow">New Wed Destinos · Edição 2027</p>
+        <h1 id="destinos-title" className="font-serif">FAMTOUR Nordeste <span>Edição 2027</span></h1>
+        <p className="nw-detail-description">Uma imersão para profissionais de casamentos conhecerem destinos, espaços e fornecedores do Nordeste.</p>
+        <div className="nw-detail-actions">
+          <a href="#famtours" className="nw-button nw-destinos-cta">Ver edições abertas</a>
         </div>
       </div>
 
-      {/* ── Painel direito — carrossel com fade ── */}
-      <div
-        className="relative min-h-[calc(100svh-4rem)] overflow-hidden md:min-h-[90vh]"
-        style={{ background: "#0a2b28" }}
-      >
-        {/* Camadas de imagem: todas absolutas, só a ativa tem opacity 1 */}
-        {SLIDES.map((src, i) => (
-          <div
-            key={src}
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundImage: `url('${src}')`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              opacity: i === current ? 1 : 0,
-              transition: "opacity 1.2s ease",
-              zIndex: 1,
-            }}
-          />
+      <div className="nw-destinos-photo">
+        {SLIDES.map((src, index) => (
+          <img key={src} src={src} alt="" className={index === current ? "is-active" : undefined} loading={index === 0 ? "eager" : "lazy"} />
         ))}
-
-        {/* Overlay escuro para contraste do texto */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(135deg, rgba(0,0,0,0.68) 0%, rgba(10,43,40,0.60) 100%)",
-            zIndex: 2,
-          }}
-        />
-
-        {/* Conteúdo textual — acima de tudo */}
-        <div
-          className="relative z-[3] flex min-h-[calc(100svh-4rem)] flex-col items-start justify-start px-6 pb-20 pt-48 sm:px-8 md:min-h-[90vh] md:justify-center md:px-16 md:py-20"
-        >
-          <div className="max-w-xl">
-            <div
-              style={{
-                width: 80,
-                height: 1,
-                background: "rgba(255,255,255,0.5)",
-                marginBottom: "1.5rem",
-              }}
-            />
-            <h1
-              style={{
-                fontFamily: "'BlockGothicRR', sans-serif",
-                fontWeight: 500,
-                textTransform: "uppercase",
-                fontSize: "clamp(2.5rem, 12vw, 5rem)",
-                color: "#FFFFFF",
-                lineHeight: 1.15,
-                margin: 0,
-              }}
-            >
-              FAMTOUR
-              <br />
-              NORDESTE
-              <br />
-              EDIÇÃO 2027
-            </h1>
-            <div
-              style={{
-                width: 80,
-                height: 1,
-                background: "rgba(255,255,255,0.5)",
-                margin: "1.5rem 0 2rem",
-              }}
-            />
-            <button
-              type="button"
-              onClick={onCta}
-              className="w-full max-w-[290px] bg-destinos-turquoise text-destinos-ink transition-colors hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white md:w-auto"
-              style={{
-                padding: "1rem 2rem",
-                borderRadius: 0,
-                fontFamily: "'Fedra Sans Std', sans-serif",
-                fontWeight: 350,
-                fontSize: "0.85rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              Ver edições abertas
-            </button>
-            <div
-              style={{
-                marginTop: "1rem",
-                fontFamily: "'Fedra Sans Std', sans-serif",
-                fontWeight: 350,
-                fontSize: "0.75rem",
-                color: "rgba(255,255,255,0.8)",
-              }}
-            >
-              4 EDIÇÕES • VAGAS LIMITADAS
-            </div>
-          </div>
-
-          {/* Indicadores de slide (bolinhas) */}
-          {SLIDES.length > 1 && (
-            <div className="absolute bottom-6 right-6 flex gap-2 md:left-16 md:right-auto">
-              {SLIDES.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  aria-label={`Slide ${i + 1}`}
-                  onClick={() => {
-                    goTo(i);
-                    resetTimer();
-                  }}
-                  style={{
-                    width: i === current ? 24 : 8,
-                    height: 8,
-                    borderRadius: 4,
-                    border: "none",
-                    background:
-                      i === current ? "#FFFFFF" : "rgba(255,255,255,0.4)",
-                    cursor: "pointer",
-                    padding: 0,
-                    transition: "width 0.35s ease, background 0.35s ease",
-                  }}
-                />
-              ))}
-            </div>
-          )}
+        <div className="nw-destinos-slide-controls" aria-label="Fotos do FAMTOUR" role="group">
+          {SLIDES.map((_, index) => (
+            <button key={index} type="button" aria-label={`Slide ${index + 1}`} aria-pressed={index === current} onClick={() => {
+              goTo(index);
+              if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) resetTimer();
+            }} />
+          ))}
         </div>
       </div>
     </section>

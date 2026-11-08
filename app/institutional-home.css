@@ -149,6 +149,9 @@
   text-align: center;
   color: white;
 }
+#feira.nw-project-card > img { object-fit: cover; object-position: center; filter: brightness(.62) saturate(.8); }
+#feira.nw-project-card .nw-project-copy { background: radial-gradient(ellipse at 18% 0%, #b3365e38, transparent 56%), linear-gradient(155deg, #431021b3 0%, #64142dbf 44%, #220b15ed 100%); }
+.nw-project-brand { position: absolute; top: 13%; left: 8%; width: 84%; height: auto; }
 .nw-project-bottom { display: flex; flex-direction: column; align-items: center; }
 .nw-project-bottom p {
   max-width: 195px;
@@ -340,6 +343,7 @@
 .nw-footer { flex-wrap: wrap; line-height: 1.6; }
 .nw-project-feira { --nw-marsala: #7C2341; --nw-accent: #C64975; --nw-soft: #f9ecf0; }
 .nw-project-guia { --nw-marsala: #68405D; --nw-accent: #68405D; --nw-soft: #f3edf2; }
+.nw-project-guia .nw-detail-image { object-fit: contain; background: #431021; }
 .nw-project-workshop { --nw-marsala: #8C2B19; --nw-accent: #8C2B19; --nw-soft: #f8eee7; }
 .nw-project-page .nw-detail-hero { background: var(--nw-soft); }
 .nw-project-page .nw-detail-section > .nw-eyebrow { color: var(--nw-accent); }
@@ -401,3 +405,27 @@
 
 /* Preserve the original partner artwork and alpha while displaying white marks. */
 .nw-home-partners img { filter: brightness(0) invert(1); }
+
+.nw-destinos-hero { background: #eaf4f2; }
+.nw-destinos-hero .nw-back-link { margin-bottom: 18px; }
+.nw-destinos-hero-brand { display: block; width: 95px; height: auto; margin-bottom: 12px; }
+.nw-destinos-hero h1 span { display: block; }
+.nw-destinos-cta { min-height: 44px; color: var(--color-destinos-ink); background: var(--color-destinos-turquoise); cursor: pointer; }
+.nw-destinos-cta:hover { filter: brightness(.95); }
+.nw-destinos-cta:focus-visible, .nw-destinos-slide-controls button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.nw-destinos-photo { position: relative; min-height: 320px; overflow: hidden; background: #431021; }
+.nw-destinos-photo > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.2s ease; }
+.nw-destinos-photo > img.is-active { opacity: 1; }
+.nw-destinos-slide-controls { position: absolute; bottom: 12px; right: 16px; display: flex; gap: 3px; padding: 0 4px; color: white; background: #191010b3; border-radius: 22px; }
+.nw-destinos-slide-controls button { display: grid; place-items: center; width: 34px; height: 44px; cursor: pointer; }
+.nw-destinos-slide-controls button::before { content: ""; width: 7px; height: 7px; border-radius: 7px; background: currentColor; opacity: .6; }
+.nw-destinos-slide-controls button[aria-pressed="true"]::before { width: 18px; opacity: 1; }
+@media (max-width: 700px) {
+  .nw-destinos-hero .nw-detail-copy { padding-block: 22px 26px; }
+  .nw-destinos-hero-brand { width: 70px; margin-bottom: 8px; }
+  .nw-destinos-hero h1 { margin: 12px 0 15px; }
+  .nw-destinos-hero .nw-detail-actions { margin-top: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nw-destinos-photo > img { transition: none; }
+}

@@ -26,4 +26,4 @@ As fontes atuais do site seguem o pedido específico D-030 (Fedra Sans Std e Blo
 
 ## Marca Feira no card da Home
 
-A Home usa o banner original `public/assets/brand/banner-feira.webp`, fornecido para a identidade do site e recuperado de `8af954f`. A arte já reúne a foto, o tratamento vinho e a marca oficial em negativo, na composição pedida para o ecossistema. A fotografia de 2026 fica disponível no acervo de `/feira`.
+A Home usa a foto do buquê da Feira de 2026 sobreposta pelo filtro marsala. A marca branca da Feira usa o desenho do objeto 140 da página 4 do manual, convertido em negativo com transparência. O selo branco faz parte do desenho e a área externa da marca é transparente.
