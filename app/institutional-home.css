@@ -409,6 +409,7 @@
 .nw-destinos-hero { background: #eaf4f2; }
 .nw-destinos-hero .nw-back-link { margin-bottom: 18px; }
 .nw-destinos-hero-brand { display: block; width: 95px; height: auto; margin-bottom: 12px; }
+.nw-destinos-hero h1 { font-family: var(--font-display); font-weight: 500; }
 .nw-destinos-hero h1 span { display: block; }
 .nw-destinos-cta { min-height: 44px; color: var(--color-destinos-ink); background: var(--color-destinos-turquoise); cursor: pointer; }
 .nw-destinos-cta:hover { filter: brightness(.95); }

@@ -46,7 +46,7 @@ export function HeroSplit() {
         <a className="nw-back-link" href="/#projetos">← Todos os projetos</a>
         <img src="/logo-newed-destinos-transparent.png" width={95} height={95} alt="New Wed Destinos" className="nw-destinos-hero-brand" />
         <p className="nw-eyebrow">New Wed Destinos · Edição 2027</p>
-        <h1 id="destinos-title" className="font-serif">FAMTOUR Nordeste <span>Edição 2027</span></h1>
+        <h1 id="destinos-title">FAMTOUR Nordeste <span>Edição 2027</span></h1>
         <p className="nw-detail-description">Uma imersão para profissionais de casamentos conhecerem destinos, espaços e fornecedores do Nordeste.</p>
         <div className="nw-detail-actions">
           <a href="#famtours" className="nw-button nw-destinos-cta">Ver edições abertas</a>
