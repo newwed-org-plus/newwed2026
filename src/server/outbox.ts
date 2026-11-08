@@ -1,7 +1,7 @@
 import {capabilityEnabled,eventCapability} from "./capabilities";
 export type QueueEvent = { id:string;type:string;checkoutId?:string;leadId?:string;externalId?:string;providerPaymentId?:string;resend?:boolean;conversationId?:string;messageId?:string;targetCount?:number;notificationId?:string;userId?:string;requestId?:string;provider?:"meta"|"uazapi" };
 
-type OutboxEnv = Pick<Env,"DB"|"EVENTS_QUEUE"> & { UAZAPI_EVENTS_QUEUE?: Queue;ENABLE_MANUAL_SEND?:string;ENABLE_AGENT?:string;ENABLE_CHECKOUT?:string;ENABLE_CONFIRMATION?:string;ENABLE_EMAIL?:string };
+type OutboxEnv = Pick<Env,"DB"|"EVENTS_QUEUE"> & { UAZAPI_EVENTS_QUEUE?: Queue;ENABLE_MANUAL_SEND?:string;ENABLE_AGENT?:string;ENABLE_PUBLIC_CHECKOUT?:string;ENABLE_CHECKOUT?:string;ENABLE_CONFIRMATION?:string;ENABLE_EMAIL?:string };
 
 function errorMessage(error: unknown) {
   return (error instanceof Error ? error.message : String(error)).slice(0,1000);

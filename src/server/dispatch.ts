@@ -1,6 +1,6 @@
 import {capabilityEnabled,eventCapability} from "./capabilities";
 import {retryAt,type QueueEvent} from "./outbox";
-type DispatchEnv=Pick<Env,'DB'> & Partial<Pick<Env,'ENABLE_MANUAL_SEND'|'ENABLE_AGENT'|'ENABLE_CHECKOUT'|'ENABLE_CONFIRMATION'|'ENABLE_EMAIL'>>;
+type DispatchEnv=Pick<Env,'DB'> & Partial<Pick<Env,'ENABLE_MANUAL_SEND'|'ENABLE_AGENT'|'ENABLE_PUBLIC_CHECKOUT'|'ENABLE_CHECKOUT'|'ENABLE_CONFIRMATION'|'ENABLE_EMAIL'>>;
 type Stored={id:string;type:string;aggregate_id:string;payload_json:string;dispatch_state:string;processing_attempts:number};
 export async function dispatchEvent(env:DispatchEnv,event:QueueEvent,handle:(event:QueueEvent)=>Promise<unknown>) {
  if(!event.id)throw new Error('Durable event identifier required');

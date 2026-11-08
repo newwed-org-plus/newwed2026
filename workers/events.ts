@@ -11,6 +11,7 @@ import { getAsaasPayment } from "@/server/integrations/asaas";
 import { applyAsaasPayment,asaasStatusEvent } from "@/server/integrations/asaas-payment";
 import { processStoredAsaasWebhook,type StoredAsaasWebhook } from "@/server/integrations/asaas-webhook";
 import { publishOutbox } from "@/server/outbox";
+import { createAsaasPublicCheckout,expireUnissuedPublicCheckouts } from "@/server/public-checkout";
 import { processNotificationEmail,type EmailEnv } from "@/server/notifications";
 import { processUazapiBatch,processUazapiStatus } from "@/server/uazapi-webhook";
 import type { RuntimeSecrets } from "@/server/secrets";
@@ -57,6 +58,7 @@ async function handleEvent(env: WorkerEnv, body: EventBody) {
   if (body.type === "whatsapp.incoming" && body.externalId) return processIncomingWhatsApp(env,body.externalId,{},"meta","receive-only");
   if (body.type === "whatsapp.status" && body.externalId) return handleStatus(env,body.externalId);
   if (body.type === "checkout.create" && body.checkoutId && body.id) return processCheckoutCreation(env,body.checkoutId,body.id);
+  if (body.type === "publicCheckout.create" && body.checkoutId) return createAsaasPublicCheckout(env,body.checkoutId);
   if (body.type === "checkout.send" && body.checkoutId && body.id) return sendCheckout(env,body.checkoutId,body.id,body.resend);
   if (body.type === "checkout.cancel" && body.checkoutId) return processCheckoutCancellation(env,body.checkoutId);
   if (body.type === "conversation.manual.send" && body.messageId) return processManualConversationMessage(env,body.messageId);
@@ -124,6 +126,7 @@ export default {
       await processStoredAsaasWebhook(workerEnv,webhook);
     }
     if(capabilityEnabled(workerEnv,"checkout"))await expireCheckoutReservations(workerEnv);
+    if(capabilityEnabled(workerEnv,"publicCheckout"))await expireUnissuedPublicCheckouts(workerEnv);
     await workerEnv.DB.prepare("DELETE FROM rate_limit_buckets WHERE expires_at<?").bind(now).run();
     await syncUazapiDelivery(workerEnv,{limit:workerEnv.ENVIRONMENT==='production'?2:10});
     const imported=await processPendingHistorySyncs(workerEnv);

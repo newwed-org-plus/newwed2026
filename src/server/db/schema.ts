@@ -38,6 +38,22 @@ export const availability = sqliteTable("availability", {
   updatedAt: text("updated_at").notNull(),
 });
 
+export const publicCheckoutSessions = sqliteTable("public_checkout_sessions", {
+  id: text("id").primaryKey(),
+  idempotencyKey: text("idempotency_key").notNull().unique(),
+  editionId: text("edition_id").notNull().references(() => editions.id),
+  priceBatchId: text("price_batch_id").notNull().references(() => priceBatches.id),
+  amountCents: integer("amount_cents").notNull(),
+  installmentCount: integer("installment_count").notNull(),
+  status: text("status").notNull(),
+  providerId: text("provider_id").unique(),
+  expiresAt: text("expires_at").notNull(),
+  ...timestamps,
+}, (table) => [
+  index("public_checkout_unissued_expiry_idx").on(table.expiresAt)
+    .where(sql`${table.status} IN ('QUEUED','SUBMITTING') AND ${table.providerId} IS NULL`),
+]);
+
 export const leads = sqliteTable("leads", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
