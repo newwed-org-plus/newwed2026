@@ -4,7 +4,7 @@ Atualizado em: 2026-11-08.
 
 ## Objetivo ativo
 
-Onda 53 (D-070/CP-53): Pix à vista e cartão em até 12x com seleção antes do Asaas. Repasse confirmado para Alagoas, Rio Grande do Norte e Ceará. Noronha fica com os valores atuais enquanto a simulação da conta está pendente.
+Onda 53 (D-070/CP-53): Pix à vista e cartão em até 12x com seleção antes do Asaas. Repasse confirmado no simulador da conta para as quatro edições.
 
 Onda 52 (D-069/CP-52): mosaico do acervo da Feira restaurado e vídeo de 2026 validado no canal oficial. A capa nova e o vídeo de 2027 dependem do envio da equipe.
 

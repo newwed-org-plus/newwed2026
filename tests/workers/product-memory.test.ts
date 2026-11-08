@@ -54,7 +54,7 @@ describe('conhecimento e memória no D1',()=>{
   await env.DB.prepare('UPDATE outbox_events SET next_attempt_at=NULL WHERE id=?').bind(job!.id).run();await dispatchEvent(runtime,job!,handle);
   expect(model).not.toHaveBeenCalled();expect(sender).toHaveBeenCalledTimes(1);
   const reply=await env.DB.prepare("SELECT body,payload_json FROM messages WHERE in_reply_to=?").bind(incoming!.external_id).first<{body:string;payload_json:string}>();
-  expect(reply?.body).toContain('R$ 7.997,00');expect(reply?.body).toContain('12x de R$ 666,42');expect(JSON.parse(reply!.payload_json).knowledge.fingerprint).toMatch(/^[a-f0-9]{64}$/);
+  expect(reply?.body).toContain('R$ 7.997,00');expect(reply?.body).toContain('12x de R$ 694,14');expect(JSON.parse(reply!.payload_json).knowledge.fingerprint).toMatch(/^[a-f0-9]{64}$/);
  });
  it('snapshot é persistido, recupera corrupção e evita sobrescrita concorrente',async()=>{
   await setup();const [a,b]=await Promise.all([loadProductMemory(runtime,'c'),loadProductMemory(runtime,'c')]);expect(a.editionSlugs).toEqual(b.editionSlugs);

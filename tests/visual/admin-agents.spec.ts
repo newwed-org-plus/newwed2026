@@ -55,7 +55,7 @@ for(const [name,width,height] of [['mobile',390,844],['tablet',768,1024],['deskt
  await page.route('**/api/admin/knowledge',route=>failed?route.fulfill({status:503,json:{message:'Base temporariamente indisponível.'}}):route.continue());
  await page.goto(`${origin}/admin`);await page.getByRole('button',{name:'Atendentes',exact:true}).click();await page.getByRole('button',{name:'Ver conhecimento dos produtos',exact:true}).click();
  await expect(page.getByRole('alert')).toContainText('Base temporariamente indisponível.');failed=false;await page.getByRole('button',{name:'Tentar novamente',exact:true}).click();
- await expect(page.getByRole('heading',{name:'Preços publicados do FAMTOUR',exact:true})).toBeVisible();await expect(page.getByText('R$ 7.697,00',{exact:true})).toBeVisible();await expect(page.getByText('12x de R$ 666,42',{exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Preços publicados do FAMTOUR',exact:true})).toBeVisible();await expect(page.getByText('R$ 7.697,00',{exact:true})).toBeVisible();await expect(page.getByText('12x de R$ 694,14',{exact:true})).toBeVisible();
  await expect(page.getByText('Sob consulta; preço não publicado',{exact:true})).toHaveCount(3);await expect(page.getByText(/Capacidade anunciada não é quantidade de vagas restantes/)).toBeVisible();await expect(page.getByText(/não confirma vaga nem pagamento/)).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`test-results/knowledge-${name}.png`,fullPage:true});
 });
