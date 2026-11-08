@@ -43,11 +43,11 @@ async function submitLead(suffix="1") {
 function jsonFetcher(value:unknown,status=200) { return (async()=>new Response(JSON.stringify(value),{status,headers:{"content-type":"application/json"}})) as typeof fetch; }
 
 describe("fluxo completo no runtime Workers",()=>{
-  it("confirma o recebimento ao Asaas mesmo se a conciliação precisar aguardar",async()=>{
+  it("confirma e descarta eventos de cobranças externas ao site",async()=>{
     const payload = {
-      id: "evt-before-checkout",
+      id: "evt-external",
       event: "PAYMENT_CONFIRMED",
-      payment: { id: "pay-before-checkout", status: "CONFIRMED", value: 1200 },
+      payment: { id: "pay-external", externalReference: "base44-order", status: "CONFIRMED", value: 1200 },
     };
     const response = await receiveAsaasWebhook(new Request("https://newwed.test/api/webhooks/asaas", {
       method: "POST",
@@ -59,15 +59,11 @@ describe("fluxo completo no runtime Workers",()=>{
     }));
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ received: true, pendingReconciliation: true });
+    expect(await response.json()).toEqual({ received: true, ignored: true });
     const event = await env.DB.prepare(
-      "SELECT processed_at, next_retry_at, error FROM webhook_events WHERE provider='asaas' AND external_id=?",
+      "SELECT id FROM webhook_events WHERE provider='asaas' AND external_id=?",
     ).bind(payload.id).first();
-    expect(event).toMatchObject({
-      processed_at: null,
-      next_retry_at: expect.any(String),
-      error: "CHECKOUT_NOT_FOUND",
-    });
+    expect(event).toBeNull();
   });
 
   it("percorre UTM, agente, qualificação, checkout, entrega, PAGO e confirmação uma vez",async()=>{
@@ -101,6 +97,24 @@ describe("fluxo completo no runtime Workers",()=>{
     const checkoutResponse=await createCheckout(adminRequest(`/api/admin/leads/${leadId}/checkouts`,{editionId:"edition-1",priceBatchId:"price-1",method:"PIX",installmentCount:1},{"idempotency-key":"checkout-idem-1","x-request-id":"req-checkout-e2e"}),{params:Promise.resolve({id:leadId})});
     expect(checkoutResponse.status).toBe(202);
     const checkoutBody=await checkoutResponse.json() as {checkoutId:string};
+    const pendingPayload = {
+      id: "evt-pending-reconciliation",
+      event: "PAYMENT_CONFIRMED",
+      payment: { id: "pay-test", externalReference: checkoutBody.checkoutId, status: "CONFIRMED", value: 1201, description: "dados externos à conciliação" },
+    };
+    const pendingResponse = await receiveAsaasWebhook(new Request("https://newwed.test/api/webhooks/asaas", {
+      method: "POST",
+      headers: { "content-type": "application/json", "asaas-access-token": "test-asaas-webhook-token" },
+      body: JSON.stringify(pendingPayload),
+    }));
+    expect(pendingResponse.status).toBe(200);
+    expect(await pendingResponse.json()).toEqual({ received: true, pendingReconciliation: true });
+    const pending = await env.DB.prepare(
+      "SELECT processed_at, next_retry_at, payload_json FROM webhook_events WHERE provider='asaas' AND external_id=?",
+    ).bind(pendingPayload.id).first<{processed_at:string|null;next_retry_at:string;payload_json:string}>();
+    expect(pending).toMatchObject({ processed_at: null, next_retry_at: expect.any(String) });
+    expect(JSON.parse(pending!.payload_json).payment).not.toHaveProperty("description");
+
     const creationEvent=await env.DB.prepare("SELECT id FROM outbox_events WHERE type='checkout.create' AND aggregate_id=?").bind(checkoutBody.checkoutId).first<{id:string}>();
     const asaasMock=(async(input:RequestInfo|URL,init?:RequestInit)=>{
       const url=String(input);

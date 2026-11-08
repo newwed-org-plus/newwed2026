@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 import { timingSafeEqual } from "@/server/crypto";
 import { errorResponse,HttpError,json } from "@/server/http";
+import { locateAsaasCheckout } from "@/server/integrations/asaas-payment";
 import { asaasWebhookSchema,processStoredAsaasWebhook,type StoredAsaasWebhook } from "@/server/integrations/asaas-webhook";
 import { getSecrets } from "@/server/secrets";
 import { readJsonWithLimit,requestIdFrom,responseWithRequestId } from "@/server/request-context";
@@ -12,6 +13,10 @@ export async function POST(request: Request) {
     const received = request.headers.get("asaas-access-token") ?? "";
     if (!expected || !timingSafeEqual(expected,received)) throw new HttpError(401,"INVALID_SIGNATURE","Webhook não autorizado.");
     const input = asaasWebhookSchema.parse(await readJsonWithLimit(request,128 * 1024));
+    // Asaas delivers account-wide events. Our checkout exists before we request the payment.
+    if (!await locateAsaasCheckout(env,input.payment)) {
+      return responseWithRequestId(json({ received:true,ignored:true }),requestId);
+    }
     const externalId = input.id ?? `${input.event}:${input.payment.id}:${input.dateCreated ?? ""}`;
     const now = new Date().toISOString();
     await env.DB.prepare("INSERT OR IGNORE INTO webhook_events (id,provider,external_id,event_type,payload_json,attempts,request_id,created_at) VALUES (?,'asaas',?,?,?,0,?,?)")
