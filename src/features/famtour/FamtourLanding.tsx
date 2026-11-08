@@ -72,7 +72,10 @@ export function FamtourLanding() {
 
   useEffect(()=>{
     if (!edicao && !fromEbook) return;
-    const frame = requestAnimationFrame(() => scrollTo(edicao ? "form" : "famtours"));
+    const frame = requestAnimationFrame(() => {
+      const anchor = window.location.hash.slice(1);
+      scrollTo(anchor && document.getElementById(anchor) ? anchor : edicao ? "form" : "famtours");
+    });
     return()=>cancelAnimationFrame(frame);
   }, [edicao, fromEbook, scrollTo]);
 

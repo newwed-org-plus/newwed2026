@@ -106,6 +106,8 @@ export const publishedFamtourEditions: readonly FamtourEdition[] = [
     parcelaQuantidade: 12,
     parcelaCentavos: 58308,
     valorAVistaCentavos: 699700,
+    imagem: "/assets/destinos/ceara-2027.webp",
+    imagemAlt: "Praia do Cumbuco, no Ceará",
     aereoIncluso: true,
     inclusos: INCLUSOS,
   },

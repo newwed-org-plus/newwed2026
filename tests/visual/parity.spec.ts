@@ -301,6 +301,8 @@ for (const [viewportName,width,height] of viewports) {
     for (const [index, slug] of slugs.entries()) {
       await visit(page,`${siteOrigin}/destinos#famtours`);
       await page.waitForLoadState("networkidle");
+      const photo = index === 0 ? "alagoas-2027" : index === 3 ? "ceara-2027" : null;
+      if (photo) await expect(page.locator("#famtours article").nth(index).locator("img")).toHaveAttribute("src", `/assets/destinos/${photo}.webp`);
       await page.locator("#famtours").getByRole("button", { name: "Solicitar informações", exact: true }).nth(index).click();
       await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=${slug}#form`);
       await expect(page.locator("#form")).toBeInViewport();
