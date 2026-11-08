@@ -43,13 +43,13 @@ function HomeContent() {
         </div>
       </section>
 
-      <section className="nw-numbers" aria-label="O Grupo New Wed em números">
-        <div className="nw-numbers-inner">
-          <div className="nw-number nw-number-since"><span>Desde</span><strong>2016</strong></div>
-          <div className="nw-number"><strong>+5 mil</strong><span>Visitantes<br />por edição</span></div>
-          <div className="nw-number"><strong>+100</strong><span>Expositores</span></div>
-          <div className="nw-number"><strong>+8 milhões</strong><span>Em contratos<br />movimentados</span></div>
-        </div>
+      <section className="nw-home-partners" aria-labelledby="nw-home-partners-title">
+        <h2 id="nw-home-partners-title">Marcas e parceiros</h2>
+        <ul>
+          <li><img src="/azul- branca.webp" alt="Azul" loading="lazy" /></li>
+          <li><img src="/empetur - Branca.webp" alt="Empetur" loading="lazy" /></li>
+          <li><img src="/assets/brand/governo-pernambuco-branca.webp" alt="Governo de Pernambuco" loading="lazy" /></li>
+        </ul>
       </section>
 
       <section id="sobre" className="nw-story" aria-labelledby="nw-story-title">
@@ -78,7 +78,7 @@ function HomeContent() {
       </section>
       <footer className="nw-footer">
         <span>© 2026 Grupo New Wed</span>
-        <span>Pernambuco · Alagoas · Rio Grande do Norte</span>
+        <span>Pernambuco · Alagoas · Rio Grande do Norte · Ceará</span>
       </footer>
     </main>
   );

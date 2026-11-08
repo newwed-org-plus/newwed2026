@@ -1,15 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { Check, Plane } from "lucide-react";
 import { formatCurrency, type FamtourEdition } from "@/features/famtour/lib/famtours";
 
 type Props = {
   famtour: FamtourEdition;
   onRequestInformation: (slug: string) => void;
-  onViewEdition: (slug: string) => void;
 };
 
-export function FamTourCard({ famtour, onRequestInformation, onViewEdition }: Props) {
+export function FamTourCard({ famtour, onRequestInformation }: Props) {
   return (
     <article className="group flex h-full flex-col border border-black/10 bg-white shadow-[0_14px_40px_rgba(25,16,16,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-destinos-turquoise)]/40 hover:shadow-[0_20px_48px_rgba(25,16,16,0.1)]">
       {famtour.imagem ? (
@@ -94,13 +94,12 @@ export function FamTourCard({ famtour, onRequestInformation, onViewEdition }: Pr
             >
               Solicitar informações
             </button>
-            <button
-              type="button"
-              onClick={() => onViewEdition(famtour.slug)}
-              className="min-h-14 border border-[var(--color-destinos-marsala)] bg-[var(--color-destinos-marsala)] px-4 py-3 font-sans text-xs font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:bg-[var(--color-destinos-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-destinos-turquoise)] sm:min-h-12"
+            <Link
+              href={`/destinos/inscricao/${famtour.slug}#condicoes`}
+              className="flex min-h-14 items-center justify-center border border-[var(--color-destinos-turquoise)] bg-[var(--color-destinos-turquoise)] px-4 py-3 text-center font-sans text-xs font-semibold uppercase tracking-[0.1em] text-[var(--color-destinos-ink)] transition-colors hover:bg-[#8AB8B7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-destinos-ink)] sm:min-h-12"
             >
-              Ver informações da edição
-            </button>
+              Ver edição e parcelamento
+            </Link>
           </div>
         </div>
       </div>

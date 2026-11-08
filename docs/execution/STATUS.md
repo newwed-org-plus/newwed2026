@@ -1,8 +1,10 @@
 # Status de execução
 
-Atualizado em: 2026-11-06.
+Atualizado em: 2026-11-08.
 
 ## Objetivo ativo
+
+Onda 45 (CP-45/D-065): ajustes públicos da Home, Feira, Destinos e pré-inscrição. PDF final, envio por e-mail, checkout público, checkout do Guia Profissional e parte do acervo histórico continuam pendentes de material ou integração confirmados.
 
 Onda 44: compactar o popup no celular (D-064/CP-44), conforme relato do contato e orientação do usuário. Branch `codex/wave-44-ebook-mobile`, base `38de100`; somente CSS mobile e testes de dimensão/horizontal. Nove cenários dedicados aprovados; gate completo em andamento. Contato avisado, mensagem lida às 12:39. Produção segue na onda 43/PR 28, web `1c0778f4-c58d-4e61-87e8-e8b2864be570`; abertura imediata preservada. Cópia de trabalho em `/Users/victorcorreia/.codex/recovery/newwed41-20261105`.
 

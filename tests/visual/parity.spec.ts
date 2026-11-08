@@ -304,10 +304,17 @@ for (const [viewportName,width,height] of viewports) {
       await page.locator("#famtours").getByRole("button", { name: "Solicitar informações", exact: true }).nth(index).click();
       await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=${slug}#form`);
       await expect(page.locator("#form")).toBeInViewport();
-      await page.locator("#famtours").getByRole("button", { name: "Ver informações da edição", exact: true }).nth(index).click();
-      await expect(page).toHaveURL(`${siteOrigin}/destinos/inscricao/${slug}`);
-      await expect(page.getByText("Nenhuma cobrança será realizada nesta etapa. O ambiente de inscrição online será disponibilizado posteriormente.", { exact: true })).toBeVisible();
-      await expect(page.getByText("Ainda não. Esta página apresenta a estrutura da inscrição", { exact: false })).toBeVisible();
+      await page.locator("#famtours").getByRole("link", { name: "Ver edição e parcelamento", exact: true }).nth(index).click();
+      await expect(page).toHaveURL(`${siteOrigin}/destinos/inscricao/${slug}#condicoes`);
+      const conditions = page.getByRole("region", { name: "Condições de pagamento" });
+      await expect(conditions).toBeInViewport();
+      await expect(conditions.getByText(/12x de R\$/)).toBeVisible();
+      await expect(conditions.getByText(/à vista/)).toBeVisible();
+      await expect(conditions.getByRole("link", { name: "Solicitar minha pré-inscrição" })).toHaveAttribute("href", `/destinos?edicao=${slug}&origem=inscricao#form`);
+      await conditions.getByRole("link", { name: "Solicitar minha pré-inscrição" }).click();
+      await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=${slug}&origem=inscricao#form`);
+      await expect(page.locator("#form")).toBeInViewport();
+      await expect(page.getByRole("dialog")).not.toBeVisible();
     }
   });
 

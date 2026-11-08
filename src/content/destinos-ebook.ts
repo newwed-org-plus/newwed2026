@@ -5,3 +5,6 @@ export const destinosEbook = {
   consentVersion: 'ebook-destinos-2026-11',
   downloadUrl: null as string | null,
 };
+
+// URL estável para o botão no final do material.
+export const destinosEbookEditionsHref = "/destinos?origem=ebook#famtours";

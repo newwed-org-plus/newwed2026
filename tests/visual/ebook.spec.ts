@@ -12,8 +12,8 @@ for(const [width,height] of [[320,568],[390,844],[430,932],[844,390],[768,1024],
     await expect(popup.getByRole('button',{name:'Fechar popup',exact:true})).toBeInViewport();
     if(width<=540 || height<=500) {
       const box=await popup.boundingBox();
-      expect(box!.width).toBeLessThanOrEqual(340);
-      expect(box!.height).toBeLessThanOrEqual(Math.min(640,height-48));
+      expect(box!.width).toBeLessThanOrEqual(width < height ? Math.min(400,width-24) : 340);
+      expect(box!.height).toBeLessThanOrEqual(width < height ? Math.min(680,height-32) : Math.min(640,height-48));
     }
     await page.screenshot({path:test.info().outputPath('popup.png'),animations:'disabled'});
     await popup.getByRole('button',{name:'Agora não',exact:true}).click();
@@ -47,6 +47,13 @@ test('pedido só confirma após resposta e falha permite tentar novamente',async
   await expect(popup.getByRole('status')).toContainText('Cadastro recebido!');
   await expect(popup.getByRole('status')).toContainText('ainda não está disponível');
   await expect(popup.getByRole('link',{name:'Baixar e-book'})).toHaveCount(0);
+  await popup.getByRole('link',{name:'Ver edições abertas'}).click();
+  await expect(page).toHaveURL(`${origin}/destinos?origem=ebook#famtours`);
+  await expect(page.locator('#famtours')).toBeInViewport();
+  await expect(popup).not.toBeVisible();
+  await page.reload({waitUntil:'domcontentloaded'});
+  await expect(page.getByRole('button',{name:'E-book gratuito'})).toBeEnabled();
+  await expect(popup).not.toBeVisible();
 });
 
 test('abre imediatamente sem avançar o relógio, mesmo após visita anterior',async({page})=>{

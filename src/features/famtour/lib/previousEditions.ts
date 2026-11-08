@@ -1,10 +1,8 @@
-import noronhaCoverAsset from "@/assets/fantour-noronha.jpg";
 import {famtourInformation} from '@/content/famtour-information';
-const noronhaCover = noronhaCoverAsset.src;
-import rioGrandeDoNorteCoverAsset from "@/assets/dest-rn.jpg";
-const rioGrandeDoNorteCover = rioGrandeDoNorteCoverAsset.src;
-import alagoasCoverAsset from "@/assets/dest-milagres.jpg";
-const alagoasCover = alagoasCoverAsset.src;
+
+const noronhaCover = "/assets/destinos/noronha-2026.webp";
+const rioGrandeDoNorteCover = "/assets/destinos/rio-grande-do-norte-2026.webp";
+const alagoasCover = "/assets/destinos/alagoas-2026.webp";
 
 export type PreviousEditionMedia =
   | {
@@ -32,36 +30,36 @@ export const PREVIOUS_EDITIONS = [
   {
     ...famtourInformation.previousEditions[0],
     capa: noronhaCover,
-    capaAlt: "Edição anterior em Fernando de Noronha",
+    capaAlt: "Praia de Fernando de Noronha ao pôr do sol",
     galeria: [
       {
         type: "image",
         src: noronhaCover,
-        alt: "Edição anterior em Fernando de Noronha",
+        alt: "Praia de Fernando de Noronha ao pôr do sol",
       },
     ],
   },
   {
     ...famtourInformation.previousEditions[1],
     capa: rioGrandeDoNorteCover,
-    capaAlt: "Edição anterior no Rio Grande do Norte",
+    capaAlt: "Praia com falésias no Rio Grande do Norte",
     galeria: [
       {
         type: "image",
         src: rioGrandeDoNorteCover,
-        alt: "Edição anterior no Rio Grande do Norte",
+        alt: "Praia com falésias no Rio Grande do Norte",
       },
     ],
   },
   {
     ...famtourInformation.previousEditions[2],
     capa: alagoasCover,
-    capaAlt: "Edição anterior em Alagoas",
+    capaAlt: "Capela branca à beira-mar em Alagoas",
     galeria: [
       {
         type: "image",
         src: alagoasCover,
-        alt: "Edição anterior em Alagoas",
+        alt: "Capela branca à beira-mar em Alagoas",
       },
     ],
   },

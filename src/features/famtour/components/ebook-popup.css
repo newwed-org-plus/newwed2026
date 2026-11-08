@@ -33,3 +33,10 @@
   .ebook-later{margin-top:8px}
   .ebook-trigger{bottom:20px;left:12px;padding:10px 14px;font-size:13px}
 }
+
+.ebook-editions{display:grid;place-items:center;min-height:44px;margin:12px 0 0;color:#7c2341;font-size:14px;text-underline-offset:4px}
+
+@media (max-width:540px) and (orientation:portrait){
+  .ebook-popup{width:min(400px,calc(100% - 24px));max-height:min(680px,calc(100dvh - 32px))}
+  .ebook-popup-content{padding-inline:clamp(18px,6vw,26px)}
+}

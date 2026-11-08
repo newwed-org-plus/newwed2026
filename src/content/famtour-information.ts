@@ -6,8 +6,8 @@ export const famtourInformation={
  registration:{
   interestUrl:'/destinos#form',
   interest:'O formulário da landing é uma pré-inscrição de interesse. A equipe retorna pelo WhatsApp; não confirma vaga nem pagamento.',
-  detailPage:'A página de cada edição apresenta informações e uma prévia do formulário, sem enviar dados nem realizar cobrança.',
-  detailPageAnswer:'Ainda não. Esta página apresenta a estrutura da inscrição, mas não envia dados e não realiza cobrança nesta etapa.',
+  detailPage:'A página de cada edição apresenta as condições publicadas e direciona para uma pré-inscrição de interesse. O pagamento é tratado com a equipe.',
+  detailPageAnswer:'Você pode solicitar a pré-inscrição. A equipe retorna pelo WhatsApp para orientar a inscrição e o pagamento. A solicitação não confirma a vaga.',
  },
  unpublished:['Companhia, horários e franquia de bagagem do aéreo','Nome do hotel/pousada, tipo de quarto e ocupação','Refeições, transfer, seguro e roteiro diário detalhado','Regras de cancelamento, reembolso, remarcação e desconto','Quantidade atual de vagas restantes e validade do lote'],
  previousEditions:[
