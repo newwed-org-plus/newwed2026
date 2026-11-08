@@ -149,7 +149,7 @@
   text-align: center;
   color: white;
 }
-.nw-project-card#feira .nw-project-copy { background: linear-gradient(transparent 42%, #1d1115e8 91%); }
+.nw-project-card#feira .nw-project-copy { background: linear-gradient(#70112b99 0%, #70112bb3 42%, #1d1115e8 91%); }
 .nw-project-bottom { display: flex; flex-direction: column; align-items: center; }
 .nw-project-bottom p {
   max-width: 195px;
@@ -398,3 +398,6 @@
 .nw-home-partners h2 { margin: 0 0 18px; font-size: 13px; font-weight: 350; text-transform: uppercase; letter-spacing: .12em; }
 .nw-home-partners ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; gap: clamp(12px, 4vw, 38px); max-width: 600px; margin: 0 auto; padding: 0; list-style: none; }
 .nw-home-partners img { display: block; width: 100%; max-width: 145px; height: 52px; margin: auto; object-fit: contain; }
+
+/* Preserve the original partner artwork and alpha while displaying white marks. */
+.nw-home-partners img { filter: brightness(0) invert(1); }

@@ -61,6 +61,6 @@ for(const [name,width,height]of [['mobile',390,844],['tablet',768,1024],['deskto
  await expect(page.getByText('Pagamento: Aguardando pagamento',{exact:true})).toBeVisible();
  state='PAID';confirmation='READ';await page.getByRole('button',{name:'Atualizar pagamentos',exact:true}).click();
  await expect(page.getByText('Pagamento: Pago',{exact:true})).toBeVisible();await expect(page.getByText('Confirmação ao cliente: Lida',{exact:true})).toBeVisible();
- fail=true;await page.getByRole('button',{name:'Atualizar pagamentos',exact:true}).click();await expect(page.getByRole('status')).toContainText('indisponibilidade');await expect(page.getByText('Pagamento: Pago',{exact:true})).toBeVisible();expect(mutations).toBe(0);
+ fail=true;await page.getByRole('button',{name:'Atualizar pagamentos',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'VALIDACAO indisponibilidade temporária.'})).toBeVisible();await expect(page.getByText('Pagamento: Pago',{exact:true})).toBeVisible();expect(mutations).toBe(0);
  await page.screenshot({path:`test-results/checkout-confirmation-${name}.png`,fullPage:true});
 });

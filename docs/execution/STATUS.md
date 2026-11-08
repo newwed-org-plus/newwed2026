@@ -4,6 +4,8 @@ Atualizado em: 2026-11-08.
 
 ## Objetivo ativo
 
+Onda 47 implementada e validada localmente (D-067/CP-47): filtro marsala no card Feira da Home, marcas parceiras brancas e Instagram contextual nos cinco cabeçalhos. Branch `codex/wave-47-visual-social`, base `bb9451e`; sem migration, push ou deploy. Tipos/lint/TypeScript/build, 190 unitários, 56 públicos e 90 cenários visuais verificados (87 na execução integral + três repetidos após corrigir seletor de teste). Auditoria bloqueada pela rede; Linux/CI pendentes. Onda 46 financeira permanece em checkout separado, intocada.
+
 Onda 45 (CP-45/D-065): ajustes públicos da Home, Feira, Destinos e pré-inscrição. PDF final, envio por e-mail, checkout público, checkout do Guia Profissional e parte do acervo histórico continuam pendentes de material ou integração confirmados.
 
 Onda 44: compactar o popup no celular (D-064/CP-44), conforme relato do contato e orientação do usuário. Branch `codex/wave-44-ebook-mobile`, base `38de100`; somente CSS mobile e testes de dimensão/horizontal. Nove cenários dedicados aprovados; gate completo em andamento. Contato avisado, mensagem lida às 12:39. Produção segue na onda 43/PR 28, web `1c0778f4-c58d-4e61-87e8-e8b2864be570`; abertura imediata preservada. Cópia de trabalho em `/Users/victorcorreia/.codex/recovery/newwed41-20261105`.

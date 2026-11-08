@@ -1,6 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { Instagram } from "lucide-react";
+import { INSTAGRAM_DESTINOS_URL } from "../contact";
 import { useState } from "react";
 import { FAMTOUR_NAVIGATION, famtourSectionHref } from "@/features/famtour/navigation";
 
@@ -32,6 +34,9 @@ export function Nav() {
           <a href={href("form")} className="hover:text-cream transition-colors">Contato</a>
         </div>
         <div className="flex items-center gap-3">
+          <a href={INSTAGRAM_DESTINOS_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram New Wed Destinos" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-current text-cream hover:text-cream/75">
+            <Instagram size={23} aria-hidden="true" />
+          </a>
           <a href="/" className="whitespace-nowrap text-[11px] text-cream underline underline-offset-4 hover:text-cream/75">
             Grupo New Wed
           </a>

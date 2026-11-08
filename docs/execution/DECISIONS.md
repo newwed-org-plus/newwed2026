@@ -332,3 +332,8 @@ Em 06/11/2026, o usuário pediu retomar a conversa com o contato e destacou que 
 Aplicar o material correspondente a cada anotação: Home com a faixa Azul/Empetur/Governo de Pernambuco e Ceará no rodapé; Feira com foto 2026 no ecossistema, Instagram no cabeçalho e acervo datado, preservando o vídeo 2019 em destaque; Destinos com as cinco fotos encaminhadas e com a paleta solicitada na seção explicativa. Só publicar mídia com ano confirmado.
 
 A inscrição de Destinos mostra as condições existentes e encaminha ao formulário real de interesse da edição. O fluxo não vende vaga nem habilita cobrança. O modal de e-book cresce no celular vertical, preserva a abertura imediata na entrada habitual e não interrompe as duas navegações explícitas para edição/preenchimento. A URL estável de edições abertas do e-book pode ser incorporada ao PDF quando o arquivo final estiver disponível. Não anunciar entrega por e-mail nem vender o Guia Profissional sem arquivo, remetente e condições comerciais confirmados.
+
+
+## D-067 — Filtro da Feira, marcas brancas e Instagram contextual
+
+Em 08/11/2026, o usuário autorizou implementar as novas correções confirmadas pelo contato: filtro vermelho na foto do card Feira em Nosso ecossistema (Home), Governo de Pernambuco e parceiros em branco, e Instagram próprio no menu superior de cada projeto. Aplicar o tom marsala pela camada CSS do card, preservando o arquivo e o enquadramento; não alterar a galeria interna. As marcas conservam o alpha original e recebem filtro branco de apresentação. Home usa @new_wed; Feira, Destinos, Guia e Workshop mantêm os perfis já centralizados no código. Links externos abrem em nova aba com proteção noopener/noreferrer. Escopo local, sem publicação, mensagens, schema ou configuração comercial.
