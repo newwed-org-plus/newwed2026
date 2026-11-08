@@ -355,3 +355,9 @@ Em 08/11/2026, a cliente pediu voltar ao mosaico e encaminhou o vídeo de 2026. 
 A cliente pediu Pix à vista abaixo do total parcelado, repasse simulado no Asaas e um caminho para a equipe quando a pessoa precisar de outra forma de pagamento. A escolha de Pix ou cartão acontece no site antes de abrir o checkout hospedado. As quatro edições recebem os totais em 12x confirmados no simulador da conta, com repasse e sem antecipação.
 
 Cada nova tentativa grava o método e o total em centavos no momento da reserva. Preços vêm da mesma fonte do site, comparada com o lote ativo. O total enviado ao Asaas é exclusivo do método escolhido. Uma tentativa já aberta conserva o preço e o método originais. O formulário da equipe atende outras modalidades sob consulta.
+
+## D-071 — Revisão das capas e unidade visual de Destinos
+
+Os áudios de 08/11 às 19h33 esclarecem que o card Feira deve conservar o filtro vinho e a marca em negativo, sobre a foto com o buquê da edição de 2026. Usar os originais encaminhados para as capas de 2022 a 2025 e conservar a capa de 2026 conforme confirmação da equipe. No Guia, usar a imagem das duas revistas do banner institucional na página de detalhes.
+
+Destinos adota o mesmo cabeçalho institucional de Feira, Guia e Workshop. A navegação interna do Famtour continua disponível em um menu próprio. A capa adota a mesma ordem dos outros projetos, com título, descrição e CTA à esquerda e fotos à direita no desktop. A marca de Destinos fica integrada ao conteúdo, e a área antes separada só para ela é removida. Preservar o acesso à compra, aos voos, aos formulários e às edições.

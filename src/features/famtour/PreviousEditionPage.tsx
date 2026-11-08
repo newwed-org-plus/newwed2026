@@ -7,7 +7,7 @@ import {
 export function EditionGallery({ edition }: { edition: PreviousEdition }) {
   return (
     <SiteShell>
-      <main className="bg-white pt-16 text-[#191010]">
+      <main className="bg-white text-[#191010]">
         <section className="relative min-h-[62vh] overflow-hidden bg-[#0A2B28] text-white">
           <img
             src={edition.capa}
@@ -79,7 +79,7 @@ export function EditionGallery({ edition }: { edition: PreviousEdition }) {
 export function EditionNotFound() {
   return (
     <SiteShell>
-      <main className="flex min-h-[70vh] items-center justify-center bg-[#0A2B28] px-6 pt-16 text-center text-white">
+      <main className="flex min-h-[70vh] items-center justify-center bg-[#0A2B28] px-6 text-center text-white">
         <div className="max-w-xl py-20">
           <p className="font-sans text-xs uppercase tracking-[0.2em] text-[#F1D89F]">
             Edição não encontrada

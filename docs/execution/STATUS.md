@@ -4,6 +4,8 @@ Atualizado em: 2026-11-08.
 
 ## Objetivo ativo
 
+Onda 54 (D-071/CP-54): foto de 2026 no card Feira com filtro vinho e marca em negativo, capas de 2022 a 2025 recebidas, duas revistas no Guia e menu institucional em Destinos.
+
 Onda 53 (D-070/CP-53): Pix à vista e cartão em até 12x com seleção antes do Asaas. Repasse confirmado no simulador da conta para as quatro edições.
 
 Onda 52 (D-069/CP-52): mosaico do acervo da Feira restaurado e vídeo de 2026 validado no canal oficial. A capa nova e o vídeo de 2027 dependem do envio da equipe.

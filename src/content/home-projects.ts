@@ -4,7 +4,7 @@ export const homeProjects = [
     href: "/feira",
     name: "Feira Tendência",
     description: "A maior feira de tendências e destinos para casamentos do Nordeste.",
-    image: "/assets/brand/banner-feira.webp",
+    image: "/assets/feira/edicao-2026.webp",
   },
   {
     id: "destinos",

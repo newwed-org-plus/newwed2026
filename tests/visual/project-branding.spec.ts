@@ -18,7 +18,7 @@ for (const width of [320, 390, 768, 1440]) {
       if (path === "/destinos") {
         await page.getByRole("button", { name: "Fechar popup", exact: true }).click();
       }
-      const header = path === "/destinos" ? page.getByRole("navigation", { name: "Navegação FAMTOUR", exact: true }) : page.locator(".nw-header");
+      const header = page.locator(".nw-header");
       const social = header.getByRole("link", { name: /Instagram New Wed/ });
       await expect(social).toBeVisible();
       await expect(social).toHaveAttribute("href", `https://www.instagram.com/${profile}/`);
@@ -31,7 +31,7 @@ for (const width of [320, 390, 768, 1440]) {
       if (width === 320) {
         const menu = header.getByLabel("Abrir menu");
         await menu.click();
-        const mobileNav = path === "/destinos" ? page.locator("#famtour-mobile-menu") : page.getByRole("navigation", { name: "Navegação principal mobile" });
+        const mobileNav = page.getByRole("navigation", { name: "Navegação principal mobile" });
         await expect(mobileNav).toBeVisible();
         await menu.click();
         await expect(mobileNav).not.toBeVisible();
@@ -41,16 +41,19 @@ for (const width of [320, 390, 768, 1440]) {
   });
 }
 
-test("Home usa as artes originais do ecossistema e marcas parceiras brancas", async ({ page }) => {
+test("Home mostra a Feira de 2026 em marsala e marcas parceiras brancas", async ({ page }) => {
   await page.goto(origin, { waitUntil: "networkidle" });
   const cards = page.locator(".nw-project-card");
   await expect(cards).toHaveCount(4);
   for (const card of await cards.all()) {
     await card.scrollIntoViewIfNeeded();
-    await expect(card.locator("> img")).toHaveAttribute("src", /\/assets\/brand\/banner-.+\.webp/);
-    await expect.poll(() => card.locator("> img").evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(1080);
+    await expect.poll(() => card.locator("> img").evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     await expect(card.getByRole("link")).toBeVisible();
   }
+  const feira = cards.filter({ has: page.getByRole("heading", { name: "New Wed Feira Tendência" }) });
+  await expect(feira.locator("> img")).toHaveAttribute("src", "/assets/feira/edicao-2026.webp");
+  await expect(feira.locator(".nw-project-brand")).toHaveAttribute("src", "/assets/brand/feira-tendencia-negativo.png");
+  await expect(feira.locator(".nw-project-copy")).toHaveCSS("background-image", /67, 16, 33/);
   const logos = page.locator(".nw-home-partners img");
   await expect(logos).toHaveCount(3);
   for (const logo of await logos.all()) {
