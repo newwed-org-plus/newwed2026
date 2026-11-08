@@ -358,6 +358,6 @@ Cada nova tentativa grava o método e o total em centavos no momento da reserva.
 
 ## D-071 — Revisão das capas e unidade visual de Destinos
 
-Os áudios de 08/11 às 19h33 esclarecem que o card Feira deve conservar o filtro vinho e a marca em negativo, sobre a foto com o buquê da edição de 2026. Substituir as capas de 2022 e 2023 no acervo pelos dois originais enviados no mesmo lote. No Guia, usar a imagem das duas revistas do banner institucional na página de detalhes.
+Os áudios de 08/11 às 19h33 esclarecem que o card Feira deve conservar o filtro vinho e a marca em negativo, sobre a foto com o buquê da edição de 2026. Usar os originais encaminhados para as capas de 2022 a 2025 e conservar a capa de 2026 conforme confirmação da equipe. No Guia, usar a imagem das duas revistas do banner institucional na página de detalhes.
 
 Destinos adota o mesmo cabeçalho institucional de Feira, Guia e Workshop. A navegação interna do Famtour continua disponível em um menu próprio. A capa adota a mesma ordem dos outros projetos, com título, descrição e CTA à esquerda e fotos à direita no desktop. A marca de Destinos fica integrada ao conteúdo, e a área antes separada só para ela é removida. Preservar o acesso à compra, aos voos, aos formulários e às edições.
