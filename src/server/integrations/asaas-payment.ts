@@ -73,7 +73,7 @@ function paymentUpsert(env: Pick<Env,"DB">,checkoutId: string,status: PaymentSta
     .bind(crypto.randomUUID(),checkoutId,payment.id,payment.installment ?? null,payment.installmentNumber ?? null,status,Math.round(payment.value * 100),payment.dueDate ?? null,payment.paymentDate ?? payment.confirmedDate ?? null,JSON.stringify(rawPayload),now,now);
 }
 
-async function locateCheckout(env: Pick<Env,"DB">,payment: AsaasPaymentSnapshot) {
+export async function locateAsaasCheckout(env: Pick<Env,"DB">,payment: AsaasPaymentSnapshot) {
   return env.DB.prepare(`SELECT c.id,c.lead_id,c.edition_id,c.price_batch_id,c.method,c.installment_count,c.provider_installment_id,c.amount_cents,c.status,c.financial_status,c.reservation_released_at,
     b.edition_id AS batch_edition_id,b.amount_cents AS batch_amount_cents,p.amount_cents AS stored_payment_amount
     FROM checkouts c JOIN price_batches b ON b.id=c.price_batch_id
@@ -83,7 +83,7 @@ async function locateCheckout(env: Pick<Env,"DB">,payment: AsaasPaymentSnapshot)
 }
 
 export async function applyAsaasPayment(env: Pick<Env,"DB"|"EVENTS_QUEUE">,event: string,payment: AsaasPaymentSnapshot,rawPayload: unknown,requestId = crypto.randomUUID()) {
-  const checkout = await locateCheckout(env,payment);
+  const checkout = await locateAsaasCheckout(env,payment);
   if (!checkout) return { found:false as const };
   validatePayment(checkout,payment);
 
