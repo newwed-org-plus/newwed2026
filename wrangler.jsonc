@@ -200,7 +200,7 @@
         "TURNSTILE_SITE_KEY": "0x4AAAAAAFmDEzs5u22oKSUa",
         "META_CHECKOUT_TEMPLATE": "checkout_famtour",
         "ENABLE_PUBLIC_LEADS": "true",
-        "ENABLE_PUBLIC_CHECKOUT": "false",
+        "ENABLE_PUBLIC_CHECKOUT": "true",
         "ENABLE_MANUAL_SEND": "true",
         "ENABLE_AGENT": "true",
         "ENABLE_CHECKOUT": "false",
