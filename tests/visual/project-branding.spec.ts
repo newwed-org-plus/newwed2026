@@ -19,6 +19,13 @@ for (const width of [320, 390, 768, 1440]) {
         await page.getByRole("button", { name: "Fechar popup", exact: true }).click();
       }
       const header = path === "/destinos" ? page.getByRole("navigation", { name: "Navegação FAMTOUR", exact: true }) : page.locator(".nw-header");
+      if (path === "/") {
+        const brand = page.locator("#feira .nw-project-brand");
+        await expect(brand).toBeVisible();
+        const brandBox = await brand.boundingBox();
+        const ctaBox = await page.locator("#feira .nw-project-bottom").boundingBox();
+        expect(brandBox!.y + brandBox!.height).toBeLessThan(ctaBox!.y);
+      }
       const social = header.getByRole("link", { name: /Instagram New Wed/ });
       await expect(social).toBeVisible();
       await expect(social).toHaveAttribute("href", `https://www.instagram.com/${profile}/`);
@@ -44,7 +51,11 @@ for (const width of [320, 390, 768, 1440]) {
 test("Home tem filtro vermelho somente na foto da Feira e marcas brancas", async ({ page }) => {
   await page.goto(origin, { waitUntil: "networkidle" });
   const feira = page.locator("#feira .nw-project-copy");
-  await expect(feira).toHaveCSS("background-image", /112, 17, 43/);
+  const marca = feira.getByRole("img", { name: "New Wed Feira Tendência", exact: true });
+  await expect(marca).toBeVisible();
+  await expect(marca).toHaveAttribute("src", "/assets/brand/logo-feira-oficial.jpg");
+  await expect.poll(() => marca.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(607);
+  await expect(feira).toHaveCSS("background-image", /124, 35, 65/);
   await expect(page.locator("#destinos .nw-project-copy")).toHaveCSS("background-image", "none");
   const logos = page.locator(".nw-home-partners img");
   await expect(logos).toHaveCount(3);

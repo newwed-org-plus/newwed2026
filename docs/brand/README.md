@@ -23,3 +23,7 @@ Os tokens correspondentes ficam em `app/globals.css`, com prefixo `destinos-`. C
 O marsala `#7C2341` conecta todas as submarcas. Cada núcleo mantém seu desenho original, proporção, margem e contraste. O manual também documenta cores complementares e tipografia editorial; ele é a referência completa.
 
 As fontes atuais do site seguem o pedido específico D-030 (Fedra Sans Std e BlockGothicRR). A correção D-060 trata de cores e parceiros; não troca famílias tipográficas nem o lettering das artes.
+
+## Marca Feira no card da Home
+
+A imagem `public/assets/brand/logo-feira-oficial.jpg` foi extraída sem alterações do objeto de imagem 140, página 4, do manual acima. Preserva o desenho, lettering, cores e proporção da versão oficial escolhida. Aplicada sobre a foto 2026 com camada marsala do grupo, conforme esclarecimento de 08/11.
