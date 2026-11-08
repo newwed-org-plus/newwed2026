@@ -320,7 +320,7 @@ for (const [viewportName,width,height] of viewports) {
       await expect(page).toHaveURL(`${siteOrigin}/destinos/inscricao/${slug}#condicoes`);
       const conditions = page.getByRole("region", { name: "Condições de pagamento" });
       await expect(conditions).toBeInViewport();
-      await expect(conditions.getByText(/12x de R\$/)).toBeVisible();
+      await expect(conditions.getByText(/12x de aprox\. R\$/)).toBeVisible();
       await expect(conditions.getByText(/à vista/)).toBeVisible();
       await expect(conditions.getByRole("link", { name: "Pedir contato da equipe" })).toHaveAttribute("href", `/destinos?edicao=${slug}&origem=inscricao#form`);
       await conditions.getByRole("link", { name: "Pedir contato da equipe" }).click();

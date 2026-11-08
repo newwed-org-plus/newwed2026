@@ -8,10 +8,10 @@ const memory=productFocusFromHistory([{direction:'IN',body:'Quero conhecer Ferna
 const response=(reply:string)=>({reply,confidence:0.99,handoff:false,reason:''});
 describe('conhecimento comercial com continuidade',()=>{
  it.each([
-  ['Qual preço do FAMTOUR Alagoas?','R$ 7.697,00','12x de R$ 641,42'],
-  ['Quanto custa Noronha?','R$ 7.997,00','12x de R$ 666,42'],
-  ['Qual valor do Rio Grande do Norte?','R$ 6.997,00','12x de R$ 583,08'],
-  ['Preço do Ceará?','R$ 6.997,00','12x de R$ 583,08'],
+  ['Qual preço do FAMTOUR Alagoas?','R$ 7.697,00','12x de R$ 668,10'],
+  ['Quanto custa Noronha?','R$ 7.997,00','12x de R$ 694,14'],
+  ['Qual valor do Rio Grande do Norte?','R$ 6.997,00','12x de R$ 607,35'],
+  ['Preço do Ceará?','R$ 6.997,00','12x de R$ 607,35'],
  ])('responde exatamente a tabela publicada: %s',(q,cash,installment)=>{
   const r=verifiedSiteAnswer(q);expect(r?.reply).toContain(cash);expect(r?.reply).toContain(installment);expect(r?.reply).toContain('Referência publicada');expect(r?.handoff).toBe(false);
  });
@@ -33,7 +33,7 @@ describe('conhecimento comercial com continuidade',()=>{
   const correction=resolveProductFocus('Não quero Noronha, quero Ceará',memory);expect(correction.editionSlugs).toEqual(['famtour-ceara-agosto-2027']);
   const changed=resolveProductFocus('Agora quero conhecer o Guia',memory);expect(changed.projects).toEqual(['guia']);expect(changed.editionSlugs).toEqual([]);
   expect(verifiedSiteAnswer('E o valor?',changed)?.reply).toContain('sob consulta');
-  const compared=resolveProductFocus('Compare Noronha e Alagoas',memory);expect(compared.ambiguous).toBe(true);expect(verifiedSiteAnswer('E as parcelas?',compared)?.reply).toContain('R$ 641,42');
+  const compared=resolveProductFocus('Compare Noronha e Alagoas',memory);expect(compared.ambiguous).toBe(true);expect(verifiedSiteAnswer('E as parcelas?',compared)?.reply).toContain('R$ 668,10');
   const cleared=resolveProductFocus('Esqueça esse destino',memory);expect(verifiedSiteAnswer('E o valor?',cleared)?.reply).toContain('qual projeto');
  });
  it('sem seleção pede esclarecimento e nunca associa um preço por suposição',()=>expect(verifiedSiteAnswer('Quanto custa?')?.reply).toContain('qual projeto'));
@@ -77,7 +77,7 @@ describe('bloqueio de afirmações comerciais sem fonte',()=>{
   const r=guardPublishedFacts(response('FAMTOUR Noronha: R$ 7.697,00.'),'Compare preços de Noronha e Alagoas',{});expect(r.reason).toContain('corrigida');
  });
  it('preserva cotação exata e nunca apaga handoff explícito do modelo',()=>{
-  const valid=response('Noronha: R$ 7.997,00 à vista ou 12x de R$ 666,42. Valores publicados sujeitos a confirmação.');expect(guardPublishedFacts(valid,'Quanto custa Noronha?',{})).toEqual(valid);
+  const valid=response('Noronha: R$ 7.997,00 à vista ou 12x de R$ 694,14. Valores publicados sujeitos a confirmação.');expect(guardPublishedFacts(valid,'Quanto custa Noronha?',{})).toEqual(valid);
   expect(guardPublishedFacts({...response('R$ 1,00'),handoff:true},'Quero comprar Noronha',{}).handoff).toBe(true);
  });
 });

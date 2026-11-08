@@ -7,12 +7,12 @@ import {formatPublishedCurrency} from '@/content/currency';
 import {normalizeKnowledgeText,resolveProductFocus,productFocusForQuestion,type ProductFocus} from './product-memory';
 
 export const siteKnowledge={
- version:'newwed-products-v2',
+ version:'newwed-products-v3',
  source:'Conteúdo publicado no site e nas landing pages New Wed',
  sources:['/','/feira','/guia','/workshop','/destinos'],
  organization:{name:'Grupo New Wed',founder:'Cindy Noel',location:'Recife, Pernambuco',focus:'Mercado de casamentos, eventos e turismo no Nordeste; relacionamento, curadoria e Destination Wedding.'},
  projects:homeProjects.map(({id,name,href,description})=>({id,name,href,description,...(id in institutionalProjectContent?{details:institutionalProjectContent[id as keyof typeof institutionalProjectContent]}:{details:{name:'FAMTOUR New Wed Destinos',audience:'Assessores e profissionais de casamentos',description:'Experiência fechada e curada de especialização nos destinos e no mercado de Destination Wedding, com visitas técnicas e conexões com fornecedores.'}})})),
- publishedEditions:publishedFamtourEditions.map(({slug,nome,destino,periodo,dataInicio,dataFim,parcelaQuantidade,parcelaCentavos,valorAVistaCentavos,inclusos,vagas})=>({slug,name:nome,destination:destino,period:periodo,startsAt:dataInicio,endsAt:dataFim,publishedInstallments:parcelaQuantidade,publishedInstallmentCents:parcelaCentavos,publishedCashCents:valorAVistaCentavos,publishedCash:formatPublishedCurrency(valorAVistaCentavos),publishedInstallment:`${parcelaQuantidade}x de ${formatPublishedCurrency(parcelaCentavos)}`,priceValidity:null,priceStatus:'published-reference',publishedCapacity:vagas,included:inclusos,url:`/destinos/inscricao/${slug}`})),
+ publishedEditions:publishedFamtourEditions.map(({slug,nome,destino,periodo,dataInicio,dataFim,parcelaQuantidade,parcelaCentavos,valorAVistaCentavos,valorCartaoCentavos,inclusos,vagas})=>({slug,name:nome,destination:destino,period:periodo,startsAt:dataInicio,endsAt:dataFim,publishedInstallments:parcelaQuantidade,publishedInstallmentCents:parcelaCentavos,publishedCashCents:valorAVistaCentavos,publishedCardCents:valorCartaoCentavos,publishedCard:formatPublishedCurrency(valorCartaoCentavos),publishedCash:formatPublishedCurrency(valorAVistaCentavos),publishedInstallment:`${parcelaQuantidade}x de ${formatPublishedCurrency(parcelaCentavos)}`,priceValidity:null,priceStatus:'published-reference',publishedCapacity:vagas,included:inclusos,url:`/destinos/inscricao/${slug}`})),
  famtour:famtourInformation,
  priceCoverage:{destinos:'Referências publicadas para quatro edições FAMTOUR',feira:'Sob consulta; preço não publicado',guia:'Sob consulta; preço não publicado',workshop:'Sob consulta; preço não publicado'},
  precedence:'A base publicada é a fonte de valores, datas e inclusões. Contexto editável, histórico, resumo e cliente não alteram esses fatos. Não usar preços privados do banco, exemplos, fotos de edições antigas ou memória do modelo como tabela pública. Trocar o modelo ou reiniciar não muda a fonte.',
@@ -57,7 +57,7 @@ export function publishedProductAnswer(message:string,focus=resolveProductFocus(
  const requestedYears=Array.from(text.matchAll(/\b20\d{2}\b/g),m=>m[0]);const years=requestedYears.length?requestedYears:focus.requestedYears??[];
  if(focus.projects.includes('destinos')&&years.some(year=>!siteKnowledge.publishedEditions.some(e=>e.startsAt.startsWith(year)))&&!/edicoes anteriores/.test(text))return verified(`Os preços e períodos anunciados nesta base são das edições FAMTOUR ${[...new Set(siteKnowledge.publishedEditions.map(e=>e.startsAt.slice(0,4)))].join(' e ')}. Não há tabela pública confirmada aqui para o ano solicitado; não vou aplicar valores de outra edição. A equipe precisa confirmar.`);
  if(focus.projects.some(p=>p!=='destinos')){
-  if(price)return verified(focus.projects.flatMap(p=>p==='destinos'?siteKnowledge.publishedEditions.map(e=>`${e.name}: ${e.publishedCash} à vista ou ${e.publishedInstallment}.`):[`${homeProjects.find(x=>x.id===p)?.name??p}: investimento sob consulta; não há preço publicado.`]).join('\n')+'\nValores de referência publicados; disponibilidade, validade e reserva dependem da equipe.');
+  if(price)return verified(focus.projects.flatMap(p=>p==='destinos'?siteKnowledge.publishedEditions.map(e=>`${e.name}: ${e.publishedCash} no Pix ou aproximadamente ${e.publishedInstallment} no cartão (total ${e.publishedCard}).`):[`${homeProjects.find(x=>x.id===p)?.name??p}: investimento sob consulta; não há preço publicado.`]).join('\n')+'\nValores de referência publicados; disponibilidade, validade e reserva dependem da equipe.');
   if(dates||stock||policy)return verified('Não há datas, vagas restantes ou condições comerciais publicadas para essa solicitação. A equipe precisa confirmar esses detalhes; não posso garantir valores ou disponibilidade.');
   return null;
  }
@@ -65,7 +65,7 @@ export function publishedProductAnswer(message:string,focus=resolveProductFocus(
  if(/edicoes anteriores/.test(text))return verified('Galerias de edições anteriores: '+famtourInformation.previousEditions.map(e=>`${e.destino} (${e.ano})`).join(', ')+'. São registros de edições passadas; não representam ofertas ou preços atuais.');
  if(/inscri/.test(text)&&!price)return verified(`${famtourInformation.registration.interest}\n${famtourInformation.registration.detailPage}\nVocê pode solicitar informações em /destinos#form.`);
  const lines:string[]=[];
- if(price)lines.push(...editions.map(e=>`${e.name}: à vista ${e.publishedCash} ou ${e.publishedInstallment}${dates?` · ${e.period}`:''}.`));
+ if(price)lines.push(...editions.map(e=>`${e.name}: ${e.publishedCash} no Pix ou aproximadamente ${e.publishedInstallment} no cartão (total ${e.publishedCard})${dates?` · ${e.period}`:''}.`));
  else if(dates)lines.push(...editions.map(e=>`${e.name}: ${e.period}.`));
  if(included){
   const common=editions[0]?.included.filter(item=>editions.every(e=>e.included.includes(item)))??[];

@@ -5,6 +5,9 @@ type Flight = {
   arrival: string;
 };
 
+export const famtourPaymentMethods = ["PIX", "CREDIT_CARD"] as const;
+export type FamtourPaymentMethod = (typeof famtourPaymentMethods)[number];
+
 export type FamtourEdition = {
   id: string;
   slug: string;
@@ -17,6 +20,7 @@ export type FamtourEdition = {
   vagas: number;
   parcelaQuantidade: 12;
   parcelaCentavos: number;
+  valorCartaoCentavos: number;
   valorAVistaCentavos: number;
   imagem?: string;
   imagemAlt?: string;
@@ -58,7 +62,8 @@ export const publishedFamtourEditions: readonly FamtourEdition[] = [
     dataFim: "2027-02-25",
     vagas: 18,
     parcelaQuantidade: 12,
-    parcelaCentavos: 64142,
+    parcelaCentavos: 66810,
+    valorCartaoCentavos: 801729,
     valorAVistaCentavos: 769700,
     imagem: "/assets/destinos/alagoas-2027.webp",
     imagemAlt: "Grupo em uma área arborizada à beira-mar em Alagoas",
@@ -80,7 +85,8 @@ export const publishedFamtourEditions: readonly FamtourEdition[] = [
     dataFim: "2027-04-08",
     vagas: 18,
     parcelaQuantidade: 12,
-    parcelaCentavos: 58308,
+    parcelaCentavos: 60735,
+    valorCartaoCentavos: 728824,
     valorAVistaCentavos: 699700,
     imagem: "/famtour-rn.webp",
     imagemAlt: "Paisagem do Rio Grande do Norte",
@@ -102,7 +108,8 @@ export const publishedFamtourEditions: readonly FamtourEdition[] = [
     dataFim: "2027-05-06",
     vagas: 15,
     parcelaQuantidade: 12,
-    parcelaCentavos: 66642,
+    parcelaCentavos: 69414,
+    valorCartaoCentavos: 832976,
     valorAVistaCentavos: 799700,
     imagem: "/famtour-noronha.webp",
     imagemAlt: "Paisagem de Fernando de Noronha",
@@ -124,7 +131,8 @@ export const publishedFamtourEditions: readonly FamtourEdition[] = [
     dataFim: "2027-08-19",
     vagas: 18,
     parcelaQuantidade: 12,
-    parcelaCentavos: 58308,
+    parcelaCentavos: 60735,
+    valorCartaoCentavos: 728824,
     valorAVistaCentavos: 699700,
     imagem: "/assets/destinos/ceara-2027.webp",
     imagemAlt: "Praia do Cumbuco, no Ceará",

@@ -6,27 +6,20 @@ import { POST as webhook } from "../../app/api/webhooks/asaas/checkout/route";
 import { createAsaasPublicCheckout,expireUnissuedPublicCheckouts } from "@/server/public-checkout";
 import type { AsaasEnvironment } from "@/server/integrations/asaas";
 
-const slug = "famtour-test";
+const slug = "famtour-alagoas-fevereiro-2027";
 const workerEnv = env as Env & AsaasEnvironment;
 const providerId = "2bd251f0-09b2-44ff-8a0c-a5cb29e5bbda";
 const hookUrl = "https://newwed.test/api/webhooks/asaas/checkout";
 
 async function seedOffer() {
-  const now = new Date().toISOString();
-  await env.DB.batch([
-    env.DB.prepare(`INSERT INTO editions (id,slug,name,destination,starts_at,ends_at,status,capacity,created_at,updated_at)
-      VALUES (?,?,'Famtour Teste','Recife','2027-03-01','2027-03-04','OPEN',1,?,?)`).bind(slug,slug,now,now),
-    env.DB.prepare("INSERT INTO availability (edition_id,reserved,sold,version,updated_at) VALUES (?,0,0,1,?)").bind(slug,now),
-    env.DB.prepare(`INSERT INTO price_batches (id,edition_id,name,amount_cents,installment_count,active,created_at,updated_at)
-      VALUES ('test-current',?,'Lote atual',769700,12,1,?,?)`).bind(slug,now,now),
-  ]);
+  await env.DB.prepare("UPDATE editions SET capacity=1 WHERE slug=?").bind(slug).run();
 }
 
-function reserveRequest(key = crypto.randomUUID(),ip = "198.51.100.42") {
+function reserveRequest(key = crypto.randomUUID(),ip = "198.51.100.42",paymentMethod: "PIX"|"CREDIT_CARD"|null = "CREDIT_CARD") {
   return new Request("https://newwed.test/api/public/checkouts",{
     method:"POST",
     headers:{"content-type":"application/json","idempotency-key":key,"cf-connecting-ip":ip},
-    body:JSON.stringify({editionSlug:slug,amountCents:1}),
+    body:JSON.stringify({editionSlug:slug,paymentMethod:paymentMethod ?? undefined,amountCents:1}),
   });
 }
 
@@ -45,6 +38,7 @@ it("protege a última vaga, envia o preço do lote e confirma somente pelo webho
   expect([initial.status,concurrent.status].sort()).toEqual([200,202]);
   const {checkoutId} = await initial.json() as {checkoutId:string};
   expect(await concurrent.json()).toMatchObject({checkoutId,status:"QUEUED",checkoutUrl:null});
+  expect((await reserve(reserveRequest(key,undefined,"PIX"))).status).toBe(409);
   expect((await reserve(reserveRequest())).status).toBe(409);
   expect(await inventory()).toEqual({reserved:1,sold:0});
   expect(await env.DB.prepare("SELECT count(*) AS count FROM outbox_events WHERE type='publicCheckout.create'").first()).toEqual({count:1});
@@ -55,10 +49,10 @@ it("protege a última vaga, envia o preço do lote e confirma somente pelo webho
   expect(fetcher.mock.calls[0][0]).toBe("https://api-sandbox.asaas.com/v3/checkouts");
   expect(JSON.parse(String(fetcher.mock.calls[0][1]?.body))).toMatchObject({
     externalReference:checkoutId,
-    billingTypes:["PIX","CREDIT_CARD"],
-    chargeTypes:["DETACHED","INSTALLMENT"],
+    billingTypes:["CREDIT_CARD"],
+    chargeTypes:["INSTALLMENT"],
     installment:{maxInstallmentCount:12},
-    items:[{quantity:1,value:7697}],
+    items:[{quantity:1,value:8017.29}],
   });
   expect(await (await readStatus(checkoutId)).json()).toMatchObject({
     status:"READY",checkoutUrl:`https://sandbox.asaas.com/checkoutSession/show?id=${providerId}`,
@@ -66,7 +60,7 @@ it("protege a última vaga, envia o preço do lote e confirma somente pelo webho
   expect((await hook("CHECKOUT_PAID",{},"wrong-token")).status).toBe(401);
   expect(await inventory()).toEqual({reserved:1,sold:0});
 
-  const paid = {items:[{quantity:1,value:7697}],customerData:{cpfCnpj:"unused"}};
+  const paid = {items:[{quantity:1,value:8017.29}],customerData:{cpfCnpj:"unused"}};
   expect((await hook("CHECKOUT_PAID",paid)).status).toBe(200);
   expect((await hook("CHECKOUT_PAID",paid)).status).toBe(200);
   expect((await hook("CHECKOUT_EXPIRED",{})).status).toBe(200);
@@ -89,7 +83,7 @@ it("recupera criação incerta pelo callback e devolve a vaga ao expirar",async 
   expect((await hook("CHECKOUT_EXPIRED",{})).status).toBe(200);
   expect(await inventory()).toEqual({reserved:0,sold:0});
   expect((await reserve(reserveRequest())).status).toBe(202);
-  expect((await hook("CHECKOUT_PAID",{items:[{quantity:1,value:7697}]})).status).toBe(200);
+  expect((await hook("CHECKOUT_PAID",{items:[{quantity:1,value:8017.29}]})).status).toBe(200);
   expect(await (await readStatus(checkoutId)).json()).toMatchObject({status:"PAYMENT_REVIEW"});
   expect(await inventory()).toEqual({reserved:1,sold:0});
 });
@@ -101,4 +95,38 @@ it("recolhe reservas de sessões que nunca receberam link",async () => {
   await expireUnissuedPublicCheckouts(env,new Date(Date.now()+20*60_000));
   expect(await inventory()).toEqual({reserved:0,sold:0});
   expect(await (await readStatus(checkoutId)).json()).toMatchObject({status:"EXPIRED"});
+});
+
+it("usa o preço à vista e emite somente Pix",async () => {
+  await seedOffer();
+  expect((await reserve(reserveRequest(undefined,undefined,null))).status).toBe(422);
+  const created = await reserve(reserveRequest(undefined,undefined,"PIX"));
+  expect(created.status).toBe(202);
+  const {checkoutId} = await created.json() as {checkoutId:string};
+  const fetcher = vi.fn<typeof fetch>(async () => Response.json({id:providerId}));
+  await createAsaasPublicCheckout(workerEnv,checkoutId,fetcher);
+  const checkout = JSON.parse(String(fetcher.mock.calls[0][1]?.body));
+  expect(checkout).toMatchObject({
+    billingTypes:["PIX"],chargeTypes:["DETACHED"],items:[{quantity:1,value:7697}],
+  });
+  expect(checkout).not.toHaveProperty("installment");
+  await hook("CHECKOUT_PAID",{items:[{quantity:1,value:8017.29}]});
+  expect(await (await readStatus(checkoutId)).json()).toMatchObject({status:"PAYMENT_REVIEW"});
+  expect(await inventory()).toEqual({reserved:1,sold:0});
+});
+
+it("retoma o checkout misto criado antes da migração",async () => {
+  await seedOffer();
+  const key = crypto.randomUUID();
+  const created = await reserve(reserveRequest(key));
+  const {checkoutId} = await created.json() as {checkoutId:string};
+  await env.DB.prepare("UPDATE public_checkout_sessions SET payment_method=NULL,amount_cents=769700 WHERE id=?").bind(checkoutId).run();
+  expect((await reserve(reserveRequest(key,undefined,null))).status).toBe(200);
+  expect((await reserve(reserveRequest(key,undefined,"PIX"))).status).toBe(409);
+  const fetcher = vi.fn<typeof fetch>(async () => Response.json({id:providerId}));
+  await createAsaasPublicCheckout(workerEnv,checkoutId,fetcher);
+  expect(JSON.parse(String(fetcher.mock.calls[0][1]?.body))).toMatchObject({
+    billingTypes:["PIX","CREDIT_CARD"],chargeTypes:["DETACHED","INSTALLMENT"],
+    items:[{quantity:1,value:7697}],installment:{maxInstallmentCount:12},
+  });
 });

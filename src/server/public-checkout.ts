@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { publishedFamtourEditions,type FamtourPaymentMethod } from "@/content/famtour-editions";
 import { HttpError } from "@/server/http";
 import { asaasRequest,type AsaasEnvironment,type AsaasFetcher } from "@/server/integrations/asaas";
 
@@ -27,22 +28,26 @@ type CheckoutRow = {
   edition_name:string;
   amount_cents:number;
   installment_count:number;
+  payment_method:FamtourPaymentMethod|null;
   status:CheckoutStatus;
   provider_id:string|null;
   expires_at:string;
 };
 
-const checkoutQuery = `SELECT c.id,c.edition_id,c.amount_cents,c.installment_count,c.status,c.provider_id,c.expires_at,
+const checkoutQuery = `SELECT c.id,c.edition_id,c.amount_cents,c.installment_count,c.payment_method,c.status,c.provider_id,c.expires_at,
   e.slug,e.name AS edition_name FROM public_checkout_sessions c JOIN editions e ON e.id=c.edition_id`;
 
 export function readPublicCheckout(env: CheckoutDb,id: string) {
   return env.DB.prepare(`${checkoutQuery} WHERE c.id=?`).bind(id).first<CheckoutRow>();
 }
 
-export async function existingPublicCheckout(env: CheckoutDb,key: string,editionSlug: string) {
+export async function existingPublicCheckout(env: CheckoutDb,key: string,editionSlug: string,paymentMethod?: FamtourPaymentMethod) {
   const session = await env.DB.prepare(`${checkoutQuery} WHERE c.idempotency_key=?`).bind(key).first<CheckoutRow>();
   if (session && session.slug !== editionSlug) {
     throw new HttpError(409,"IDEMPOTENCY_KEY_REUSED","Esta tentativa pertence a outra edição.");
+  }
+  if (session && paymentMethod && session.payment_method !== paymentMethod) {
+    throw new HttpError(409,"CHECKOUT_METHOD_ALREADY_SELECTED","Já existe uma tentativa com outra forma de pagamento. Retome ou cancele essa tentativa para escolher novamente.");
   }
   return session;
 }
@@ -55,6 +60,7 @@ export function publicCheckoutResponse(session: CheckoutRow,apiUrl: string) {
   return {
     checkoutId:session.id,
     editionSlug:session.slug,
+    paymentMethod:session.payment_method,
     status,
     checkoutUrl:status === "READY" && session.provider_id
       ? `${hostedOrigin}/checkoutSession/show?id=${encodeURIComponent(session.provider_id)}` : null,
@@ -63,7 +69,7 @@ export function publicCheckoutResponse(session: CheckoutRow,apiUrl: string) {
 }
 
 export async function reservePublicCheckout(env: CheckoutDb,input: {
-  key:string;editionSlug:string;requestId:string;
+  key:string;editionSlug:string;paymentMethod:FamtourPaymentMethod;requestId:string;
 }) {
   const now = new Date();
   const createdAt = now.toISOString();
@@ -76,7 +82,12 @@ export async function reservePublicCheckout(env: CheckoutDb,input: {
     ORDER BY p.created_at DESC,p.id LIMIT 1`)
     .bind(input.editionSlug,createdAt,createdAt)
     .first<{edition_id:string;id:string;amount_cents:number;installment_count:number}>();
-  if (!offer) throw new HttpError(422,"EDITION_UNAVAILABLE","Esta edição não está disponível para compra.");
+  const price = publishedFamtourEditions.find(edition => edition.slug === input.editionSlug);
+  if (!offer || !price || offer.amount_cents !== price.valorAVistaCentavos || offer.installment_count !== price.parcelaQuantidade) {
+    throw new HttpError(422,"EDITION_UNAVAILABLE","Esta edição não está disponível para compra.");
+  }
+  const amount = input.paymentMethod === "PIX" ? price.valorAVistaCentavos : price.valorCartaoCentavos;
+  const installments = input.paymentMethod === "PIX" ? 1 : price.parcelaQuantidade;
 
   const checkoutId = crypto.randomUUID();
   const outboxId = crypto.randomUUID();
@@ -90,9 +101,9 @@ export async function reservePublicCheckout(env: CheckoutDb,input: {
         AND NOT EXISTS(SELECT 1 FROM public_checkout_sessions WHERE idempotency_key=?)`)
       .bind(createdAt,offer.edition_id,offer.edition_id,offer.id,offer.amount_cents,offer.installment_count,createdAt,createdAt,input.key),
     env.DB.prepare(`INSERT INTO public_checkout_sessions
-      (id,idempotency_key,edition_id,price_batch_id,amount_cents,installment_count,status,expires_at,created_at,updated_at)
-      SELECT ?,?,?,?,?,?,'QUEUED',?,?,? WHERE changes()=1`)
-      .bind(checkoutId,input.key,offer.edition_id,offer.id,offer.amount_cents,offer.installment_count,expiresAt,createdAt,createdAt),
+      (id,idempotency_key,edition_id,price_batch_id,amount_cents,installment_count,payment_method,status,expires_at,created_at,updated_at)
+      SELECT ?,?,?,?,?,?,?,'QUEUED',?,?,? WHERE changes()=1`)
+      .bind(checkoutId,input.key,offer.edition_id,offer.id,amount,installments,input.paymentMethod,expiresAt,createdAt,createdAt),
     env.DB.prepare(`INSERT INTO outbox_events (id,type,aggregate_id,dedupe_key,payload_json,attempts,request_id,created_at)
       SELECT ?,'publicCheckout.create',?,?,?,0,?,? WHERE changes()=1`)
       .bind(outboxId,checkoutId,`publicCheckout.create:${checkoutId}`,JSON.stringify({checkoutId,requestId:input.requestId}),input.requestId,createdAt),
@@ -102,7 +113,7 @@ export async function reservePublicCheckout(env: CheckoutDb,input: {
     if (!checkout) throw new Error("Reserved checkout not found");
     return {checkout,event:{id:outboxId,type:"publicCheckout.create",checkoutId,requestId:input.requestId}};
   }
-  const existing = await existingPublicCheckout(env,input.key,input.editionSlug);
+  const existing = await existingPublicCheckout(env,input.key,input.editionSlug,input.paymentMethod);
   if (existing) return {checkout:existing};
   throw new HttpError(409,"CHECKOUT_UNAVAILABLE","A oferta ou a disponibilidade de vagas mudou. Atualize a página.");
 }
@@ -139,8 +150,9 @@ export async function createAsaasPublicCheckout(env: CheckoutDb & AsaasEnvironme
     const response = await asaasRequest<unknown>(env,"/checkouts",{
       method:"POST",
       body:JSON.stringify({
-        billingTypes:["PIX","CREDIT_CARD"],
-        chargeTypes:session.installment_count>1 ? ["DETACHED","INSTALLMENT"] : ["DETACHED"],
+        billingTypes:session.payment_method ? [session.payment_method] : ["PIX","CREDIT_CARD"],
+        chargeTypes:session.payment_method === "CREDIT_CARD" ? ["INSTALLMENT"]
+          : session.installment_count>1 ? ["DETACHED","INSTALLMENT"] : ["DETACHED"],
         minutesToExpire:checkoutMinutes,
         externalReference:id,
         callback:{
