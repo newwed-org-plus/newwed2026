@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect,useRef,useState } from "react";
+import { useEffect,useId,useRef,useState,useSyncExternalStore } from "react";
+import type { FamtourEdition,FamtourPaymentMethod } from "@/content/famtour-editions";
+import { formatCurrency } from "../lib/famtours";
 import { getTurnstileToken,removeTurnstile } from "../turnstile";
 
 const messages = {
@@ -15,10 +17,12 @@ type FinalStatus = keyof typeof messages;
 type Checkout = {
   checkoutId:string;
   editionSlug:string;
+  paymentMethod:FamtourPaymentMethod|null;
   status:"QUEUED"|"READY"|"AWAITING_CONFIRMATION"|FinalStatus;
   checkoutUrl:string|null;
 };
 
+const subscribe = () => () => {};
 const pause = () => new Promise<void>(resolve => setTimeout(resolve,2000));
 const finished = (checkout:Checkout) => Object.hasOwn(messages,checkout.status);
 const canRetry = (checkout:Checkout) => ["CANCELED","EXPIRED","FAILED"].includes(checkout.status);
@@ -38,7 +42,28 @@ function readCheckout(id:string,signal:AbortSignal) {
 
 const purchaseClass = "inline-flex min-h-12 items-center justify-center bg-[var(--color-destinos-turquoise)] px-5 py-3 text-center font-sans text-sm font-semibold text-[var(--color-destinos-ink)] hover:bg-[#8AB8B7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-destinos-ink)] disabled:opacity-60";
 
-export function FamtourCheckoutButton({slug,className}: {slug:string;className?:string}) {
+function checkoutDestination(url: string) {
+  const destination = new URL(url);
+  if (!["https://asaas.com","https://sandbox.asaas.com"].includes(destination.origin) || destination.pathname !== "/checkoutSession/show") {
+    throw new Error("O endereço de pagamento é inválido. Fale com a equipe New Wed.");
+  }
+  return destination.href;
+}
+
+function clearAttempt(keyName: string) {
+  sessionStorage.removeItem(keyName);
+  sessionStorage.removeItem(`${keyName}.id`);
+  sessionStorage.removeItem(`${keyName}.method`);
+}
+
+type PaymentOffer = Pick<FamtourEdition,"slug"|"valorAVistaCentavos"|"valorCartaoCentavos"|"parcelaQuantidade">;
+
+export function FamtourCheckoutButton({edition,className}: {edition:PaymentOffer;className?:string}) {
+  const {slug,valorAVistaCentavos,valorCartaoCentavos,parcelaQuantidade} = edition;
+  const choicesId = useId();
+  const interactive = useSyncExternalStore(subscribe, () => true, () => false);
+  const [showMethods,setShowMethods] = useState(false);
+  const [resumeUrl,setResumeUrl] = useState("");
   const widget = useRef<HTMLDivElement>(null);
   const current = useRef<AbortController|null>(null);
   const [busy,setBusy] = useState(false);
@@ -52,7 +77,7 @@ export function FamtourCheckoutButton({slug,className}: {slug:string;className?:
     };
   },[]);
 
-  async function start() {
+  async function start(paymentMethod: FamtourPaymentMethod) {
     if (current.current) return;
     const controller = new AbortController();
     current.current = controller;
@@ -60,14 +85,32 @@ export function FamtourCheckoutButton({slug,className}: {slug:string;className?:
     const keyName = `newwed.checkout.${slug}`;
     setBusy(true);
     setMessage("");
+    setResumeUrl("");
     try {
+      const previousId = sessionStorage.getItem(`${keyName}.id`);
+      const previousMethod = sessionStorage.getItem(`${keyName}.method`);
+      if (previousId && previousMethod !== paymentMethod) {
+        const previous = await readCheckout(previousId,signal);
+        if (canRetry(previous) && sessionStorage.getItem(`${keyName}.id`) === previousId) {
+          clearAttempt(keyName);
+        } else {
+          if (previous.checkoutUrl) setResumeUrl(checkoutDestination(previous.checkoutUrl));
+          setMessage(finished(previous) ? messages[previous.status as FinalStatus] : "Já existe uma tentativa com outra forma de pagamento. Retome ou cancele essa tentativa para escolher novamente.");
+          return;
+        }
+      }
       const key = sessionStorage.getItem(keyName) ?? crypto.randomUUID();
       sessionStorage.setItem(keyName,key);
       const turnstileToken = await getTurnstileToken(widget.current,"public_checkout");
+      const selectedMethod = sessionStorage.getItem(`${keyName}.method`);
+      if (selectedMethod && selectedMethod !== paymentMethod) {
+        throw new Error("Já existe uma tentativa com outra forma de pagamento. Selecione a forma anterior para continuar.");
+      }
+      sessionStorage.setItem(`${keyName}.method`,paymentMethod);
       let checkout = await checkoutRequest("/api/public/checkouts",signal,{
         method:"POST",
         headers:{"Content-Type":"application/json","Idempotency-Key":key},
-        body:JSON.stringify({editionSlug:slug,turnstileToken}),
+        body:JSON.stringify({editionSlug:slug,paymentMethod,turnstileToken}),
       });
       sessionStorage.setItem(`${keyName}.id`,checkout.checkoutId);
       for (let attempt=0; checkout.status==="QUEUED" && attempt<20; attempt++) {
@@ -75,17 +118,10 @@ export function FamtourCheckoutButton({slug,className}: {slug:string;className?:
         checkout = await readCheckout(checkout.checkoutId,signal);
       }
       if (checkout.status==="READY" && checkout.checkoutUrl) {
-        const url = new URL(checkout.checkoutUrl);
-        if (!["https://asaas.com","https://sandbox.asaas.com"].includes(url.origin) || url.pathname!=="/checkoutSession/show") {
-          throw new Error("O endereço de pagamento é inválido. Fale com a equipe New Wed.");
-        }
-        window.location.assign(url.href);
+        window.location.assign(checkoutDestination(checkout.checkoutUrl));
         return;
       }
-      if (canRetry(checkout)) {
-        sessionStorage.removeItem(keyName);
-        sessionStorage.removeItem(`${keyName}.id`);
-      }
+      if (canRetry(checkout)) clearAttempt(keyName);
       setMessage(finished(checkout) ? messages[checkout.status as FinalStatus] : "O pagamento ainda está sendo preparado ou confirmado. Tente novamente em instantes.");
     } catch (error) {
       if (!signal.aborted) setMessage(error instanceof Error ? error.message : "Não foi possível abrir o pagamento. Tente novamente.");
@@ -99,11 +135,25 @@ export function FamtourCheckoutButton({slug,className}: {slug:string;className?:
 
   return (
     <div className={className}>
-      <button type="button" onClick={start} disabled={busy} className={`${purchaseClass} w-full`}>
+      <button type="button" onClick={() => setShowMethods(open => !open)} disabled={!interactive || busy} aria-expanded={showMethods} aria-controls={choicesId} className={`${purchaseClass} w-full`}>
         {busy ? "Preparando pagamento…" : "Comprar agora · Garantir minha vaga"}
       </button>
-      <div ref={widget}/>
-      {message && <p role="status" className="mt-2 font-sans text-sm">{message}</p>}
+      <div id={choicesId} hidden={!showMethods}>
+        <div role="group" aria-label="Escolha a forma de pagamento" className="mt-2 grid gap-2 font-sans text-sm">
+          <button type="button" disabled={busy} onClick={() => void start("PIX")} className="min-h-12 border border-current px-4 py-2 text-left disabled:opacity-60">
+            Pagar com Pix · {formatCurrency(valorAVistaCentavos)}
+          </button>
+          <button type="button" disabled={busy} onClick={() => void start("CREDIT_CARD")} className="min-h-12 border border-current px-4 py-2 text-left disabled:opacity-60">
+            Pagar com cartão em até {parcelaQuantidade}x · Total {formatCurrency(valorCartaoCentavos)}
+          </button>
+        </div>
+        <a className="mt-2 inline-flex min-h-11 items-center font-sans text-sm underline underline-offset-4" href={`/destinos?edicao=${encodeURIComponent(slug)}&origem=inscricao#form`}>
+          Precisa de outra forma de pagamento? Peça contato da equipe.
+        </a>
+        <div ref={widget}/>
+        {(busy || message) && <p role="status" className="mt-2 font-sans text-sm">{busy ? "Conclua a verificação de segurança se ela aparecer." : message}</p>}
+        {resumeUrl && <a href={resumeUrl} className="mt-2 inline-block underline">Retomar tentativa anterior</a>}
+      </div>
     </div>
   );
 }
@@ -125,8 +175,7 @@ export function FamtourCheckoutReturn({id,slug,contactHref}:{id:string;slug:stri
           if (finished(result)) {
             const keyName = `newwed.checkout.${slug}`;
             if (canRetry(result) && sessionStorage.getItem(`${keyName}.id`)===id) {
-              sessionStorage.removeItem(keyName);
-              sessionStorage.removeItem(`${keyName}.id`);
+              clearAttempt(keyName);
             }
             setMessage(messages[result.status as FinalStatus]);
             return;

@@ -79,15 +79,15 @@ export function FamTourCard({ famtour, onRequestInformation }: Props) {
               Investimento
             </p>
             <p className="mt-2 font-serif text-[clamp(2.1rem,8vw,2.5rem)] font-medium leading-none text-[var(--color-destinos-marsala)]">
-              {famtour.parcelaQuantidade}x de{" "}
+              {famtour.parcelaQuantidade}x de aprox.{" "}
               {formatCurrency(famtour.parcelaCentavos)}
             </p>
             <p className="mt-2 font-sans text-sm text-black/65">
-              ou {formatCurrency(famtour.valorAVistaCentavos)} à vista
+              Total no cartão {formatCurrency(famtour.valorCartaoCentavos)} · Pix à vista {formatCurrency(famtour.valorAVistaCentavos)}
             </p>
           </div>
 
-          <FamtourCheckoutButton slug={famtour.slug} className="mt-5" />
+          <FamtourCheckoutButton edition={famtour} className="mt-5" />
           <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
             <Link
               href={`/destinos/inscricao/${famtour.slug}`}

@@ -10,7 +10,7 @@ export function guardPublishedFacts(result:AgentResult,message:string,context:un
  const focus=productFocusForContext(message,context);const answer=normalizeKnowledgeText(result.reply);
  const editions=siteKnowledge.publishedEditions.filter(e=>!focus.editionSlugs.length||focus.editionSlugs.includes(e.slug));
  const canQuoteFamtour=focus.projects.includes('destinos')&&!(focus.requestedYears??[]).some(year=>!editions.some(e=>e.startsAt.startsWith(year)));
- const allowed=new Set(canQuoteFamtour?editions.flatMap(e=>[e.publishedCashCents,e.publishedInstallmentCents]):[]);
+ const allowed=new Set(canQuoteFamtour?editions.flatMap(e=>[e.publishedCashCents,e.publishedInstallmentCents,e.publishedCardCents]):[]);
  const matches=Array.from(result.reply.matchAll(/R\$\s*([\d.,]+)|(\d[\d.,]*)\s*reais\b|\b\d{1,2}\s*(?:x|parcelas)(?:\s+de)?\s*(?:R\$\s*)?([\d.,]+)/gi));
  const unknownMoney=matches.some(match=>!allowed.has(moneyCents(match[1]??match[2]??match[3])));
  const falseInstitutionalPrice=result.reply.split(/[\n;]|(?<=[.!?])\s+(?=[A-Z])/).some(line=>/\bguia\b|\bworkshop\b|\bfeira\b/i.test(line)&&/R\$|\breais\b/.test(line));
@@ -23,7 +23,7 @@ export function guardPublishedFacts(result:AgentResult,message:string,context:un
  const wrongBinding=result.reply.split('\n').some(line=>{
   const named=focusFromMessage(line).editionSlugs;if(named.length!==1)return false;
   const edition=siteKnowledge.publishedEditions.find(e=>e.slug===named[0])!;
-  const values=new Set([edition.publishedCashCents,edition.publishedInstallmentCents]);
+  const values=new Set([edition.publishedCashCents,edition.publishedInstallmentCents,edition.publishedCardCents]);
   const money=Array.from(line.matchAll(/R\$\s*([\d.,]+)/g));
   return money.some(m=>!values.has(moneyCents(m[1])))||money.length>0&&Array.from(line.matchAll(/\b20\d{2}\b/g),m=>m[0]).some(year=>!edition.startsAt.startsWith(year));
  });

@@ -45,6 +45,7 @@ export const publicCheckoutSessions = sqliteTable("public_checkout_sessions", {
   priceBatchId: text("price_batch_id").notNull().references(() => priceBatches.id),
   amountCents: integer("amount_cents").notNull(),
   installmentCount: integer("installment_count").notNull(),
+  paymentMethod: text("payment_method", { enum: ["PIX", "CREDIT_CARD"] }),
   status: text("status").notNull(),
   providerId: text("provider_id").unique(),
   expiresAt: text("expires_at").notNull(),

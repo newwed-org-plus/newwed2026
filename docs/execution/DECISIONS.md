@@ -349,3 +349,9 @@ Expor compra direta nos cards e no topo e nas condições de cada edição de De
 ## D-069 — Mosaico e vídeo oficial da Feira de 2026
 
 Em 08/11/2026, a cliente pediu voltar ao mosaico e encaminhou o vídeo de 2026. Mostrar as oito edições disponíveis em grade de quatro colunas, com duas em telas pequenas. Preservar ampliação, navegação por teclado e links de cada edição. Destacar o vídeo de 2026 e manter o de 2019 no cartão correspondente. Usar o acervo disponível até a equipe enviar as novas fotografias e o vídeo de 2027.
+
+## D-070 — Escolha e preço por forma de pagamento
+
+A cliente pediu Pix à vista abaixo do total parcelado, repasse simulado no Asaas e um caminho para a equipe quando a pessoa precisar de outra forma de pagamento. A escolha de Pix ou cartão acontece no site antes de abrir o checkout hospedado. Alagoas, Rio Grande do Norte e Ceará recebem os totais em 12x confirmados no simulador da conta, com repasse e sem antecipação. Noronha usa as condições anteriores até a confirmação do total específico.
+
+Cada nova tentativa grava o método e o total em centavos no momento da reserva. Preços vêm da mesma fonte do site, comparada com o lote ativo. O total enviado ao Asaas é exclusivo do método escolhido. Uma tentativa já aberta conserva o preço e o método originais. O formulário da equipe atende outras modalidades sob consulta.

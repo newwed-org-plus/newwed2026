@@ -68,7 +68,7 @@ export function InscricaoPage({ edition,checkoutId }: PageProps) {
                   AÉREO INCLUSO
                 </span>
               </div>
-              <FamtourCheckoutButton slug={edition.slug} className="mt-7 max-w-sm" />
+              <FamtourCheckoutButton edition={edition} className="mt-7 max-w-sm" />
               <a href="#condicoes" className="mt-2 inline-flex min-h-11 items-center underline underline-offset-4">
                 Ver condições de pagamento
               </a>
@@ -151,15 +151,15 @@ export function InscricaoPage({ edition,checkoutId }: PageProps) {
               <p className="font-sans text-xs">{edition.destino} · {edition.periodo}</p>
               <h2 id="condicoes-title" className="mt-2 font-serif text-4xl">Condições de pagamento</h2>
               <p className="mt-4 font-serif text-[clamp(2.5rem,6vw,4.5rem)] font-light leading-none">
-                {edition.parcelaQuantidade}x de {formatCurrency(edition.parcelaCentavos)}
+                {edition.parcelaQuantidade}x de aprox. {formatCurrency(edition.parcelaCentavos)}
               </p>
-              <p className="mt-3 font-sans text-sm">ou {formatCurrency(edition.valorAVistaCentavos)} à vista</p>
+              <p className="mt-3 font-sans text-sm">Total no cartão {formatCurrency(edition.valorCartaoCentavos)} · Pix à vista {formatCurrency(edition.valorAVistaCentavos)}</p>
             </div>
             <div>
               <p className="max-w-sm font-sans text-sm leading-relaxed text-[#191010]">
                 Pague com Pix ou cartão em até {edition.parcelaQuantidade}x pelo Asaas. A vaga é confirmada após a aprovação do pagamento.
               </p>
-              <FamtourCheckoutButton slug={edition.slug} className="mt-4 max-w-sm" />
+              <FamtourCheckoutButton edition={edition} className="mt-4 max-w-sm" />
               <a href={interestHref} className="mt-4 inline-flex min-h-12 items-center border border-current px-5 py-3 font-sans text-sm font-semibold text-[var(--color-destinos-ink)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-destinos-ink)]">
                 Pedir contato da equipe
               </a>

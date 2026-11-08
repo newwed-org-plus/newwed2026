@@ -4,6 +4,8 @@ Atualizado em: 2026-11-08.
 
 ## Objetivo ativo
 
+Onda 53 (D-070/CP-53): Pix à vista e cartão em até 12x com seleção antes do Asaas. Repasse confirmado para Alagoas, Rio Grande do Norte e Ceará. Noronha fica com os valores atuais enquanto a simulação da conta está pendente.
+
 Onda 52 (D-069/CP-52): mosaico do acervo da Feira restaurado e vídeo de 2026 validado no canal oficial. A capa nova e o vídeo de 2027 dependem do envio da equipe.
 
 Onda 51 (D-068/CP-51): referência visual original da Feira recuperada, compra direta visível nos cards e nas páginas das quatro edições e cotação Azul identificada como previsão. A Onda 50 publicou o checkout público após homologar Pix e cartão em 12x no Sandbox. Os ajustes anteriores de parceiros e Instagram da Onda 47 estão em CP-47.
