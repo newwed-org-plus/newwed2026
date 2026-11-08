@@ -37,7 +37,7 @@ function Divisor({ children }: { children: React.ReactNode }) {
           fontSize: "0.65rem",
           letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: "var(--color-destinos-turquoise)",
+          color: "var(--color-destinos-marsala)",
           whiteSpace: "nowrap",
         }}
       >
@@ -51,6 +51,8 @@ function Divisor({ children }: { children: React.ReactNode }) {
 export function FamtourLanding() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const source = searchParams.get("origem");
+  const fromEbook = source === "ebook";
   const edicao = searchParams.get("edicao") ?? undefined;
 
   const famtours = FAMTOUR_EDITIONS;
@@ -69,23 +71,22 @@ export function FamtourLanding() {
   },[]);
 
   useEffect(()=>{
-    if(!edicao)return;
-    const frame=requestAnimationFrame(()=>scrollTo("form"));
+    if (!edicao && !fromEbook) return;
+    const frame = requestAnimationFrame(() => {
+      const anchor = window.location.hash.slice(1);
+      scrollTo(anchor && document.getElementById(anchor) ? anchor : edicao ? "form" : "famtours");
+    });
     return()=>cancelAnimationFrame(frame);
-  },[edicao,scrollTo]);
+  }, [edicao, fromEbook, scrollTo]);
 
   const handleRequestInformation = (slug: string) => {
     router.push(`/destinos?edicao=${encodeURIComponent(slug)}#form`,{scroll:false});
     scrollTo("form");
   };
 
-  const handleViewEdition = (slug: string) => {
-    router.push(`/destinos/inscricao/${encodeURIComponent(slug)}`);
-  };
-
   return (
     <SiteShell>
-      <EbookPopup />
+      <EbookPopup openOnEntry={!fromEbook && source !== "inscricao"} />
       <Toaster position="top-center" richColors />
       <main
         className="famtour-landing bg-white"
@@ -110,7 +111,7 @@ export function FamtourLanding() {
                   fontFamily: "'Fedra Sans Std', sans-serif",
                   fontWeight: 300,
                   fontSize: "clamp(2rem, 4vw, 2.8rem)",
-                  color: "#191010",
+                  color: "var(--color-destinos-marsala)",
                   lineHeight: 1.15,
                   margin: 0,
                 }}
@@ -139,9 +140,9 @@ export function FamtourLanding() {
                 onClick={() => scrollTo("edicoes-anteriores")}
                 style={{
                   marginTop: "2rem",
-                  background: "var(--color-destinos-marsala)",
-                  color: "#FFFFFF",
-                  border: "1px solid var(--color-destinos-marsala)",
+                  background: "var(--color-destinos-turquoise)",
+                  color: "var(--color-destinos-ink)",
+                  border: "1px solid var(--color-destinos-turquoise)",
                   padding: "1rem 1.75rem",
                   fontFamily: "'Fedra Sans Std', sans-serif",
                   fontWeight: 350,
@@ -171,7 +172,7 @@ export function FamtourLanding() {
             {/* Edições abertas */}
             <section
               id="famtours"
-              className="mx-auto max-w-[1100px] px-6 pb-10 pt-10 md:pb-12 md:pt-12"
+              className="mx-auto max-w-[1100px] scroll-mt-20 px-6 pb-10 pt-10 md:pb-12 md:pt-12"
             >
               <OpenEditionsHeading />
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
@@ -180,7 +181,6 @@ export function FamtourLanding() {
                     key={f.id}
                     famtour={f}
                     onRequestInformation={handleRequestInformation}
-                    onViewEdition={handleViewEdition}
                   />
                 ))}
               </div>

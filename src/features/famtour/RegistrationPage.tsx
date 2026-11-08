@@ -1,7 +1,5 @@
 import { Plane } from "lucide-react";
 import {famtourInformation} from '@/content/famtour-information';
-import { RegistrationFormPreview } from "@/features/famtour/components/inscricao/RegistrationFormPreview";
-import { RegistrationSummary } from "@/features/famtour/components/inscricao/RegistrationSummary";
 import {
   formatCurrency,
   type FamtourEdition,
@@ -12,6 +10,8 @@ type PageProps = {
 };
 
 export function InscricaoPage({ edition }: PageProps) {
+  const interestHref = `/destinos?edicao=${encodeURIComponent(edition.slug)}&origem=inscricao#form`;
+
   return (
     <div className="min-h-screen bg-white text-[#191010]">
       <header className="border-b border-white/10 bg-[#191010] px-5 py-4 text-white md:px-10">
@@ -58,6 +58,9 @@ export function InscricaoPage({ edition }: PageProps) {
                   AÉREO INCLUSO
                 </span>
               </div>
+              <a href="#condicoes" className="mt-7 inline-flex min-h-11 items-center underline underline-offset-4">
+                Ver condições de pagamento
+              </a>
             </div>
           </div>
           <div className="order-1 min-h-72 overflow-hidden lg:order-2 lg:min-h-full">
@@ -110,39 +113,24 @@ export function InscricaoPage({ edition }: PageProps) {
           </div>
         </section>
 
-        <section className="bg-[var(--color-destinos-marsala)] px-6 py-12 text-white md:px-10 md:py-16">
-          <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-7 md:flex-row md:items-end">
+        <section id="condicoes" aria-labelledby="condicoes-title" className="bg-[#F7F4EE] px-6 py-12 text-[var(--color-destinos-marsala)] md:px-10 md:py-16">
+          <div className="mx-auto grid max-w-5xl items-center gap-8 md:grid-cols-2">
             <div>
-              <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-white/65">
-                Investimento
+              <p className="font-sans text-xs">{edition.destino} · {edition.periodo}</p>
+              <h2 id="condicoes-title" className="mt-2 font-serif text-4xl">Condições de pagamento</h2>
+              <p className="mt-4 font-serif text-[clamp(2.5rem,6vw,4.5rem)] font-light leading-none">
+                {edition.parcelaQuantidade}x de {formatCurrency(edition.parcelaCentavos)}
               </p>
-              <p className="mt-3 font-serif text-[clamp(2.8rem,7vw,5rem)] font-light leading-none">
-                {edition.parcelaQuantidade}x de{" "}
-                {formatCurrency(edition.parcelaCentavos)}
-              </p>
-              <p className="mt-3 font-sans text-sm uppercase tracking-[0.08em] text-white/70">
-                {formatCurrency(edition.valorAVistaCentavos)} à vista
-              </p>
+              <p className="mt-3 font-sans text-sm">ou {formatCurrency(edition.valorAVistaCentavos)} à vista</p>
             </div>
-            <p className="max-w-sm font-sans text-sm leading-relaxed text-white/75">
-              Nenhuma cobrança será realizada nesta etapa. O ambiente de
-              inscrição online será disponibilizado posteriormente.
-            </p>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-6 py-14 md:px-10 md:py-20">
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
             <div>
-              <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-[var(--color-destinos-turquoise)]">
-                Formulário de inscrição
+              <p className="max-w-sm font-sans text-sm leading-relaxed text-[#191010]">
+                Consulte a equipe New Wed para confirmar a disponibilidade e receber as instruções de pagamento.
               </p>
-              <h2 className="mb-10 mt-4 font-serif text-[clamp(2.4rem,5vw,4rem)] font-light leading-none">
-                Seus dados
-              </h2>
-              <RegistrationFormPreview />
+              <a href={interestHref} className="mt-4 inline-flex min-h-12 items-center bg-[var(--color-destinos-turquoise)] px-5 py-3 font-sans text-sm font-semibold text-[var(--color-destinos-ink)] hover:bg-[#8AB8B7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-destinos-ink)]">
+                Solicitar minha pré-inscrição
+              </a>
             </div>
-            <RegistrationSummary edition={edition} />
           </div>
         </section>
 

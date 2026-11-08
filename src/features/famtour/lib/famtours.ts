@@ -1,8 +1,7 @@
-import alagoasImageAsset from "@/assets/dest-milagres.jpg";
 import {publishedFamtourEditions} from "@/content/famtour-editions";
 import type {FamtourEdition,LegacyFamTour} from "@/content/famtour-editions";
 export type {FamtourEdition,LegacyFamTour} from "@/content/famtour-editions";
-export const FAMTOUR_EDITIONS:readonly FamtourEdition[]=publishedFamtourEditions.map(edition=>edition.slug==='famtour-alagoas-fevereiro-2027'?{...edition,imagem:alagoasImageAsset.src}:edition);
+export const FAMTOUR_EDITIONS:readonly FamtourEdition[]=publishedFamtourEditions;
 
 export function formatCurrency(centavos: number): string {
   return new Intl.NumberFormat("pt-BR", {

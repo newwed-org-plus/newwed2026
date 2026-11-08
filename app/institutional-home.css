@@ -69,6 +69,9 @@
 .nw-nav a:hover,
 .nw-mobile-menu nav a:hover { opacity: .55; }
 .nw-mobile-menu { display: none; }
+.nw-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.nw-header-instagram { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid currentColor; border-radius: 50%; color: var(--nw-marsala); }
+.nw-header-instagram:hover { background: var(--nw-soft); }
 
 .nw-hero-content {
   position: relative;
@@ -146,6 +149,7 @@
   text-align: center;
   color: white;
 }
+.nw-project-card#feira .nw-project-copy { background: linear-gradient(transparent 42%, #1d1115e8 91%); }
 .nw-project-bottom { display: flex; flex-direction: column; align-items: center; }
 .nw-project-bottom p {
   max-width: 195px;
@@ -362,18 +366,26 @@
 }
 .nw-fair-history { background: #faf7f4; }
 .nw-history-intro { max-width: 680px; color: #4c4946; font-size: 15px; line-height: 1.8; margin-bottom: 35px; }
-.nw-fair-mosaic { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 18px; align-items: start; }
-.nw-fair-mosaic figure { margin: 0; min-width: 0; }
-.nw-fair-mosaic figure:nth-child(even) { padding-top: 45px; }
-.nw-fair-mosaic a { display: block; overflow: hidden; }
-.nw-fair-mosaic img { display: block; width: 100%; height: auto; }
-.nw-fair-mosaic figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 14px 0; color: #7C2341; font-size: 12px; }
+.nw-fair-controls { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
+.nw-fair-controls button, .nw-fair-dialog button { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border: 1px solid currentColor; color: #7c2341; background: white; cursor: pointer; }
+.nw-fair-strip { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(180px, 28%); gap: 16px; padding: 4px 4px 12px; margin: 0; list-style: none; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 4px; }
+.nw-fair-strip li { scroll-snap-align: start; min-width: 0; }
+.nw-fair-strip button { display: block; width: 100%; padding: 0; background: white; border: 1px solid #7c23412e; color: #7c2341; text-align: left; cursor: pointer; }
+.nw-fair-strip button img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+.nw-fair-strip button span { display: flex; justify-content: space-between; gap: 8px; padding: 14px 12px; font-size: 14px; }
+.nw-fair-strip button:focus-visible, .nw-fair-controls button:focus-visible, .nw-fair-dialog :is(button, a):focus-visible { outline: 2px solid #7c2341; outline-offset: 2px; }
+.nw-fair-dialog { width: min(680px, calc(100% - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 16px; border: 0; border-radius: 12px; color: #7c2341; background: #faf7f4; }
+.nw-fair-dialog::backdrop { background: #230e19b3; }
+.nw-fair-dialog-heading, .nw-fair-dialog-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.nw-fair-dialog-heading h3 { margin: 0; font-size: clamp(20px, 5vw, 28px); }
+.nw-fair-dialog > img { display: block; width: 100%; height: min(54dvh, 520px); margin-block: 14px; object-fit: contain; background: #252322; }
+.nw-fair-dialog-actions a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
 .nw-history-video { max-width: 1040px; aspect-ratio: 16 / 9; margin: 55px auto 0; background: #252322; }
 .nw-history-video iframe { border: 0; width: 100%; height: 100%; }
-.nw-video-caption { text-align: center; color: #686663; font-size: 12px; }
+.nw-video-caption { text-align: center; color: #686663; font-size: 14px; }
+.nw-video-caption a { color: #7c2341; text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 700px) {
-  .nw-fair-mosaic { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
-  .nw-fair-mosaic figure:nth-child(even) { padding-top: 24px; }
+  .nw-fair-strip { grid-auto-columns: minmax(165px, 72%); gap: 12px; }
   .nw-history-video { margin-top: 30px; }
 }
 @media (max-width: 700px) {
@@ -381,3 +393,8 @@
   .nw-number { min-width: 0; padding-inline: 10px; }
   .nw-number strong { font-size: clamp(22px,6vw,32px); }
 }
+
+.nw-home-partners { padding: 30px max(24px, 6vw); background: #7c2341; color: white; text-align: center; }
+.nw-home-partners h2 { margin: 0 0 18px; font-size: 13px; font-weight: 350; text-transform: uppercase; letter-spacing: .12em; }
+.nw-home-partners ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center; gap: clamp(12px, 4vw, 38px); max-width: 600px; margin: 0 auto; padding: 0; list-style: none; }
+.nw-home-partners img { display: block; width: 100%; max-width: 145px; height: 52px; margin: auto; object-fit: contain; }

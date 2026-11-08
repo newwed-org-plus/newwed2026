@@ -325,3 +325,10 @@ Em 06/11/2026, o usuário determinou que o popup apareça imediatamente ao entra
 ## D-064 — Popup compacto no celular
 
 Em 06/11/2026, o usuário pediu retomar a conversa com o contato e destacou que o popup está grande no celular. Compactar somente a apresentação em telas estreitas ou celulares na horizontal: limitar a largura a 340px e a altura a 640px ou à área disponível, reduzir margens/espaçamentos e a tipografia de apoio. Preservar os quatro campos, consentimento, inputs de 16px, alvos de toque de pelo menos 44px para inputs/ação principal/X, rolagem interna e abertura imediata de D-063. Desktop e fluxo de cadastro permanecem iguais. Avisar o contato depois de validar a publicação.
+
+
+## D-065 — Feedback público de 07/11
+
+Aplicar o material correspondente a cada anotação: Home com a faixa Azul/Empetur/Governo de Pernambuco e Ceará no rodapé; Feira com foto 2026 no ecossistema, Instagram no cabeçalho e acervo datado, preservando o vídeo 2019 em destaque; Destinos com as cinco fotos encaminhadas e com a paleta solicitada na seção explicativa. Só publicar mídia com ano confirmado.
+
+A inscrição de Destinos mostra as condições existentes e encaminha ao formulário real de interesse da edição. O fluxo não vende vaga nem habilita cobrança. O modal de e-book cresce no celular vertical, preserva a abertura imediata na entrada habitual e não interrompe as duas navegações explícitas para edição/preenchimento. A URL estável de edições abertas do e-book pode ser incorporada ao PDF quando o arquivo final estiver disponível. Não anunciar entrega por e-mail nem vender o Guia Profissional sem arquivo, remetente e condições comerciais confirmados.

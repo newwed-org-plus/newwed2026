@@ -67,7 +67,7 @@ export function ProjectPage({ projectId }: { projectId: InstitutionalProjectId }
       <footer className="nw-footer">
         <span>© 2026 Grupo New Wed</span>
         <Link href="/#projetos">Todos os projetos</Link>
-        <a href={PROJECT_INSTAGRAM_URLS[projectId]} target="_blank" rel="noopener noreferrer" aria-label={`Instagram ${project.name}`}>Instagram · {project.name}</a>
+        <a href={PROJECT_INSTAGRAM_URLS[projectId]} target="_blank" rel="noopener noreferrer" aria-label={`Instagram ${project.name} no rodapé`}>Instagram · {project.name}</a>
         <span>Pernambuco · Alagoas · Rio Grande do Norte</span>
       </footer>
     </div>

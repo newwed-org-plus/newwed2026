@@ -2,19 +2,20 @@
 
 import {useCallback, useEffect, useRef, useState, useSyncExternalStore, type FormEvent} from 'react';
 import {BookOpen, Check, X} from 'lucide-react';
-import {destinosEbook} from '@/content/destinos-ebook';
+import {destinosEbook, destinosEbookEditionsHref} from '@/content/destinos-ebook';
 import {ebookLeadSchema} from '@/features/leads/ebook-schema';
 import {getTurnstileToken, removeTurnstile, resetTurnstile} from '../turnstile';
 import './ebook-popup.css';
 
 const subscribe = () => () => {};
 
-export function EbookPopup() {
+export function EbookPopup({openOnEntry = true}: {openOnEntry?: boolean}) {
   const interactive = useSyncExternalStore(subscribe, () => true, () => false);
   const dialog = useRef<HTMLDialogElement>(null);
   const verification = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const busy = useRef(false);
+  const entryHandled = useRef(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<{downloadUrl: string | null} | null>(null);
@@ -27,8 +28,10 @@ export function EbookPopup() {
   }, []);
 
   useEffect(() => {
-    if (interactive) show();
-  }, [interactive, show]);
+    if (!interactive || entryHandled.current) return;
+    entryHandled.current = true;
+    if (openOnEntry) show();
+  }, [interactive, openOnEntry, show]);
 
   useEffect(() => {
     if (!open) return;
@@ -81,7 +84,7 @@ export function EbookPopup() {
         {result ? <div className="ebook-success" role="status">
           <Check size={28} aria-hidden="true"/><h3>Cadastro recebido!</h3>
           {result.downloadUrl ? <><p>Seu e-book está disponível.</p><a className="ebook-submit" href={result.downloadUrl} download>Baixar e-book</a></> : <p>Seu interesse foi registrado com a equipe New Wed. O arquivo ainda não está disponível para download.</p>}
-          <button type="button" className="ebook-later" onClick={close}>Continuar explorando Destinos</button>
+          <a className="ebook-editions" href={destinosEbookEditionsHref} onClick={close}>Ver edições abertas</a>
         </div> : <form onSubmit={submit}>
           <div className="ebook-fields">
             <label>Nome completo<input name="nome" autoComplete="name" required minLength={3} maxLength={160} placeholder="Seu nome completo"/></label>
