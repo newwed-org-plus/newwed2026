@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Check, Plane } from "lucide-react";
 import { formatCurrency, type FamtourEdition } from "@/features/famtour/lib/famtours";
+import { FamtourCheckoutButton } from "./FamtourCheckout";
 
 type Props = {
   famtour: FamtourEdition;
@@ -86,7 +87,8 @@ export function FamTourCard({ famtour, onRequestInformation }: Props) {
             </p>
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
+          <FamtourCheckoutButton slug={famtour.slug} className="mt-5" />
+          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
             <button
               type="button"
               onClick={() => onRequestInformation(famtour.slug)}

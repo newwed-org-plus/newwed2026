@@ -21,17 +21,18 @@ export function removeTurnstile(element:HTMLElement|null) {
  if(!element)return;const widget=widgets.get(element);if(!widget)return;
  clearTimeout(widget.timer);widget.reject?.(new Error('Verificação interrompida.'));window.turnstile?.remove(widget.id);widgets.delete(element);
 }
-export async function getTurnstileToken(element:HTMLElement|null):Promise<string|undefined> {
+export async function getTurnstileToken(element:HTMLElement|null,action:"public_lead"|"public_checkout"="public_lead"):Promise<string|undefined> {
  const response=await fetch('/api/public/config');if(!response.ok)throw new Error('Não foi possível iniciar a verificação.');
- const config=await response.json() as {turnstileSiteKey?:string;leadSubmissionEnabled:boolean};
- if(!config.leadSubmissionEnabled)throw new Error('As inscrições estão temporariamente indisponíveis.');
+ const config=await response.json() as {turnstileSiteKey?:string;leadSubmissionEnabled:boolean;publicCheckoutEnabled?:boolean};
+ if(action==='public_checkout'&&!config.publicCheckoutEnabled)throw new Error('O pagamento está temporariamente indisponível. Fale com a equipe New Wed.');
+ if(action==='public_lead'&&!config.leadSubmissionEnabled)throw new Error('As inscrições estão temporariamente indisponíveis.');
  if(!config.turnstileSiteKey)return undefined;
  if(!element)throw new Error('A verificação de segurança não iniciou. Atualize a página.');await loadScript();
  let widget=widgets.get(element);
  if(!widget) {
   const state:Widget={id:''};widgets.set(element,state);
   const complete=(token?:string,error?:Error)=>{clearTimeout(state.timer);const resolve=state.resolve;const reject=state.reject;state.resolve=undefined;state.reject=undefined;if(error)reject?.(error);else if(token)resolve?.(token);};
-  state.id=window.turnstile!.render(element,{sitekey:config.turnstileSiteKey,action:'public_lead',size:'flexible',execution:'execute',appearance:'interaction-only',callback:(token:string)=>complete(token),'error-callback':()=>complete(undefined,new Error('Falha na verificação. Tente novamente.')),'expired-callback':()=>complete(undefined,new Error('A verificação expirou. Tente novamente.'))});widget=state;
+  state.id=window.turnstile!.render(element,{sitekey:config.turnstileSiteKey,action,size:'flexible',execution:'execute',appearance:'interaction-only',callback:(token:string)=>complete(token),'error-callback':()=>complete(undefined,new Error('Falha na verificação. Tente novamente.')),'expired-callback':()=>complete(undefined,new Error('A verificação expirou. Tente novamente.'))});widget=state;
  }
  resetTurnstile(element);
  return new Promise<string>((resolve,reject)=>{

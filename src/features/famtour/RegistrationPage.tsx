@@ -1,5 +1,6 @@
 import { Plane } from "lucide-react";
 import {famtourInformation} from '@/content/famtour-information';
+import { FamtourCheckoutButton,FamtourCheckoutReturn } from "./components/FamtourCheckout";
 import {
   formatCurrency,
   type FamtourEdition,
@@ -7,9 +8,10 @@ import {
 
 type PageProps = {
   edition: FamtourEdition;
+  checkoutId?: string;
 };
 
-export function InscricaoPage({ edition }: PageProps) {
+export function InscricaoPage({ edition,checkoutId }: PageProps) {
   const interestHref = `/destinos?edicao=${encodeURIComponent(edition.slug)}&origem=inscricao#form`;
 
   return (
@@ -37,6 +39,7 @@ export function InscricaoPage({ edition }: PageProps) {
       </header>
 
       <main>
+        {checkoutId && <FamtourCheckoutReturn id={checkoutId} slug={edition.slug} contactHref={interestHref}/>}
         <section className="grid min-h-[34rem] grid-cols-1 bg-[#191010] text-white lg:grid-cols-2">
           <div className="order-2 flex items-center px-6 py-12 md:px-12 lg:order-1 lg:px-[clamp(3rem,7vw,7rem)]">
             <div className="max-w-xl">
@@ -125,8 +128,9 @@ export function InscricaoPage({ edition }: PageProps) {
             </div>
             <div>
               <p className="max-w-sm font-sans text-sm leading-relaxed text-[#191010]">
-                Consulte a equipe New Wed para confirmar a disponibilidade e receber as instruções de pagamento.
+                Pague com Pix ou cartão em até {edition.parcelaQuantidade}x pelo Asaas. A vaga é confirmada após a aprovação do pagamento.
               </p>
+              <FamtourCheckoutButton slug={edition.slug} className="mt-4 max-w-sm" />
               <a href={interestHref} className="mt-4 inline-flex min-h-12 items-center bg-[var(--color-destinos-turquoise)] px-5 py-3 font-sans text-sm font-semibold text-[var(--color-destinos-ink)] hover:bg-[#8AB8B7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-destinos-ink)]">
                 Solicitar minha pré-inscrição
               </a>
