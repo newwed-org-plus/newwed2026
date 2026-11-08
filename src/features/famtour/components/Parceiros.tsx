@@ -11,7 +11,7 @@ export function ParceirosLogos() {
         <ul aria-label="Logomarcas parceiras" className="m-0 grid list-none grid-cols-2 gap-3 p-0 md:gap-5">
           {PARCEIROS.map((partner) => (
             <li key={partner.name} className="flex min-w-0 items-center justify-center bg-destinos-turquoise px-4 py-5">
-              <img src={partner.src} alt={partner.name} loading="lazy" style={{ height: partner.height, maxHeight: partner.height, width: "auto", maxWidth: "100%", objectFit: "contain" }} />
+              <img src={partner.src} alt={partner.name} loading="lazy" style={{ filter: "brightness(0) invert(1)", height: partner.height, maxHeight: partner.height, width: "auto", maxWidth: "100%", objectFit: "contain" }} />
             </li>
           ))}
         </ul>
