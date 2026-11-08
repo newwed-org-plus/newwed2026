@@ -7,10 +7,11 @@ test("Feira destaca o Instagram e permite navegar pelo acervo no celular", async
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`${origin}/feira`, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("banner").getByRole("link", { name: "Instagram New Wed Feira" })).toHaveAttribute("href", /instagram\.com\/new_wed_feira/);
-  await expect(page.getByTitle("New Wed Feira Tendência 2019 — vídeo oficial")).toHaveAttribute("src", /xhentgAI9pU/);
+  await expect(page.getByTitle("New Wed Feira Tendência 2026 — vídeo oficial")).toHaveAttribute("src", /juZ5xsOwPZs/);
   const list = page.getByRole("list", { name: "Edições da Feira" });
-  await page.getByRole("button", { name: "Rolar galeria para a direita" }).click();
-  await expect.poll(() => list.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+  await expect(list.getByRole("listitem")).toHaveCount(8);
+  await expect(list).toHaveCSS("display", "grid");
+  expect(await list.evaluate(element => element.scrollWidth)).toBeLessThanOrEqual(await list.evaluate(element => element.clientWidth));
   const card = page.getByRole("button", { name: "Ver galeria da Feira 2023" });
   await card.click();
   const gallery = page.getByRole("dialog", { name: "New Wed Feira 2023" });
