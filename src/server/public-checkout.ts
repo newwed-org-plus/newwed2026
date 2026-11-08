@@ -54,6 +54,7 @@ export function publicCheckoutResponse(session: CheckoutRow,apiUrl: string) {
   const hostedOrigin = apiUrl === "https://api.asaas.com/v3" ? "https://asaas.com" : "https://sandbox.asaas.com";
   return {
     checkoutId:session.id,
+    editionSlug:session.slug,
     status,
     checkoutUrl:status === "READY" && session.provider_id
       ? `${hostedOrigin}/checkoutSession/show?id=${encodeURIComponent(session.provider_id)}` : null,

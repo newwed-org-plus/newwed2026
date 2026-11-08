@@ -4,7 +4,7 @@
 
 - Consulte `GET /api/public/config` para obter `publicCheckoutEnabled` e `turnstileSiteKey`.
 - `POST /api/public/checkouts` com `Idempotency-Key: <UUID aleatório>` e JSON `{ "editionSlug": "...", "turnstileToken": "..." }`. O Turnstile usa a ação `public_checkout`. Use a mesma chave ao repetir a mesma tentativa e outra chave para uma nova tentativa após falha, cancelamento ou expiração.
-- HTTP 202 inicia a reserva. HTTP 200 devolve a mesma reserva para uma repetição. Os campos são `checkoutId`, `status`, `checkoutUrl` e `expiresAt`. O site consulta `GET /api/public/checkouts/{checkoutId}` enquanto `status` for `QUEUED`. O prazo começa de novo quando o consumidor inicia a solicitação ao Asaas.
+- HTTP 202 inicia a reserva. HTTP 200 devolve a mesma reserva para uma repetição. Os campos são `checkoutId`, `editionSlug`, `status`, `checkoutUrl` e `expiresAt`. O site consulta `GET /api/public/checkouts/{checkoutId}` enquanto `status` for `QUEUED`. O prazo começa de novo quando o consumidor inicia a solicitação ao Asaas.
 - Redirecione para `checkoutUrl` quando o status for `READY` e houver URL. O Asaas apresenta Pix e cartão até o limite do lote. O comprador fornece os dados diretamente ao Asaas.
 - O Asaas volta a `/destinos/inscricao/{editionSlug}?checkout={checkoutId}&retorno={concluido|cancelado|expirado}`. Consulte o GET antes de mostrar confirmação. `AWAITING_CONFIRMATION` indica que o prazo do link acabou e o evento do provedor ainda não chegou. Só `PAID` representa compra confirmada. `PAYMENT_REVIEW` deve encaminhar o comprador ao atendimento com o identificador do checkout.
 
