@@ -11,18 +11,16 @@ export const asaasWebhookSchema = z.object({
   payment:z.object({
     id:z.string().min(1),
     externalReference:optionalProviderString,
-    customer:optionalProviderString,
     installment:optionalProviderString,
     installmentNumber:z.number().int().positive().nullish().transform(value=>value??undefined),
-    invoiceUrl:z.string().url().nullish().transform(value=>value??undefined),
     billingType:optionalProviderString,
     value:z.number().positive(),
     dueDate:optionalProviderString,
     status:z.string().min(1),
     paymentDate:optionalProviderString,
     confirmedDate:optionalProviderString,
-  }).passthrough(),
-}).passthrough();
+  }),
+});
 
 export type AsaasWebhook = z.infer<typeof asaasWebhookSchema>;
 export type StoredAsaasWebhook = { id:string;external_id:string;payload_json:string;attempts:number;request_id?:string|null };
