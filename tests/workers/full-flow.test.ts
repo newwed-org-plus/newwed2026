@@ -43,6 +43,33 @@ async function submitLead(suffix="1") {
 function jsonFetcher(value:unknown,status=200) { return (async()=>new Response(JSON.stringify(value),{status,headers:{"content-type":"application/json"}})) as typeof fetch; }
 
 describe("fluxo completo no runtime Workers",()=>{
+  it("confirma o recebimento ao Asaas mesmo se a conciliação precisar aguardar",async()=>{
+    const payload = {
+      id: "evt-before-checkout",
+      event: "PAYMENT_CONFIRMED",
+      payment: { id: "pay-before-checkout", status: "CONFIRMED", value: 1200 },
+    };
+    const response = await receiveAsaasWebhook(new Request("https://newwed.test/api/webhooks/asaas", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "asaas-access-token": "test-asaas-webhook-token",
+      },
+      body: JSON.stringify(payload),
+    }));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ received: true, pendingReconciliation: true });
+    const event = await env.DB.prepare(
+      "SELECT processed_at, next_retry_at, error FROM webhook_events WHERE provider='asaas' AND external_id=?",
+    ).bind(payload.id).first();
+    expect(event).toMatchObject({
+      processed_at: null,
+      next_retry_at: expect.any(String),
+      error: "CHECKOUT_NOT_FOUND",
+    });
+  });
+
   it("percorre UTM, agente, qualificação, checkout, entrega, PAGO e confirmação uma vez",async()=>{
     await seedEdition();
     const {leadId}=await submitLead();

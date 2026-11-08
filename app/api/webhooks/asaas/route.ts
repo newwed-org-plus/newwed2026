@@ -22,8 +22,9 @@ export async function POST(request: Request) {
     if (stored.processed_at) return responseWithRequestId(json({ received:true,duplicate:true }),requestId);
 
     const result = await processStoredAsaasWebhook(env,stored);
+    // Asaas only acknowledges HTTP 200. The stored event can be retried by the worker.
     return responseWithRequestId(result.processed
       ? json({ received:true })
-      : json({ received:true,pendingReconciliation:true },{ status:202 }),requestId);
+      : json({ received:true,pendingReconciliation:true }),requestId);
   } catch (error) { return responseWithRequestId(errorResponse(error,requestId),requestId); }
 }
