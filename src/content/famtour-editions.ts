@@ -1,3 +1,10 @@
+type Flight = {
+  route: string;
+  numbers: string;
+  departure: string;
+  arrival: string;
+};
+
 export type FamtourEdition = {
   id: string;
   slug: string;
@@ -14,6 +21,7 @@ export type FamtourEdition = {
   imagem?: string;
   imagemAlt?: string;
   aereoIncluso: true;
+  voos: { ida: Flight; volta: Flight };
   inclusos: readonly string[];
 };
 
@@ -55,6 +63,10 @@ export const publishedFamtourEditions: readonly FamtourEdition[] = [
     imagem: "/assets/destinos/alagoas-2027.webp",
     imagemAlt: "Grupo em uma área arborizada à beira-mar em Alagoas",
     aereoIncluso: true,
+    voos: {
+      ida: { route: "Congonhas (CGH) → Maceió (MCZ)", numbers: "2454", departure: "06:00", arrival: "08:55" },
+      volta: { route: "Recife (REC) → Congonhas (CGH)", numbers: "4277", departure: "16:35", arrival: "20:05" },
+    },
     inclusos: INCLUSOS,
   },
   {
@@ -73,6 +85,10 @@ export const publishedFamtourEditions: readonly FamtourEdition[] = [
     imagem: "/famtour-rn.webp",
     imagemAlt: "Paisagem do Rio Grande do Norte",
     aereoIncluso: true,
+    voos: {
+      ida: { route: "Congonhas (CGH) → Natal (NAT)", numbers: "2455", departure: "06:15", arrival: "09:40" },
+      volta: { route: "Natal (NAT) → Congonhas (CGH)", numbers: "2562 / 6419", departure: "11:15", arrival: "17:20" },
+    },
     inclusos: INCLUSOS,
   },
   {
@@ -91,6 +107,10 @@ export const publishedFamtourEditions: readonly FamtourEdition[] = [
     imagem: "/famtour-noronha.webp",
     imagemAlt: "Paisagem de Fernando de Noronha",
     aereoIncluso: true,
+    voos: {
+      ida: { route: "Congonhas (CGH) → Fernando de Noronha (FEN)", numbers: "4004 / 4255", departure: "07:40", arrival: "15:50" },
+      volta: { route: "Fernando de Noronha (FEN) → Congonhas (CGH)", numbers: "4091 / 6085", departure: "16:30", arrival: "21:30" },
+    },
     inclusos: INCLUSOS,
   },
   {
@@ -109,6 +129,10 @@ export const publishedFamtourEditions: readonly FamtourEdition[] = [
     imagem: "/assets/destinos/ceara-2027.webp",
     imagemAlt: "Praia do Cumbuco, no Ceará",
     aereoIncluso: true,
+    voos: {
+      ida: { route: "Congonhas (CGH) → Fortaleza (FOR)", numbers: "4004 / 4035", departure: "07:40", arrival: "14:40" },
+      volta: { route: "Fortaleza (FOR) → Congonhas (CGH)", numbers: "4656 / 4145", departure: "10:15", arrival: "16:10" },
+    },
     inclusos: INCLUSOS,
   },
 ] as const;

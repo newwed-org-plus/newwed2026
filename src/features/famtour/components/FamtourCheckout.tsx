@@ -100,10 +100,10 @@ export function FamtourCheckoutButton({slug,className}: {slug:string;className?:
   return (
     <div className={className}>
       <button type="button" onClick={start} disabled={busy} className={`${purchaseClass} w-full`}>
-        {busy ? "Preparando pagamento…" : "Garantir minha vaga"}
+        {busy ? "Preparando pagamento…" : "Comprar agora · Garantir minha vaga"}
       </button>
       <div ref={widget}/>
-      {message && <p role="status" className="mt-2 font-sans text-sm text-[var(--color-destinos-marsala)]">{message}</p>}
+      {message && <p role="status" className="mt-2 font-sans text-sm">{message}</p>}
     </div>
   );
 }

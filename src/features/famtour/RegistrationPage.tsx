@@ -6,6 +6,8 @@ import {
   type FamtourEdition,
 } from "@/features/famtour/lib/famtours";
 
+const flightDate = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "long", timeZone: "UTC" });
+
 type PageProps = {
   edition: FamtourEdition;
   checkoutId?: string;
@@ -13,6 +15,11 @@ type PageProps = {
 
 export function InscricaoPage({ edition,checkoutId }: PageProps) {
   const interestHref = `/destinos?edicao=${encodeURIComponent(edition.slug)}&origem=inscricao#form`;
+
+  const flights = [
+    { label: "Ida", date: edition.dataInicio, ...edition.voos.ida },
+    { label: "Volta", date: edition.dataFim, ...edition.voos.volta },
+  ];
 
   return (
     <div className="min-h-screen bg-white text-[#191010]">
@@ -61,7 +68,8 @@ export function InscricaoPage({ edition,checkoutId }: PageProps) {
                   AÉREO INCLUSO
                 </span>
               </div>
-              <a href="#condicoes" className="mt-7 inline-flex min-h-11 items-center underline underline-offset-4">
+              <FamtourCheckoutButton slug={edition.slug} className="mt-7 max-w-sm" />
+              <a href="#condicoes" className="mt-2 inline-flex min-h-11 items-center underline underline-offset-4">
                 Ver condições de pagamento
               </a>
             </div>
@@ -116,6 +124,27 @@ export function InscricaoPage({ edition,checkoutId }: PageProps) {
           </div>
         </section>
 
+        <section aria-labelledby="voos-title" className="mx-auto max-w-7xl border-t border-black/10 px-6 py-12 md:px-10 md:py-16">
+          <h2 id="voos-title" className="font-serif text-4xl font-light">Voos previstos com a Azul</h2>
+          <p className="mt-3 max-w-3xl font-sans text-sm leading-relaxed text-black/65">
+            Os voos abaixo seguem a cotação da Azul e estão sujeitos a alteração. A bagagem despachada é à parte.
+          </p>
+          <dl className="mt-6 grid max-w-4xl gap-4 sm:grid-cols-2">
+            {flights.map(flight => (
+              <div key={flight.label} className="border border-black/10 bg-[#F7F4EE] p-5 font-sans text-sm">
+                <dt className="font-semibold text-[var(--color-destinos-marsala)]">
+                  {flight.label} · <time dateTime={flight.date}>{flightDate.format(new Date(flight.date))}</time>
+                </dt>
+                <dd className="mt-2 leading-relaxed">
+                  <span className="block font-medium">{flight.route}</span>
+                  <span className="block">Azul · {flight.numbers}</span>
+                  <span className="block">Saída {flight.departure} · Chegada {flight.arrival}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
         <section id="condicoes" aria-labelledby="condicoes-title" className="bg-[#F7F4EE] px-6 py-12 text-[var(--color-destinos-marsala)] md:px-10 md:py-16">
           <div className="mx-auto grid max-w-5xl items-center gap-8 md:grid-cols-2">
             <div>
@@ -131,8 +160,8 @@ export function InscricaoPage({ edition,checkoutId }: PageProps) {
                 Pague com Pix ou cartão em até {edition.parcelaQuantidade}x pelo Asaas. A vaga é confirmada após a aprovação do pagamento.
               </p>
               <FamtourCheckoutButton slug={edition.slug} className="mt-4 max-w-sm" />
-              <a href={interestHref} className="mt-4 inline-flex min-h-12 items-center bg-[var(--color-destinos-turquoise)] px-5 py-3 font-sans text-sm font-semibold text-[var(--color-destinos-ink)] hover:bg-[#8AB8B7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-destinos-ink)]">
-                Solicitar minha pré-inscrição
+              <a href={interestHref} className="mt-4 inline-flex min-h-12 items-center border border-current px-5 py-3 font-sans text-sm font-semibold text-[var(--color-destinos-ink)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-destinos-ink)]">
+                Pedir contato da equipe
               </a>
             </div>
           </div>
@@ -157,7 +186,7 @@ export function InscricaoPage({ edition,checkoutId }: PageProps) {
               </div>
               <div className="py-6">
                 <dt className="font-sans text-sm font-semibold uppercase tracking-[0.08em] text-[var(--color-destinos-marsala)]">
-                  A inscrição já pode ser enviada?
+                  Como posso comprar minha vaga?
                 </dt>
                 <dd className="mt-3 font-sans text-sm leading-relaxed text-black/65">
                   {famtourInformation.registration.detailPageAnswer}

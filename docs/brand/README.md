@@ -26,4 +26,4 @@ As fontes atuais do site seguem o pedido específico D-030 (Fedra Sans Std e Blo
 
 ## Marca Feira no card da Home
 
-A imagem `public/assets/brand/logo-feira-oficial.jpg` foi extraída sem alterações do objeto de imagem 140, página 4, do manual acima. Preserva o desenho, lettering, cores e proporção da versão oficial escolhida. Aplicada sobre a foto 2026 com camada marsala do grupo, conforme esclarecimento de 08/11.
+A Home usa o banner original `public/assets/brand/banner-feira.webp`, fornecido para a identidade do site e recuperado de `8af954f`. A arte já reúne a foto, o tratamento vinho e a marca oficial em negativo, na composição pedida para o ecossistema. A fotografia de 2026 fica disponível no acervo de `/feira`.

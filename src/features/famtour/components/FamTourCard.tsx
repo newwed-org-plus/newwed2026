@@ -89,6 +89,12 @@ export function FamTourCard({ famtour, onRequestInformation }: Props) {
 
           <FamtourCheckoutButton slug={famtour.slug} className="mt-5" />
           <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
+            <Link
+              href={`/destinos/inscricao/${famtour.slug}`}
+              className="flex min-h-14 items-center justify-center border border-black/20 bg-white px-4 py-3 text-center font-sans text-xs font-semibold uppercase tracking-[0.1em] text-[var(--color-destinos-ink)] transition-colors hover:bg-[#F7F4EE] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-destinos-ink)] sm:min-h-12"
+            >
+              Ver mais informações
+            </Link>
             <button
               type="button"
               onClick={() => onRequestInformation(famtour.slug)}
@@ -96,12 +102,6 @@ export function FamTourCard({ famtour, onRequestInformation }: Props) {
             >
               Solicitar informações
             </button>
-            <Link
-              href={`/destinos/inscricao/${famtour.slug}#condicoes`}
-              className="flex min-h-14 items-center justify-center border border-[var(--color-destinos-turquoise)] bg-[var(--color-destinos-turquoise)] px-4 py-3 text-center font-sans text-xs font-semibold uppercase tracking-[0.1em] text-[var(--color-destinos-ink)] transition-colors hover:bg-[#8AB8B7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-destinos-ink)] sm:min-h-12"
-            >
-              Ver edição e parcelamento
-            </Link>
           </div>
         </div>
       </div>

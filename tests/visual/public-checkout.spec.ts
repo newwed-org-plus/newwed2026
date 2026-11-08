@@ -32,10 +32,12 @@ test("Garantir minha vaga retoma o mesmo pedido e abre o checkout Asaas",async (
   await page.goto(`${origin}/destinos#famtours`);
   await page.waitForLoadState("networkidle");
   await page.getByRole("button",{name:"Fechar popup",exact:true}).click();
-  const button = page.locator("#famtours article").first().getByRole("button",{name:"Garantir minha vaga"});
+  const button = page.locator("#famtours article").first().getByRole("button",{name:"Comprar agora · Garantir minha vaga"});
   await button.click();
   await expect(page.getByText("Tente novamente.",{exact:true})).toBeVisible();
-  await button.click();
+  await page.locator("#famtours article").first().getByRole("link",{name:"Ver mais informações"}).click();
+  await expect(page).toHaveURL(`${origin}/destinos/inscricao/${slug}`);
+  await page.getByRole("button",{name:"Comprar agora · Garantir minha vaga"}).first().click();
   await expect(page).toHaveURL(sandbox);
   expect(keys).toEqual([keys[0],keys[0]]);
   expect(keys[0]).toMatch(/^[a-f0-9-]{36}$/);
