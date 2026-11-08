@@ -345,3 +345,7 @@ Complemento antes da publicação: manter a foto 2026 no card Feira, tratá-la c
 Na revisão de 08/11/2026, a cliente apontou o retângulo branco e a diferença de tratamento da foto da Feira. O contato encaminhou a composição original como referência. Restaurar o banner original completo no ecossistema da Home. A foto de 2026 permanece no acervo da Feira. Manter os quatro CTAs do ecossistema e as marcas parceiras brancas.
 
 Expor compra direta nos cards e no topo e nas condições de cada edição de Destinos. Separar os detalhes e o pedido de contato, que continua no formulário. A página de detalhes apresenta os voos previstos na cotação Azul encaminhada em 08/11, com ida e volta, aeroportos, horários e números dos voos, sujeitos a alteração. Bagagem despachada é à parte. A contratação dos voos não é inferida da cotação. Não definir novos valores para cartão ou Pix sem condições comerciais confirmadas.
+
+## D-069 — Mosaico e vídeo oficial da Feira de 2026
+
+Em 08/11/2026, a cliente pediu voltar ao mosaico e encaminhou o vídeo de 2026. Mostrar as oito edições disponíveis em grade de quatro colunas, com duas em telas pequenas. Preservar ampliação, navegação por teclado e links de cada edição. Destacar o vídeo de 2026 e manter o de 2019 no cartão correspondente. Usar o acervo disponível até a equipe enviar as novas fotografias e o vídeo de 2027.
