@@ -306,14 +306,24 @@ for (const [viewportName,width,height] of viewports) {
       await page.locator("#famtours").getByRole("button", { name: "Solicitar informações", exact: true }).nth(index).click();
       await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=${slug}#form`);
       await expect(page.locator("#form")).toBeInViewport();
-      await page.locator("#famtours").getByRole("link", { name: "Ver edição e parcelamento", exact: true }).nth(index).click();
+      await page.locator("#famtours").getByRole("link", { name: "Ver mais informações", exact: true }).nth(index).click();
+      await expect(page).toHaveURL(`${siteOrigin}/destinos/inscricao/${slug}`);
+      await expect(page.getByRole("button", { name: /Comprar agora/ }).first()).toBeVisible();
+      const flights = page.getByRole("region", { name: "Voos previstos com a Azul" });
+      await expect(flights.getByText(/Ida ·/)).toBeVisible();
+      await expect(flights.getByText(/Volta ·/)).toBeVisible();
+      if (index === 0) {
+        await expect(flights.getByText("Congonhas (CGH) → Maceió (MCZ)")).toBeVisible();
+        await expect(flights.getByText("Recife (REC) → Congonhas (CGH)")).toBeVisible();
+      }
+      await page.getByRole("link", { name: "Ver condições de pagamento" }).click();
       await expect(page).toHaveURL(`${siteOrigin}/destinos/inscricao/${slug}#condicoes`);
       const conditions = page.getByRole("region", { name: "Condições de pagamento" });
       await expect(conditions).toBeInViewport();
       await expect(conditions.getByText(/12x de R\$/)).toBeVisible();
       await expect(conditions.getByText(/à vista/)).toBeVisible();
-      await expect(conditions.getByRole("link", { name: "Solicitar minha pré-inscrição" })).toHaveAttribute("href", `/destinos?edicao=${slug}&origem=inscricao#form`);
-      await conditions.getByRole("link", { name: "Solicitar minha pré-inscrição" }).click();
+      await expect(conditions.getByRole("link", { name: "Pedir contato da equipe" })).toHaveAttribute("href", `/destinos?edicao=${slug}&origem=inscricao#form`);
+      await conditions.getByRole("link", { name: "Pedir contato da equipe" }).click();
       await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=${slug}&origem=inscricao#form`);
       await expect(page.locator("#form")).toBeInViewport();
       await expect(page.getByRole("dialog")).not.toBeVisible();

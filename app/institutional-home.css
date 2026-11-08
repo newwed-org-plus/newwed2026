@@ -149,7 +149,6 @@
   text-align: center;
   color: white;
 }
-.nw-project-card#feira .nw-project-copy { background: linear-gradient(#7c234199 0%, #7c2341b3 42%, #1d1115e8 91%); }
 .nw-project-bottom { display: flex; flex-direction: column; align-items: center; }
 .nw-project-bottom p {
   max-width: 195px;
@@ -401,5 +400,3 @@
 
 /* Preserve the original partner artwork and alpha while displaying white marks. */
 .nw-home-partners img { filter: brightness(0) invert(1); }
-
-.nw-project-brand { position: absolute; top: 13%; left: 8%; width: 84%; height: auto; object-fit: contain; }

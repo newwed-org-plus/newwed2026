@@ -4,7 +4,7 @@ Atualizado em: 2026-11-08.
 
 ## Objetivo ativo
 
-Onda 47 implementada e validada localmente (D-067/CP-47): filtro marsala no card Feira da Home, marcas parceiras brancas e Instagram contextual nos cinco cabeçalhos. Branch `codex/wave-47-visual-social`, base `bb9451e`; sem migration, push ou deploy. Tipos/lint/TypeScript/build, 190 unitários, 56 públicos e 90 cenários visuais verificados (87 na execução integral + três repetidos após corrigir seletor de teste). Auditoria bloqueada pela rede; Linux/CI pendentes. Onda 46 financeira permanece em checkout separado, intocada.
+Onda 51 (D-068/CP-51): referência visual original da Feira recuperada, compra direta visível nos cards e nas páginas das quatro edições e cotação Azul identificada como previsão. A Onda 50 publicou o checkout público após homologar Pix e cartão em 12x no Sandbox. Os ajustes anteriores de parceiros e Instagram da Onda 47 estão em CP-47.
 
 Onda 45 (CP-45/D-065): ajustes públicos da Home, Feira, Destinos e pré-inscrição. PDF final, envio por e-mail, checkout público, checkout do Guia Profissional e parte do acervo histórico continuam pendentes de material ou integração confirmados.
 
