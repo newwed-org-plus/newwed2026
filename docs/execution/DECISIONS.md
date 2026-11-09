@@ -361,3 +361,9 @@ Cada nova tentativa grava o método e o total em centavos no momento da reserva.
 Os áudios de 08/11 às 19h33 esclarecem que o card Feira deve conservar o filtro vinho e a marca em negativo, sobre a foto com o buquê da edição de 2026. Usar os originais encaminhados para as capas de 2022 a 2025 e conservar a capa de 2026 conforme confirmação da equipe. No Guia, usar a imagem das duas revistas do banner institucional na página de detalhes.
 
 Destinos adota o mesmo cabeçalho institucional de Feira, Guia e Workshop. A navegação interna do Famtour continua disponível em um menu próprio. A capa adota a mesma ordem dos outros projetos, com título, descrição e CTA à esquerda e fotos à direita no desktop. A marca de Destinos fica integrada ao conteúdo, e a área antes separada só para ela é removida. Preservar o acesso à compra, aos voos, aos formulários e às edições.
+
+## D-072 — Carrossel de Destinos e marcas nas páginas dos projetos
+
+Em 09/11/2026, o usuário autorizou publicar a revisão visual do vídeo de 08/11 e do print marcado às 20h36. O carrossel existente na abertura de Destinos recebe as dez fotos encaminhadas às 20h28, na ordem do envio. As setas, a indicação da posição e a pausa mantêm o painel operável no celular. A rotação respeita a preferência de movimento reduzido. O título de Destinos usa a mesma tipografia das páginas de projeto, com a edição em uma linha menor. A marca de Destinos também fica menor.
+
+As marcas Feira Tendência e Guia Nordeste vêm dos objetos 140 e 49 do Manual Grupo New Wed 2026 e aparecem acima do título de cada projeto. O menu institucional mantém a marca do grupo. O acervo, o e-book e as integrações comerciais não fazem parte desta alteração.

@@ -1,10 +1,12 @@
 # Status de execução
 
-Atualizado em: 2026-11-08.
+Atualizado em: 2026-11-09.
 
 ## Objetivo ativo
 
-Onda 54 (D-071/CP-54): foto de 2026 no card Feira com filtro vinho e marca em negativo, capas de 2022 a 2025 recebidas, duas revistas no Guia e menu institucional em Destinos.
+Onda 55 (D-072/CP-55): dez fotos no carrossel de Destinos, tipografia compartilhada na abertura e marcas oficiais nas páginas da Feira e do Guia.
+
+Onda 54 (D-071/CP-54): foto de 2026 e marca em negativo na Home, capas de 2022 a 2025, duas revistas no Guia e menu institucional em Destinos.
 
 Onda 53 (D-070/CP-53): Pix à vista e cartão em até 12x com seleção antes do Asaas. Repasse confirmado no simulador da conta para as quatro edições.
 

@@ -62,3 +62,44 @@ test("Home mostra a Feira de 2026 em marsala e marcas parceiras brancas", async 
   await expect(page.getByRole("img", { name: "Governo de Pernambuco", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Conheça New Wed Feira Tendência", exact: true })).toHaveAttribute("href", "/feira");
 });
+
+test("Feira e Guia exibem a marca própria acima do título", async ({ page }) => {
+  for (const [route, brand] of [
+    ["/feira", "New Wed Feira Tendência"],
+    ["/guia", "New Wed Guia Nordeste"],
+  ]) {
+    await page.goto(origin + route);
+    const hero = page.locator(".nw-detail-hero");
+    const logo = hero.getByRole("img", { name: brand, exact: true });
+    await expect(logo).toBeVisible();
+    await expect.poll(() => logo.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    const brandBox = await logo.boundingBox();
+    const titleBox = await hero.getByRole("heading", { level: 1 }).boundingBox();
+    expect(brandBox!.y + brandBox!.height).toBeLessThan(titleBox!.y);
+  }
+});
+
+test("Carrossel de Destinos exibe as dez fotos e funciona a 320px", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(origin + "/destinos");
+  await page.getByRole("button", { name: "Fechar popup", exact: true }).click();
+  const carousel = page.getByRole("region", { name: "Fotos do FAMTOUR" });
+  const next = carousel.getByRole("button", { name: "Próxima foto" });
+  const activePhoto = carousel.getByRole("img");
+  const sources = new Set<string>();
+  for (let index = 1; index <= 10; index += 1) {
+    await expect(carousel.getByText(`${index} / 10`, { exact: true })).toBeVisible();
+    await expect.poll(() => activePhoto.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    const source = await activePhoto.getAttribute("src");
+    expect(source).toMatch(/^\/assets\/destinos\/abertura\/.+\.webp$/);
+    sources.add(source!);
+    await next.click();
+  }
+  expect(sources.size).toBe(10);
+  await expect(carousel.getByText("1 / 10", { exact: true })).toBeVisible();
+  await expect(carousel.getByRole("button", { name: "Pausar carrossel" })).toBeHidden();
+  await carousel.getByRole("button", { name: "Foto anterior" }).click();
+  await expect(carousel.getByText("10 / 10", { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+});

@@ -290,7 +290,7 @@ for (const [viewportName,width,height] of viewports) {
         };
       });
       expect(typography.loaded).toEqual(expect.arrayContaining(["Fedra Sans Std:300", "Fedra Sans Std:350", "Fedra Sans Std:700", "BlockGothicRR:500"]));
-      expect(typography.heading).toContain(route === "/" ? "Fedra Sans Std" : "BlockGothicRR");
+      expect(typography.heading).toContain("Fedra Sans Std");
       expect(typography.synthesis).toBe("none");
     }
     expect(remoteFonts).toEqual([]);
