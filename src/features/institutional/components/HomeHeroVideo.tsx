@@ -28,7 +28,7 @@ export function HomeHeroVideo() {
     <div className="nw-hero-media">
       <video
         ref={videoRef}
-        src="/assets/videos/new-wed-home.mp4"
+        src="/media/new-wed-home.mp4"
         poster="/assets/brand/new-wed-home-poster.webp"
         aria-label="Vídeo institucional do Grupo New Wed"
         width={1280}

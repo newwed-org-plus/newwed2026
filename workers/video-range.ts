@@ -49,7 +49,9 @@ export async function serveVideo(request: Request, assets: Pick<Fetcher, "fetch"
     cancel: reason => reader.cancel(reason),
   });
   const fixed = new FixedLengthStream(length);
-  ctx.waitUntil(slice.pipeTo(fixed.writable));
+  // The client may cancel an open range before requesting a different offset.
+  // Stream failures already reach the response body through the pipe.
+  ctx.waitUntil(slice.pipeTo(fixed.writable).catch(() => {}));
   headers.set("Content-Range", `bytes ${start}-${end}/${size}`);
   headers.set("Content-Length", String(length));
   return new Response(fixed.readable, {status: 206, headers});
