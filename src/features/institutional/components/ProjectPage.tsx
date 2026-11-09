@@ -13,6 +13,7 @@ export function ProjectPage({ projectId }: { projectId: InstitutionalProjectId }
         <section className="nw-detail-hero" aria-labelledby="project-title">
           <div className="nw-detail-copy">
             <Link className="nw-back-link" href="/#projetos">← Todos os projetos</Link>
+            {"brand" in project && <img className="nw-detail-brand" {...project.brand} />}
             <p className="nw-eyebrow">{project.name} · {project.eyebrow}</p>
             <h1 id="project-title">{project.title}</h1>
             <p className="nw-detail-description">{project.description}</p>
