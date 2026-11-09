@@ -172,6 +172,7 @@ for (const [viewportName,width,height] of viewports) {
     }
     for (const section of ["sobre", "contato"]) {
       await visit(page,`${siteOrigin}/`);
+      await page.waitForLoadState("networkidle");
       if (viewportName === "mobile") await page.locator(".nw-mobile-menu summary").click();
       const menu = page.getByRole("navigation", { name: viewportName === "mobile" ? "Navegação principal mobile" : "Navegação principal", exact: true });
       await menu.locator(`a[href="/#${section}"]`).click();
@@ -326,7 +327,7 @@ for (const [viewportName,width,height] of viewports) {
       const conditions = page.getByRole("region", { name: "Condições de pagamento" });
       await expect(conditions).toBeInViewport();
       await expect(conditions.getByText(/12x de aprox\. R\$/)).toBeVisible();
-      await expect(conditions.getByText(/à vista/)).toBeVisible();
+      await expect(conditions.getByText(/Pix à vista/i)).toBeVisible();
       await expect(conditions.getByRole("link", { name: "Pedir contato da equipe" })).toHaveAttribute("href", `/destinos?edicao=${slug}&origem=inscricao#form`);
       await conditions.getByRole("link", { name: "Pedir contato da equipe" }).click();
       await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=${slug}&origem=inscricao#form`);

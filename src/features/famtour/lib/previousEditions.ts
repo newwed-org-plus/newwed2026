@@ -32,12 +32,14 @@ export const PREVIOUS_EDITIONS: readonly PreviousEdition[] = [
   {
     ...famtourInformation.previousEditions[0],
     capa: noronhaCover,
+    videoUrl: "/destinos/edicoes/fernando-de-noronha-2026#video",
     capaAlt: "Praia de Fernando de Noronha ao pôr do sol",
     galeria: [
       {
-        type: "image",
-        src: noronhaCover,
-        alt: "Praia de Fernando de Noronha ao pôr do sol",
+        type: "video",
+        src: "/assets/destinos/videos/noronha-2026.mp4",
+        title: "Trailer do Famtour Fernando de Noronha 2026",
+        poster: noronhaCover,
       },
     ],
   },
