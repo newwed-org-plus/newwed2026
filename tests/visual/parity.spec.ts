@@ -118,6 +118,9 @@ test("Destinos usa o cabeçalho do grupo e mantém o CTA turquesa na primeira te
     const box = await cta.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.y + box!.height).toBeLessThanOrEqual(height);
+    const ebookButton = await page.getByRole("button", { name: "E-book gratuito", exact: true }).boundingBox();
+    expect(ebookButton).not.toBeNull();
+    expect(box!.y + box!.height).toBeLessThanOrEqual(ebookButton!.y);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await mkdir(resolve("test-results/visual/destinos"), { recursive: true });
     await page.screenshot({ path: resolve(`test-results/visual/destinos/hero-${width}.png`), animations: "disabled" });

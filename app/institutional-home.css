@@ -436,6 +436,9 @@
 @media (max-width: 360px) {
   .nw-destinos-hero .nw-detail-copy { padding-top: 16px; }
   .nw-destinos-hero .nw-detail-copy .nw-back-link { margin-bottom: 10px; }
-  .nw-destinos-hero .nw-detail-description { line-height: 1.5; }
-  .nw-destinos-hero .nw-detail-actions { margin-top: 12px; }
+  .nw-destinos-hero-brand { width: 42px; }
+  .nw-destinos-hero .nw-eyebrow { display: none; }
+  .nw-destinos-hero h1 { margin-block: 8px 10px; }
+  .nw-destinos-hero .nw-detail-description { line-height: 1.4; }
+  .nw-destinos-hero .nw-detail-actions { margin-top: 8px; }
 }
