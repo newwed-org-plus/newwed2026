@@ -11,7 +11,7 @@ export const institutionalProjects = {
   },
   guia: {
     ...institutionalProjectContent.guia,
-    image: "/assets/brand/guia-duas-revistas.webp",
+    image: "/assets/brand/guia-home-horizontal.webp",
     imageAlt: "Duas capas do New Wed Guia Nordeste lado a lado",
     brand: { src: "/assets/brand/guia-nordeste.webp", alt: "New Wed Guia Nordeste", width: 106, height: 57 },
   },

@@ -14,19 +14,34 @@
 .nw-home a { text-decoration: none; }
 
 .nw-hero {
-  position: relative;
-  min-height: clamp(570px, 48vw, 750px);
-  background: #eee9e2 url("/new-wed-institutional-hero.jpg") center center / cover no-repeat;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  align-items: center;
+  background: #f8f4ef;
 }
 
-.nw-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(255,255,255,.91) 0%, rgba(255,255,255,.79) 29%, rgba(255,255,255,.22) 53%, transparent 68%);
-  pointer-events: none;
+.nw-hero > .nw-header { grid-column: 1 / -1; }
+.nw-hero-media {
+  position: relative;
+  margin: 44px max(5.5vw, 28px) 44px 0;
+  background: #171915;
 }
+.nw-hero-media video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+.nw-hero-media button {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: white;
+  background: #171915d9;
+  border: 1px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.nw-hero-media button:focus-visible { outline: 2px solid white; outline-offset: 3px; }
 
 .nw-header {
   position: relative;
@@ -74,10 +89,7 @@
 .nw-header-instagram:hover { background: var(--nw-soft); }
 
 .nw-hero-content {
-  position: relative;
-  z-index: 1;
-  width: min(620px, 52vw);
-  margin: clamp(105px, 9vw, 165px) 0 95px max(11.5vw, 44px);
+  padding: clamp(40px, 6vw, 92px) clamp(24px, 4vw, 64px) clamp(40px, 6vw, 92px) max(5.5vw, 28px);
 }
 
 .nw-hero h1 {
@@ -151,6 +163,9 @@
 }
 #feira.nw-project-card > img { object-fit: cover; object-position: center; filter: brightness(.62) saturate(.8); }
 #feira.nw-project-card .nw-project-copy { background: radial-gradient(ellipse at 18% 0%, #b3365e38, transparent 56%), linear-gradient(155deg, #431021b3 0%, #64142dbf 44%, #220b15ed 100%); }
+#guia.nw-project-card { background: #431021; }
+#guia.nw-project-card > img { position: absolute; top: 12%; height: auto; }
+.nw-project-title { margin: 0 0 10px; font-size: clamp(16px, 1.6vw, 25px); font-weight: 350; }
 .nw-project-brand { position: absolute; top: 13%; left: 8%; width: 84%; height: auto; }
 .nw-project-bottom { display: flex; flex-direction: column; align-items: center; }
 .nw-project-bottom p {
@@ -240,8 +255,8 @@
 }
 
 @media (max-width: 700px) {
-  .nw-hero { min-height: 690px; background-position: 69% bottom; }
-  .nw-hero::before { background: linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(255,255,255,.94) 28%, rgba(255,255,255,.15) 68%, transparent 100%); }
+  .nw-hero { grid-template-columns: minmax(0, 1fr); }
+  .nw-hero-media { margin: 0; }
   .nw-header { min-height: 84px; padding: 12px 23px; background: rgba(255,255,255,.94); }
   .nw-logo { width: 72px; }
   .nw-nav { display: none; }
@@ -251,7 +266,7 @@
   .nw-mobile-menu summary span { width: 22px; height: 1px; background: #252322; }
   .nw-mobile-menu nav { position: absolute; top: 47px; right: -23px; display: flex; flex-direction: column; gap: 0; width: min(290px, 90vw); padding: 10px 23px; background: #fff; box-shadow: 0 20px 30px rgba(0,0,0,.1); }
   .nw-mobile-menu nav a { padding: 13px 0; border-bottom: 1px solid #eeece9; font-size: 10px; }
-  .nw-hero-content { width: calc(100% - 48px); margin: 72px 24px 0; }
+  .nw-hero-content { padding: 34px 24px; }
   .nw-hero h1 { font-size: clamp(42px, 9vw, 58px); }
   .nw-hero-content p { font-size: clamp(27px, 7vw, 37px); margin-bottom: 26px; }
   .nw-projects { padding: 46px 20px 48px; }
@@ -358,7 +373,6 @@
   .nw-story-copy p { font-size: 13px; }
 }
 @media (max-width: 700px) {
-  .nw-hero-content { margin-top: 48px; }
   .nw-hero h1 { font-size: clamp(32px, 7.7vw, 46px); line-height: 1.12; }
   .nw-hero-content p { font-size: 13px; }
   .nw-story-image { position: relative; height: auto; aspect-ratio: 9 / 12; }

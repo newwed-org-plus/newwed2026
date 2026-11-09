@@ -375,3 +375,9 @@ Priorizar a parcela nos cards e no botão de cartão. Mostrar o total em separad
 Na Feira, aplicar a foto encaminhada na abertura, reenquadrar a capa de 2023, ligar o vídeo de 2024 ao acervo e voltar a destacar 2019. O Workshop recebe a foto encaminhada e a marca do manual.
 
 O PDF gratuito de Noronha recebido em 09/11 tem links para a oferta Hotmart e para edições abertas. Disponibilizar o download após o cadastro. A confirmação reflete a ação efetivamente concluída. A integração de e-mail atual atende destinatários internos e não entrega o PDF aos cadastrados.
+
+## D-074 — Vídeo institucional, banner do Guia e confirmação do e-book
+
+O vídeo indicado para a Home substitui a foto na abertura. A versão web preserva o enquadramento horizontal, fica ao lado do texto no desktop e abaixo do texto no celular. Reproduz sem som e oferece pausa. Com movimento reduzido, a reprodução depende do visitante.
+
+A arte horizontal do Guia, enviada sem texto, aparece na Home e na página Guia. O título e a descrição são texto do site. O PDF de Noronha enviado é idêntico ao arquivo publicado. A instrução de deixar o contato aparece somente antes de concluir o cadastro.

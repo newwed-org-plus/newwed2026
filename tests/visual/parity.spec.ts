@@ -88,6 +88,21 @@ async function settle(page: import("@playwright/test").Page) {
   await page.waitForTimeout(250);
 }
 
+test("o vídeo da Home respeita movimento reduzido e permite reproduzir e pausar", async ({ page }) => {
+  await page.setViewportSize({width: 390, height: 844});
+  await page.emulateMedia({reducedMotion: "reduce"});
+  await page.goto(siteOrigin);
+
+  const video = page.locator(".nw-hero video");
+  const play = page.getByRole("button", {name: "Reproduzir vídeo institucional"});
+  await expect(play).toBeEnabled();
+  await expect(video).toHaveJSProperty("paused", true);
+  await play.click();
+  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.currentTime)).toBeGreaterThan(0);
+  await page.getByRole("button", {name: "Pausar vídeo institucional"}).click();
+  await expect(video).toHaveJSProperty("paused", true);
+});
+
 test("URLs antigas da FAMTOUR preservam edição, campanha e seção", async ({ page, request }) => {
   const query = "edicao=famtour-rn-abril-2027&utm_source=validacao&utm_source=link";
   for (const suffix of ["", "/edicoes/fernando-de-noronha-2026", "/inscricao/famtour-rn-abril-2027"]) {
@@ -132,6 +147,7 @@ test("Destinos usa o cabeçalho do grupo e mantém o CTA turquesa na primeira te
 for (const [viewportName,width,height] of viewports) {
   test(`${viewportName} · institucional-home estrutura`,async ({ page }) => {
     await page.setViewportSize({ width,height });
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await visit(page,`${siteOrigin}/`,{ waitUntil:"load" });
     await settle(page);
     await expect(page.getByRole("heading",{ name:/O maior ecossistema de conexões para o mercado de casamentos do Nordeste/i })).toBeVisible();

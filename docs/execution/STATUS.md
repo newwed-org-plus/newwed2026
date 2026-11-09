@@ -4,6 +4,8 @@ Atualizado em: 2026-11-09.
 
 ## Objetivo ativo
 
+Onda 57 (D-074/CP-57). Vídeo institucional na abertura da Home, banner horizontal do Guia e confirmação simplificada do e-book.
+
 Onda 56 (D-073/CP-56): revisão de Feira, Workshop e Destinos após os encaminhamentos de 09/11, vídeo de 2024 no acervo e PDF de Noronha disponível após cadastro.
 
 Onda 55 (D-072/CP-55): dez fotos no carrossel de Destinos, tipografia compartilhada na abertura e marcas oficiais nas páginas da Feira e do Guia.
