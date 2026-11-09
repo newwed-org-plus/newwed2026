@@ -87,6 +87,7 @@ test("Carrossel de Destinos exibe as dez fotos e funciona a 320px", async ({ pag
   const carousel = page.getByRole("region", { name: "Fotos do FAMTOUR" });
   const next = carousel.getByRole("button", { name: "Próxima foto" });
   const activePhoto = carousel.getByRole("img");
+  await expect(activePhoto).toHaveAttribute("src", "/assets/destinos/abertura/encontro-noronha.webp");
   const sources = new Set<string>();
   for (let index = 1; index <= 10; index += 1) {
     await expect(carousel.getByText(`${index} / 10`, { exact: true })).toBeVisible();
@@ -98,8 +99,25 @@ test("Carrossel de Destinos exibe as dez fotos e funciona a 320px", async ({ pag
   }
   expect(sources.size).toBe(10);
   await expect(carousel.getByText("1 / 10", { exact: true })).toBeVisible();
-  await expect(carousel.getByRole("button", { name: "Pausar carrossel" })).toBeHidden();
+  await page.clock.install();
+  const play = carousel.getByRole("button", { name: "Reproduzir carrossel" });
+  await expect(play).toBeVisible();
+  await page.clock.runFor(5000);
+  await expect(carousel.getByText("1 / 10", { exact: true })).toBeVisible();
+  await play.click();
+  await expect(carousel.getByRole("button", { name: "Pausar carrossel" })).toBeVisible();
+  await page.clock.runFor(5000);
+  await expect(carousel.getByText("2 / 10", { exact: true })).toBeVisible();
+  await carousel.getByRole("button", { name: "Pausar carrossel" }).click();
+  await carousel.getByRole("button", { name: "Foto anterior" }).click();
   await carousel.getByRole("button", { name: "Foto anterior" }).click();
   await expect(carousel.getByText("10 / 10", { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.reload();
+  await page.getByRole("button", { name: "Fechar popup", exact: true }).click();
+  await expect(carousel.getByRole("button", { name: "Pausar carrossel" })).toBeVisible();
+  await page.clock.runFor(5000);
+  await expect(carousel.getByText("2 / 10", { exact: true })).toBeVisible();
 });

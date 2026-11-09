@@ -430,7 +430,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .nw-destinos-photo > img { transition: none; }
-  .nw-destinos-slide-controls .nw-destinos-slide-playback { display: none; }
 }
 
 @media (max-width: 360px) {
