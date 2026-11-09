@@ -367,3 +367,11 @@ Destinos adota o mesmo cabeçalho institucional de Feira, Guia e Workshop. A nav
 Em 09/11/2026, o usuário autorizou publicar a revisão visual do vídeo de 08/11 e do print marcado às 20h36. O carrossel existente na abertura de Destinos recebe as dez fotos encaminhadas às 20h28, na ordem do envio. As setas, a indicação da posição e a pausa mantêm o painel operável no celular. A rotação respeita a preferência de movimento reduzido. O título de Destinos usa a mesma tipografia das páginas de projeto, com a edição em uma linha menor. A marca de Destinos também fica menor.
 
 As marcas Feira Tendência e Guia Nordeste vêm dos objetos 140 e 49 do Manual Grupo New Wed 2026 e aparecem acima do título de cada projeto. O menu institucional mantém a marca do grupo. O acervo, o e-book e as integrações comerciais não fazem parte desta alteração.
+
+## D-073 — Revisão de 09/11 e e-book de Noronha
+
+Priorizar a parcela nos cards e no botão de cartão. Mostrar o total em separado ao escolher o meio de pagamento, antes do Asaas, sem alterar valores ou integrações. Na abertura de Destinos, ajustar o título e explicar as visitas e conexões do Famtour. Edições com vídeo público confirmado apresentam o CTA de vídeo. Preservar as demais páginas de edição.
+
+Na Feira, aplicar a foto encaminhada na abertura, reenquadrar a capa de 2023, ligar o vídeo de 2024 ao acervo e voltar a destacar 2019. O Workshop recebe a foto encaminhada e a marca do manual.
+
+O PDF gratuito de Noronha recebido em 09/11 tem links para a oferta Hotmart e para edições abertas. Disponibilizar o download após o cadastro. A confirmação reflete a ação efetivamente concluída. A integração de e-mail atual atende destinatários internos e não entrega o PDF aos cadastrados.

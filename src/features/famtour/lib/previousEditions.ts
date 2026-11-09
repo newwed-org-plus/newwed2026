@@ -1,3 +1,4 @@
+import pipaCover from "@/assets/pipa.jpg";
 import {famtourInformation} from '@/content/famtour-information';
 
 const noronhaCover = "/assets/destinos/noronha-2026.webp";
@@ -23,10 +24,11 @@ export type PreviousEdition = {
   ano: number;
   capa: string;
   capaAlt: string;
+  videoUrl?: string;
   galeria: readonly PreviousEditionMedia[];
 };
 
-export const PREVIOUS_EDITIONS = [
+export const PREVIOUS_EDITIONS: readonly PreviousEdition[] = [
   {
     ...famtourInformation.previousEditions[0],
     capa: noronhaCover,
@@ -54,6 +56,7 @@ export const PREVIOUS_EDITIONS = [
   {
     ...famtourInformation.previousEditions[2],
     capa: alagoasCover,
+    videoUrl: "https://drive.google.com/file/d/1qXtoGNpkbzF71cIAC7oHeRJRLGRF552P/view",
     capaAlt: "Capela branca à beira-mar em Alagoas",
     galeria: [
       {
@@ -63,7 +66,16 @@ export const PREVIOUS_EDITIONS = [
       },
     ],
   },
-] as const satisfies readonly PreviousEdition[];
+  {
+    slug: "pipa-2025",
+    destino: "Pipa",
+    ano: 2025,
+    capa: pipaCover.src,
+    capaAlt: "Vista da costa de Pipa",
+    videoUrl: "https://drive.google.com/file/d/1mnEmQ36A0sJ5eT9i6qeWhgcWfhqQnon-/view",
+    galeria: [{ type: "image", src: pipaCover.src, alt: "Vista da costa de Pipa" }],
+  },
+];
 
 export function getPreviousEditionBySlug(slug: string) {
   return PREVIOUS_EDITIONS.find((edition) => edition.slug === slug);

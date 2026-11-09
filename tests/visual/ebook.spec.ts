@@ -31,7 +31,7 @@ test('pedido só confirma após resposta e falha permite tentar novamente',async
   await page.route('**/api/public/ebook',route=>{
     attempts++;
     expect(route.request().postDataJSON()).toMatchObject({nome:'VALIDACAO Pessoa',empresa:'Empresa sintética',consent:{accepted:true}});
-    return route.fulfill({status:attempts===1?503:200,json:attempts===1?{message:'Tente novamente.'}:{accepted:true,downloadUrl:null}});
+    return route.fulfill({status:attempts===1?503:200,json:attempts===1?{message:'Tente novamente.'}:{accepted:true,downloadUrl:"/assets/ebooks/noronha-alem-do-cenario.pdf"}});
   });
   await page.goto(`${origin}/destinos`,{waitUntil:'domcontentloaded'});
   const popup=page.getByRole('dialog');
@@ -42,11 +42,11 @@ test('pedido só confirma após resposta e falha permite tentar novamente',async
   await popup.getByRole('checkbox').check();
   await popup.getByRole('button',{name:'Receber e-book',exact:true}).click();
   await expect(popup.getByRole('alert')).toHaveText('Tente novamente.');
-  await expect(popup.getByText('Cadastro recebido!')).not.toBeVisible();
+  await expect(popup.getByText('Cadastro confirmado!')).not.toBeVisible();
   await popup.getByRole('button',{name:'Receber e-book',exact:true}).click();
-  await expect(popup.getByRole('status')).toContainText('Cadastro recebido!');
-  await expect(popup.getByRole('status')).toContainText('ainda não está disponível');
-  await expect(popup.getByRole('link',{name:'Baixar e-book'})).toHaveCount(0);
+  await expect(popup.getByRole('status')).toContainText('Cadastro confirmado!');
+  await expect(popup.getByRole('status')).toContainText('pronto para baixar');
+  await expect(popup.getByRole('link',{name:'Baixar e-book'})).toHaveAttribute('href', '/assets/ebooks/noronha-alem-do-cenario.pdf');
   await popup.getByRole('link',{name:'Ver edições abertas'}).click();
   await expect(page).toHaveURL(`${origin}/destinos?origem=ebook#famtours`);
   await expect(page.locator('#famtours')).toBeInViewport();

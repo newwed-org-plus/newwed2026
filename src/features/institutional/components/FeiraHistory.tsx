@@ -10,7 +10,7 @@ const editions = [
   { year: 2019, description: "Público e expositores na New Wed Feira de 2019", video: "xhentgAI9pU" },
   { year: 2022, description: "Vista dos estandes da New Wed Feira de 2022, com uma profissional em primeiro plano", video: "37FaAgAqHnM" },
   { year: 2023, description: "Retrato em frente à entrada da New Wed Feira Tendência de 2023", video: "OqfXxlvGmyE" },
-  { year: 2024, description: "Retrato diante do painel da New Wed Feira Tendência de 2024", video: null },
+  { year: 2024, description: "Retrato diante do painel da New Wed Feira Tendência de 2024", video: "suBPxUvfBaw" },
   { year: 2025, description: "Retrato na entrada decorada da New Wed Feira Tendência de 2025", video: "L1gnu-51G1U" },
   { year: 2026, description: "Cindy Noel na New Wed Feira Tendência 2026", video: "juZ5xsOwPZs" },
 ] as const;
@@ -38,7 +38,7 @@ export function FeiraHistory() {
       <p className="nw-history-intro">Desde 2016, a New Wed Feira reúne tendências, profissionais e histórias de quem faz o mercado de casamentos. Selecione uma edição para ver seu registro e, quando disponível, o vídeo oficial.</p>
       <ul className="nw-fair-mosaic" aria-label="Edições da Feira">
         {editions.map(({ year, description }, index) => (
-          <li key={year}>
+          <li key={year} data-edition={year}>
             <button type="button" disabled={!interactive} aria-label={`Ver galeria da Feira ${year}`} onClick={event => {
               opener.current = event.currentTarget;
               setSelected(index);
@@ -74,9 +74,9 @@ export function FeiraHistory() {
         </div>
       </dialog>
       <div className="nw-history-video">
-        <iframe src="https://www.youtube-nocookie.com/embed/juZ5xsOwPZs" title="New Wed Feira Tendência 2026 — vídeo oficial" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
+        <iframe src="https://www.youtube-nocookie.com/embed/xhentgAI9pU" title="New Wed Feira Tendência 2019 — vídeo oficial" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
       </div>
-      <p className="nw-video-caption">Reviva a New Wed Feira Tendência 2026. <a href={channelUrl} target="_blank" rel="noopener noreferrer">Ver mais vídeos no canal oficial</a></p>
+      <p className="nw-video-caption">Reviva a New Wed Feira Tendência 2019. <a href={channelUrl} target="_blank" rel="noopener noreferrer">Ver mais vídeos no canal oficial</a></p>
     </section>
   );
 }

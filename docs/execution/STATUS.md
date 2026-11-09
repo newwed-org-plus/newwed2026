@@ -4,6 +4,8 @@ Atualizado em: 2026-11-09.
 
 ## Objetivo ativo
 
+Onda 56 (D-073/CP-56): revisão de Feira, Workshop e Destinos após os encaminhamentos de 09/11, vídeo de 2024 no acervo e PDF de Noronha disponível após cadastro.
+
 Onda 55 (D-072/CP-55): dez fotos no carrossel de Destinos, tipografia compartilhada na abertura e marcas oficiais nas páginas da Feira e do Guia.
 
 Onda 54 (D-071/CP-54): foto de 2026 e marca em negativo na Home, capas de 2022 a 2025, duas revistas no Guia e menu institucional em Destinos.

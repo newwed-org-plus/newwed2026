@@ -110,7 +110,7 @@ test("Destinos usa o cabeçalho do grupo e mantém o CTA turquesa na primeira te
     const logo = page.getByRole("link", { name: "Grupo New Wed, página inicial", exact: true });
     await expect(logo).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     await expect(logo.locator("img")).toHaveCSS("filter", "none");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("FAMTOUR Nordeste Edição 2027");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Famtour Nordeste Edição 2027");
     await expect(page.locator(".nw-destinos-hero")).toHaveCSS("background-color", "rgb(234, 244, 242)");
     const cta = page.getByRole("link", { name: "Ver edições abertas", exact: true });
     await expect(cta).toHaveCSS("background-color", "rgb(91, 153, 152)");

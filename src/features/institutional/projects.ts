@@ -1,5 +1,3 @@
-import feiraImage from "@/assets/feira.jpg";
-import workshopImage from "@/assets/workshop.jpg";
 import { institutionalProjectContent } from "@/content/institutional-projects";
 
 export type { InstitutionalProjectId } from "@/content/institutional-projects";
@@ -7,7 +5,8 @@ export type { InstitutionalProjectId } from "@/content/institutional-projects";
 export const institutionalProjects = {
   feira: {
     ...institutionalProjectContent.feira,
-    image: feiraImage.src,
+    image: "/assets/brand/feira-abertura.webp",
+    imageAlt: "Profissional diante dos estandes da New Wed Feira",
     brand: { src: "/assets/brand/feira-tendencia.webp", alt: "New Wed Feira Tendência", width: 156, height: 44 },
   },
   guia: {
@@ -18,6 +17,8 @@ export const institutionalProjects = {
   },
   workshop: {
     ...institutionalProjectContent.workshop,
-    image: workshopImage.src,
+    image: "/assets/brand/workshop-abertura.webp",
+    imageAlt: "Participantes reunidos à mesa no New Wed Workshop",
+    brand: { src: "/assets/brand/workshop-nordeste.webp", alt: "New Wed Workshop Nordeste", width: 76, height: 112 },
   },
 } as const;

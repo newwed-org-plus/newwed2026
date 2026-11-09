@@ -153,7 +153,7 @@ export function InscricaoPage({ edition,checkoutId }: PageProps) {
               <p className="mt-4 font-serif text-[clamp(2.5rem,6vw,4.5rem)] font-light leading-none">
                 {edition.parcelaQuantidade}x de aprox. {formatCurrency(edition.parcelaCentavos)}
               </p>
-              <p className="mt-3 font-sans text-sm">Total no cartão {formatCurrency(edition.valorCartaoCentavos)} · Pix à vista {formatCurrency(edition.valorAVistaCentavos)}</p>
+              <p className="mt-3 font-sans text-sm">Pix à vista {formatCurrency(edition.valorAVistaCentavos)}</p>
             </div>
             <div>
               <p className="max-w-sm font-sans text-sm leading-relaxed text-[#191010]">
