@@ -13,6 +13,7 @@ for (const width of [320, 390, 768, 1440]) {
   test(`Instagram contextual e navegação preservados em ${width}px`, async ({ page }) => {
     test.setTimeout(120_000);
     await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
     for (const [path, profile] of profiles) {
       await page.goto(origin + path, { waitUntil: "networkidle" });
       if (path === "/destinos") {
@@ -42,6 +43,7 @@ for (const width of [320, 390, 768, 1440]) {
 }
 
 test("Home mostra a Feira de 2026 em marsala e marcas parceiras brancas", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(origin, { waitUntil: "networkidle" });
   const cards = page.locator(".nw-project-card");
   await expect(cards).toHaveCount(4);

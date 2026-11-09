@@ -46,6 +46,7 @@ test('pedido só confirma após resposta e falha permite tentar novamente',async
   await popup.getByRole('button',{name:'Receber e-book',exact:true}).click();
   await expect(popup.getByRole('status')).toContainText('Cadastro confirmado!');
   await expect(popup.getByRole('status')).toContainText('pronto para baixar');
+  await expect(popup.getByText('Deixe seu contato', {exact: false})).toHaveCount(0);
   await expect(popup.getByRole('link',{name:'Baixar e-book'})).toHaveAttribute('href', '/assets/ebooks/noronha-alem-do-cenario.pdf');
   await popup.getByRole('link',{name:'Ver edições abertas'}).click();
   await expect(page).toHaveURL(`${origin}/destinos?origem=ebook#famtours`);

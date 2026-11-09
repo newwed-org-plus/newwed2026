@@ -75,12 +75,12 @@ export function EbookPopup({openOnEntry = true}: {openOnEntry?: boolean}) {
 
   return <>
     <button ref={trigger} type="button" onClick={show} disabled={!interactive} className="ebook-trigger" aria-haspopup="dialog"><BookOpen size={18} aria-hidden="true"/> E-book gratuito</button>
-    <dialog ref={dialog} className="ebook-popup" aria-labelledby="ebook-title" aria-describedby="ebook-description" onClose={onClose} onClick={event => { if (event.target === event.currentTarget && !sending) close(); }}>
+    <dialog ref={dialog} className="ebook-popup" aria-labelledby="ebook-title" aria-describedby={result ? undefined : "ebook-description"} onClose={onClose} onClick={event => { if (event.target === event.currentTarget && !sending) close(); }}>
       <div className="ebook-popup-content">
         <button type="button" className="ebook-close" onClick={close} aria-label="Fechar popup"><X size={22}/></button>
         <p className="ebook-eyebrow">Um presente para você</p>
         <h2 id="ebook-title">{destinosEbook.title}</h2>
-        <p id="ebook-description">{destinosEbook.downloadUrl ? 'Deixe seu contato para baixar gratuitamente o e-book.' : 'Deixe seu contato para receber gratuitamente o e-book assim que estiver disponível.'}</p>
+        {!result && <p id="ebook-description">{destinosEbook.downloadUrl ? 'Deixe seu contato para baixar gratuitamente o e-book.' : 'Deixe seu contato para receber gratuitamente o e-book assim que estiver disponível.'}</p>}
         {result ? <div className="ebook-success" role="status">
           <Check size={28} aria-hidden="true"/><h3>{result.downloadUrl ? "Cadastro confirmado!" : "Cadastro recebido!"}</h3>
           {result.downloadUrl ? <><p>Seu e-book está pronto para baixar.</p><a className="ebook-submit" href={result.downloadUrl} download>Baixar e-book</a></> : <p>Seu interesse foi registrado com a equipe New Wed. O arquivo ainda não está disponível para download.</p>}
