@@ -28,7 +28,6 @@ export function HomeHeroVideo() {
     <div className="nw-hero-media">
       <video
         ref={videoRef}
-        src="/media/new-wed-home.mp4"
         poster="/assets/brand/new-wed-home-poster.webp"
         aria-label="Vídeo institucional do Grupo New Wed"
         width={1280}
@@ -40,7 +39,10 @@ export function HomeHeroVideo() {
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onError={() => setPlaying(false)}
-      />
+      >
+        <source src="/assets/videos/new-wed-home/index.m3u8" type="application/vnd.apple.mpegurl" />
+        <source src="/assets/videos/new-wed-home.mp4" type="video/mp4" />
+      </video>
       <button
         type="button"
         disabled={!interactive}
