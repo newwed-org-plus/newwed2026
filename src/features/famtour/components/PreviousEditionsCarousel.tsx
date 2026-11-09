@@ -44,13 +44,13 @@ export function PreviousEditionsCarousel() {
         className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 md:gap-5 [&::-webkit-scrollbar]:hidden"
         style={{ scrollbarWidth: "none" }}
       >
-        {PREVIOUS_EDITIONS.map((edicao) => (
+        {PREVIOUS_EDITIONS.map((edicao) => edicao.videoUrl && (
           <Link
             key={edicao.slug}
-            href={edicao.videoUrl ?? `/destinos/edicoes/${edicao.slug}`}
-            target={edicao.videoUrl?.startsWith("https://") ? "_blank" : undefined}
-            rel={edicao.videoUrl?.startsWith("https://") ? "noopener noreferrer" : undefined}
-            aria-label={`Ver ${edicao.videoUrl ? "vídeo" : "galeria"} da edição ${edicao.destino} ${edicao.ano}`}
+            href={edicao.videoUrl}
+            target={edicao.videoUrl.startsWith("https://") ? "_blank" : undefined}
+            rel={edicao.videoUrl.startsWith("https://") ? "noopener noreferrer" : undefined}
+            aria-label={`Ver vídeo da edição ${edicao.destino} ${edicao.ano}`}
             className="group relative block aspect-[4/5] min-w-0 flex-[0_0_86%] snap-start overflow-hidden bg-[#0A2B28] text-left shadow-[0_16px_36px_rgba(10,43,40,0.12)] sm:flex-[0_0_60%] lg:flex-[0_0_calc((100%_-_2.5rem)/3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-destinos-turquoise)] focus-visible:ring-offset-2"
           >
             <img
@@ -71,7 +71,7 @@ export function PreviousEditionsCarousel() {
                 EDIÇÃO {edicao.ano}
               </span>
               <span className="mt-2 block font-sans text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[#F1D89F]">
-                {edicao.videoUrl ? "VER VÍDEO" : "VER GALERIA"} →
+                VER VÍDEO →
               </span>
             </span>
           </Link>
