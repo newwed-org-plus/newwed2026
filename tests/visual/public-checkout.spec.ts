@@ -34,7 +34,7 @@ test("Garantir minha vaga retoma o mesmo pedido e abre o checkout Asaas",async (
   await page.getByRole("button",{name:"Fechar popup",exact:true}).click();
   const button = page.locator("#famtours article").first().getByRole("button",{name:"Comprar agora · Garantir minha vaga"});
   await button.click();
-  await expect(page.getByRole("button",{name:/Pagar com cartão.*8.017,29/})).toBeVisible();
+  await expect(page.getByRole("button",{name:/Pagar com cartão.*668,10/})).toBeVisible();
   await page.getByRole("button",{name:/Pagar com Pix.*7.697,00/}).click();
   await expect(page.getByText("Tente novamente.",{exact:true})).toBeVisible();
   await page.locator("#famtours article").first().getByRole("link",{name:"Ver mais informações"}).click();

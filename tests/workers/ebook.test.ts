@@ -14,7 +14,7 @@ describe('cadastro do e-book de Destinos',()=>{
     const network = vi.spyOn(globalThis,'fetch');
     const response = await POST(request());
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({accepted:true,downloadUrl:null});
+    expect(await response.json()).toEqual({accepted:true,downloadUrl:'/assets/ebooks/noronha-alem-do-cenario.pdf'});
     const lead = await env.DB.prepare("SELECT * FROM leads WHERE source_system='ebook'").first();
     expect(lead).toMatchObject({name:input.nome,company:input.empresa,edition_id:null,stage:'NOVO',normalized_phone:'+5581999990001'});
     const answer = await env.DB.prepare('SELECT answers_json FROM lead_answers WHERE lead_id=?').bind(lead!.id).first<{answers_json:string}>();

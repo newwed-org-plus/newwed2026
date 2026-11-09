@@ -5,6 +5,7 @@ import {
 } from "@/features/famtour/lib/previousEditions";
 
 export function EditionGallery({ edition }: { edition: PreviousEdition }) {
+  const hasVideo = edition.galeria.some(media => media.type === "video");
   return (
     <SiteShell>
       <main className="bg-white text-[#191010]">
@@ -32,10 +33,10 @@ export function EditionGallery({ edition }: { edition: PreviousEdition }) {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-14 md:px-10 md:py-20">
+        <section id={hasVideo ? "video" : undefined} className="mx-auto max-w-7xl px-6 py-14 md:px-10 md:py-20">
           <div className="mb-10 max-w-2xl">
             <p className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-[var(--color-destinos-turquoise)]">
-              Galeria da edição
+              {hasVideo ? "Vídeo da edição" : "Galeria da edição"}
             </p>
             <h2 className="mt-4 font-serif text-[clamp(2.5rem,5vw,4rem)] font-light leading-none">
               Memórias da experiência
@@ -60,7 +61,7 @@ export function EditionGallery({ edition }: { edition: PreviousEdition }) {
                 <video
                   key={media.src}
                   controls
-                  preload="metadata"
+                  preload="none"
                   poster={media.poster}
                   aria-label={media.title}
                   className="aspect-video w-full bg-black"

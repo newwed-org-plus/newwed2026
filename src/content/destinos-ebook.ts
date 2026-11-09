@@ -3,7 +3,7 @@ export const destinosEbook = {
   id: 'noronha-alem-do-cenario',
   title: 'Noronha além do cenário',
   consentVersion: 'ebook-destinos-2026-11',
-  downloadUrl: null as string | null,
+  downloadUrl: '/assets/ebooks/noronha-alem-do-cenario.pdf' as string | null,
 };
 
 // URL estável para o botão no final do material.

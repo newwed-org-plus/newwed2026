@@ -83,7 +83,7 @@ export function FamTourCard({ famtour, onRequestInformation }: Props) {
               {formatCurrency(famtour.parcelaCentavos)}
             </p>
             <p className="mt-2 font-sans text-sm text-black/65">
-              Total no cartão {formatCurrency(famtour.valorCartaoCentavos)} · Pix à vista {formatCurrency(famtour.valorAVistaCentavos)}
+              Pix à vista {formatCurrency(famtour.valorAVistaCentavos)}
             </p>
           </div>
 

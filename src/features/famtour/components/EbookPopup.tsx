@@ -80,10 +80,10 @@ export function EbookPopup({openOnEntry = true}: {openOnEntry?: boolean}) {
         <button type="button" className="ebook-close" onClick={close} aria-label="Fechar popup"><X size={22}/></button>
         <p className="ebook-eyebrow">Um presente para você</p>
         <h2 id="ebook-title">{destinosEbook.title}</h2>
-        <p id="ebook-description">{destinosEbook.downloadUrl ? 'Preencha seu cadastro e receba gratuitamente o e-book.' : 'Deixe seu contato para receber gratuitamente o e-book assim que estiver disponível.'}</p>
+        <p id="ebook-description">{destinosEbook.downloadUrl ? 'Deixe seu contato para baixar gratuitamente o e-book.' : 'Deixe seu contato para receber gratuitamente o e-book assim que estiver disponível.'}</p>
         {result ? <div className="ebook-success" role="status">
-          <Check size={28} aria-hidden="true"/><h3>Cadastro recebido!</h3>
-          {result.downloadUrl ? <><p>Seu e-book está disponível.</p><a className="ebook-submit" href={result.downloadUrl} download>Baixar e-book</a></> : <p>Seu interesse foi registrado com a equipe New Wed. O arquivo ainda não está disponível para download.</p>}
+          <Check size={28} aria-hidden="true"/><h3>{result.downloadUrl ? "Cadastro confirmado!" : "Cadastro recebido!"}</h3>
+          {result.downloadUrl ? <><p>Seu e-book está pronto para baixar.</p><a className="ebook-submit" href={result.downloadUrl} download>Baixar e-book</a></> : <p>Seu interesse foi registrado com a equipe New Wed. O arquivo ainda não está disponível para download.</p>}
           <a className="ebook-editions" href={destinosEbookEditionsHref} onClick={close}>Ver edições abertas</a>
         </div> : <form onSubmit={submit}>
           <div className="ebook-fields">

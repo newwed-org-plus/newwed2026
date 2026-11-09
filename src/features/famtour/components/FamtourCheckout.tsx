@@ -56,10 +56,10 @@ function clearAttempt(keyName: string) {
   sessionStorage.removeItem(`${keyName}.method`);
 }
 
-type PaymentOffer = Pick<FamtourEdition,"slug"|"valorAVistaCentavos"|"valorCartaoCentavos"|"parcelaQuantidade">;
+type PaymentOffer = Pick<FamtourEdition,"slug"|"valorAVistaCentavos"|"valorCartaoCentavos"|"parcelaCentavos"|"parcelaQuantidade">;
 
 export function FamtourCheckoutButton({edition,className}: {edition:PaymentOffer;className?:string}) {
-  const {slug,valorAVistaCentavos,valorCartaoCentavos,parcelaQuantidade} = edition;
+  const {slug,valorAVistaCentavos,valorCartaoCentavos,parcelaCentavos,parcelaQuantidade} = edition;
   const choicesId = useId();
   const interactive = useSyncExternalStore(subscribe, () => true, () => false);
   const [showMethods,setShowMethods] = useState(false);
@@ -144,9 +144,10 @@ export function FamtourCheckoutButton({edition,className}: {edition:PaymentOffer
             Pagar com Pix · {formatCurrency(valorAVistaCentavos)}
           </button>
           <button type="button" disabled={busy} onClick={() => void start("CREDIT_CARD")} className="min-h-12 border border-current px-4 py-2 text-left disabled:opacity-60">
-            Pagar com cartão em até {parcelaQuantidade}x · Total {formatCurrency(valorCartaoCentavos)}
+            Pagar com cartão · {parcelaQuantidade}x de aprox. {formatCurrency(parcelaCentavos)}
           </button>
         </div>
+        <p className="mt-2 font-sans text-sm">Total no cartão: {formatCurrency(valorCartaoCentavos)}</p>
         <a className="mt-2 inline-flex min-h-11 items-center font-sans text-sm underline underline-offset-4" href={`/destinos?edicao=${encodeURIComponent(slug)}&origem=inscricao#form`}>
           Precisa de outra forma de pagamento? Peça contato da equipe.
         </a>

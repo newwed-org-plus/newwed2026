@@ -7,7 +7,7 @@ test("Feira destaca o Instagram e permite navegar pelo acervo no celular", async
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`${origin}/feira`, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("banner").getByRole("link", { name: "Instagram New Wed Feira" })).toHaveAttribute("href", /instagram\.com\/new_wed_feira/);
-  await expect(page.getByTitle("New Wed Feira Tendência 2026 — vídeo oficial")).toHaveAttribute("src", /juZ5xsOwPZs/);
+  await expect(page.getByTitle("New Wed Feira Tendência 2019 — vídeo oficial")).toHaveAttribute("src", /xhentgAI9pU/);
   const list = page.getByRole("list", { name: "Edições da Feira" });
   await expect(list.getByRole("listitem")).toHaveCount(9);
   await expect(list).toHaveCSS("display", "grid");
@@ -21,6 +21,7 @@ test("Feira destaca o Instagram e permite navegar pelo acervo no celular", async
   await page.keyboard.press("ArrowRight");
   await expect(page.getByRole("dialog", { name: "New Wed Feira 2024" })).toBeVisible();
   await expect(page.getByRole("dialog").locator("img")).toHaveAttribute("src", "/assets/feira/edicao-2024.webp");
+  await expect(page.getByRole("dialog", { name: "New Wed Feira 2024" }).getByRole("link", { name: "Assistir ao vídeo de 2024" })).toHaveAttribute("href", /suBPxUvfBaw/);
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(card).toBeFocused();

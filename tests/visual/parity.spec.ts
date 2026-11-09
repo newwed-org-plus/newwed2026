@@ -110,7 +110,7 @@ test("Destinos usa o cabeçalho do grupo e mantém o CTA turquesa na primeira te
     const logo = page.getByRole("link", { name: "Grupo New Wed, página inicial", exact: true });
     await expect(logo).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     await expect(logo.locator("img")).toHaveCSS("filter", "none");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("FAMTOUR Nordeste Edição 2027");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Famtour Nordeste Edição 2027");
     await expect(page.locator(".nw-destinos-hero")).toHaveCSS("background-color", "rgb(234, 244, 242)");
     const cta = page.getByRole("link", { name: "Ver edições abertas", exact: true });
     await expect(cta).toHaveCSS("background-color", "rgb(91, 153, 152)");
@@ -118,6 +118,9 @@ test("Destinos usa o cabeçalho do grupo e mantém o CTA turquesa na primeira te
     const box = await cta.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.y + box!.height).toBeLessThanOrEqual(height);
+    const ebookButton = await page.getByRole("button", { name: "E-book gratuito", exact: true }).boundingBox();
+    expect(ebookButton).not.toBeNull();
+    expect(box!.y + box!.height).toBeLessThanOrEqual(ebookButton!.y);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await mkdir(resolve("test-results/visual/destinos"), { recursive: true });
     await page.screenshot({ path: resolve(`test-results/visual/destinos/hero-${width}.png`), animations: "disabled" });
@@ -169,6 +172,7 @@ for (const [viewportName,width,height] of viewports) {
     }
     for (const section of ["sobre", "contato"]) {
       await visit(page,`${siteOrigin}/`);
+      await page.waitForLoadState("networkidle");
       if (viewportName === "mobile") await page.locator(".nw-mobile-menu summary").click();
       const menu = page.getByRole("navigation", { name: viewportName === "mobile" ? "Navegação principal mobile" : "Navegação principal", exact: true });
       await menu.locator(`a[href="/#${section}"]`).click();
@@ -322,8 +326,8 @@ for (const [viewportName,width,height] of viewports) {
       await expect(page).toHaveURL(`${siteOrigin}/destinos/inscricao/${slug}#condicoes`);
       const conditions = page.getByRole("region", { name: "Condições de pagamento" });
       await expect(conditions).toBeInViewport();
-      await expect(conditions.getByText(/12x de aprox\. R\$/)).toBeVisible();
-      await expect(conditions.getByText(/à vista/)).toBeVisible();
+      await expect(conditions.getByText(/^12x de aprox\. R\$/)).toBeVisible();
+      await expect(conditions.getByText(/^Pix à vista/i)).toBeVisible();
       await expect(conditions.getByRole("link", { name: "Pedir contato da equipe" })).toHaveAttribute("href", `/destinos?edicao=${slug}&origem=inscricao#form`);
       await conditions.getByRole("link", { name: "Pedir contato da equipe" }).click();
       await expect(page).toHaveURL(`${siteOrigin}/destinos?edicao=${slug}&origem=inscricao#form`);
