@@ -381,3 +381,7 @@ O PDF gratuito de Noronha recebido em 09/11 tem links para a oferta Hotmart e pa
 O vídeo indicado para a Home substitui a foto na abertura. A versão web preserva o enquadramento horizontal, fica ao lado do texto no desktop e abaixo do texto no celular. Reproduz sem som e oferece pausa. Com movimento reduzido, a reprodução depende do visitante.
 
 A arte horizontal do Guia, enviada sem texto, aparece na Home e na página Guia. O título e a descrição são texto do site. O PDF de Noronha enviado é idêntico ao arquivo publicado. A instrução de deixar o contato aparece somente antes de concluir o cadastro.
+
+## D-075 — Arte do Guia no ecossistema da Home
+
+Na revisão de 10/11, a cliente confirmou que a arte horizontal da onda 57 era só para a página interna do Guia. Restaurar a arte vertical anterior no card Guia da Home e usar a mesma composição dos outros cards do ecossistema. A página interna mantém a arte horizontal.
