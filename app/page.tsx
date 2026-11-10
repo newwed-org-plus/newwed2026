@@ -30,10 +30,10 @@ function HomeContent() {
         <div className="nw-project-grid">
           {projects.map((project) => (
             <article className="nw-project-card" id={project.id} key={project.id}>
-              <img src={project.image} alt="" width={project.id === "guia" ? 1920 : 1080} height={project.id === "guia" ? 1080 : 1920} loading="lazy" />
+              <img src={project.image} alt="" width={1080} height={1920} loading="lazy" />
               <div className="nw-project-copy">
                 {project.id === "feira" && <img className="nw-project-brand" src="/assets/brand/feira-tendencia-negativo.png" alt="" loading="lazy" />}
-                <h3 className={project.id === "guia" ? "nw-project-title" : "sr-only"}>New Wed {project.name}</h3>
+                <h3 className="sr-only">New Wed {project.name}</h3>
                 <div className="nw-project-bottom">
                   <p>{project.description}</p>
                   <a href={project.href} className="nw-button nw-button-outline" aria-label={project.id === "destinos" ? "Conheça o FAMTOUR New Wed Destinos" : `Conheça New Wed ${project.name}`}>

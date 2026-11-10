@@ -1,8 +1,10 @@
 # Status de execução
 
-Atualizado em: 2026-11-09.
+Atualizado em: 2026-11-10.
 
 ## Objetivo ativo
+
+Onda 58 (D-075/CP-58). Restauração da arte vertical do card Guia no ecossistema da Home.
 
 Onda 57 (D-074/CP-57). Vídeo institucional na abertura da Home, banner horizontal do Guia e confirmação simplificada do e-book.
 

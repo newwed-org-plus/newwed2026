@@ -163,9 +163,6 @@
 }
 #feira.nw-project-card > img { object-fit: cover; object-position: center; filter: brightness(.62) saturate(.8); }
 #feira.nw-project-card .nw-project-copy { background: radial-gradient(ellipse at 18% 0%, #b3365e38, transparent 56%), linear-gradient(155deg, #431021b3 0%, #64142dbf 44%, #220b15ed 100%); }
-#guia.nw-project-card { background: #431021; }
-#guia.nw-project-card > img { position: absolute; top: 12%; height: auto; }
-.nw-project-title { margin: 0 0 10px; font-size: clamp(16px, 1.6vw, 25px); font-weight: 350; }
 .nw-project-brand { position: absolute; top: 13%; left: 8%; width: 84%; height: auto; }
 .nw-project-bottom { display: flex; flex-direction: column; align-items: center; }
 .nw-project-bottom p {

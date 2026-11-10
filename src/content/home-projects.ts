@@ -18,7 +18,7 @@ export const homeProjects = [
     href: "/guia",
     name: "Guia",
     description: "Publicação de referência com fornecedores, destinos e conteúdo exclusivo.",
-    image: "/assets/brand/guia-home-horizontal.webp",
+    image: "/assets/brand/banner-guia.webp",
   },
   {
     id: "workshop",
